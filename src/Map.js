@@ -1,8 +1,8 @@
-import React, { useRef, useEffect } from 'react';
-import * as THREE from 'three';
-import { FBXLoader } from 'three-stdlib';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { AnimationMixer } from 'three';
+import React, { useRef, useEffect } from "react";
+import * as THREE from "three";
+import { FBXLoader } from "three-stdlib";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { AnimationMixer } from "three";
 
 const Map = () => {
   const mountRef = useRef(null);
@@ -10,12 +10,17 @@ const Map = () => {
   const mouse = new THREE.Vector2();
   const collidableObjects = [];
   const mixers = [];
-
+  const lightObjects = [];
   useEffect(() => {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 10, 10000);
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      10,
+      10000
+    );
     camera.position.set(0, 10, 20);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -35,7 +40,7 @@ const Map = () => {
 
     const loader = new FBXLoader();
     loader.load(
-      '/Models/Map.fbx',
+      "/Models/Map.fbx",
       (object) => {
         object.scale.set(0.1, 0.1, 0.1);
         object.position.set(0, 0, 0);
@@ -56,7 +61,7 @@ const Map = () => {
       },
       undefined,
       (error) => {
-        console.error('Error loading Map model:', error);
+        console.error("Error loading Map model:", error);
       }
     );
 
@@ -64,7 +69,7 @@ const Map = () => {
 
     const reusableLoader = new FBXLoader();
     reusableLoader.load(
-      '/Models/Street Light.fbx',
+      "/Models/Street Light.fbx",
       (object) => {
         reusableModel = object;
         reusableModel.scale.set(0.09, 0.09, 0.09);
@@ -90,12 +95,12 @@ const Map = () => {
         addReusableModel(scene, 60, 108, 930, 0, Math.PI / 2, 0);
         addReusableModel(scene, -245, 108, 1117, 0, Math.PI / 2, 0);
         addReusableModel(scene, -655, 108, 780, 0, Math.PI * 1.5, 0);
-      
+
         addReusableModel(scene, 60, 108, 1380, 0, Math.PI / 2, 0);
       },
       undefined,
       (error) => {
-        console.error('Error loading Street Light model:', error);
+        console.error("Error loading Street Light model:", error);
       }
     );
 
@@ -103,7 +108,7 @@ const Map = () => {
     let npcMixer = null;
 
     const npcLoader = new FBXLoader();
-    npcLoader.load('/Models/NPC.fbx', (object) => {
+    npcLoader.load("/Models/NPC.fbx", (object) => {
       npcModel = object;
       npcModel.scale.set(0.1, 0.1, 0.1);
       npcModel.position.set(0, 0, 0);
@@ -116,6 +121,7 @@ const Map = () => {
       scene.add(npcModel);
     });
 
+
     const addReusableModel = (scene, x, y, z, xR = 0, yR = 0, zR = 0) => {
       if (reusableModel) {
         const clone = reusableModel.clone();
@@ -124,7 +130,14 @@ const Map = () => {
 
         scene.add(clone);
 
-        const modelLight = new THREE.SpotLight(0xffffff, 1000, 0, Math.PI / 2, 0.3, 1.25);
+        const modelLight = new THREE.SpotLight(
+          0xffffff,
+          1000,
+          0,
+          Math.PI / 2,
+          0.3,
+          1.25
+        );
         modelLight.position.set(x, y, z);
 
         const targetObject = new THREE.Object3D();
@@ -136,10 +149,10 @@ const Map = () => {
         modelLight.shadow.mapSize.width = 512;
         modelLight.shadow.mapSize.height = 512;
         modelLight.shadow.bias = -0.01;
-
-        const helper = new THREE.SpotLightHelper(modelLight);
+        modelLight.visible = true;
         // scene.add(helper);
         scene.add(modelLight);
+        lightObjects.push({ model: clone, light: modelLight });
       }
     };
 
@@ -170,18 +183,17 @@ const Map = () => {
 
       if (intersects.length > 0) {
         const intersection = intersects[0];
-        console.log('Coordinates:', intersection.point);
-
-        collidableObjects.forEach(({ object, box }) => {
-          box.setFromObject(object);
-          if (box.containsPoint(intersection.point)) {
-            console.log('Collision detected with:', object.name);
+        for (let i = 0; i < lightObjects.length; i++) {
+          const { model, light } = lightObjects[i];
+          if (model === intersection.object.parent) {
+            light.visible = !light.visible; // переключаем видимость света
+            break;
           }
-        });
+        }
       }
     };
 
-    window.addEventListener('click', onMouseClick, false);
+    window.addEventListener("click", onMouseClick, false);
 
     const animate = () => {
       requestAnimationFrame(animate);
@@ -197,7 +209,7 @@ const Map = () => {
     animate();
 
     return () => {
-      window.removeEventListener('click', onMouseClick);
+      window.removeEventListener("click", onMouseClick);
       mountRef.current.removeChild(renderer.domElement);
     };
   }, []);
