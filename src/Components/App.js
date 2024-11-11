@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import Map from './Map'; // Импортируем компонент Map
+import Map from './Game'; // Импортируем компонент Map
 
 function App() {
   return (
