@@ -2,71 +2,83 @@ import * as THREE from "three";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 
 const NPCSpawns = [
-  [0, 0, 0]
+  [80, 0, -80],
+  [-80, 0, -80],
+];
+
+const NPCPaths = [
+  [
+    { x: 80, z: -80 },
+    { x: 80, z: 515 },
+    { x: -80, z: 515 },
+    { x: -80, z: -80 },
+  ],
+  [
+    { x: -80, z: -80 },
+    { x: -80, z: 515 },
+    { x: 80, z: 515 },
+    { x: 80, z: -80 },
+  ],
 ];
 
 export default function NPCLoader(NPCObjects, mixers, scene) {
   const NPCModelLoader = new FBXLoader();
 
-  // Загружаем модель NPC
-  NPCModelLoader.load("/Models/NPC.fbx", (NPC) => {
-    console.log("NPC модель загружена:", NPC);  // Логируем загруженную модель
+  NPCSpawns.forEach((spawn, index) => {
+    NPCModelLoader.load(
+      "/Models/Walking (4).fbx",
+      (NPC) => {
+        console.log("NPC модель загружена:", NPC);
 
-    const NPCAnimationLoader = new FBXLoader();
-    
-    // Загружаем анимацию
-    NPCAnimationLoader.load("/Models/Walking (1).fbx", (Animation) => {
-      console.log("Анимация загружена:", Animation);  // Логируем загруженную анимацию
+        const NPCAnimationLoader = new FBXLoader();
+        NPCAnimationLoader.load(
+          "/Models/Walking (2).fbx",
+          (Animation) => {
+            if (Animation.animations.length === 0) {
+              console.error("Анимации не найдены в файле Walking (1).fbx");
+              return;
+            }
 
-      // Проверяем, есть ли анимации
-      if (Animation.animations.length === 0) {
-        console.error("Анимации не найдены в файле Walking (1).fbx");
-        return;
-      }
+            //NPC.animations = Animation.animations;
+            console.log("Loaded animations:", Animation.animations);
 
-      // Логируем структуру анимации
-      console.log("Анимации внутри файла:", Animation.animations);
+            const mixer = new THREE.AnimationMixer(NPC);
+            mixers.push(mixer);
 
-      // Убедимся, что анимации присваиваются NPC
-      NPC.animations = Animation.animations;
+            const action = mixer.clipAction(NPC.animations[0], NPC);
+            console.log("Animation action created:", action);
+            action.play();
 
-      // Создаем анимационный миксер для NPC
-      const mixer = new THREE.AnimationMixer(NPC);
-      mixers.push(mixer);
+            NPC.scale.set(0.3, 0.3, 0.3);
+            NPC.position.set(...spawn);
+            scene.add(NPC);
 
-      // Применяем первую анимацию к NPC
-      const action = mixer.clipAction(NPC.animations[0]);
-      action.play();
+            const npcData = {
+              model: NPC,
+              mixer: mixer,
+              path: NPCPaths[index],
+              currentTarget: 1,
+              speed: 0.33,
+            };
+            NPCObjects.push(npcData);
 
-      // Настройка и добавление NPC в сцену
-      NPC.scale.set(0.1, 0.1, 0.1);
-      NPC.position.set(...NPCSpawns[Math.floor(Math.random() * NPCSpawns.length)]);
-      scene.add(NPC);
-
-      // Добавляем NPC в список объектов
-      NPCObjects.push(NPC);
-
-      // Настройка теней
-      NPC.traverse((child) => {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-
-          // Если у дочернего объекта есть анимации, применяем их
-          if (child.animations && child.animations.length > 0) {
-            const childMixer = new THREE.AnimationMixer(child);
-            mixers.push(childMixer);
-            const childAction = childMixer.clipAction(child.animations[0]);
-            childAction.play();
+            NPC.traverse((child) => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+              }
+            });
+          },
+          undefined,
+          (error) => {
+            console.error("Error loading NPC animation:", error);
           }
-        }
-      });
-
-    }, undefined, (error) => {
-      console.error("Error loading NPC animation:", error);
-    });
-
-  }, undefined, (error) => {
-    console.error("Error loading NPC model:", error);
+        );
+      },
+      undefined,
+      (error) => {
+        console.error("Error loading NPC model:", error);
+      }
+    );
   });
 }
