@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import Progressbar from 'react-js-progressbar';
 
 import "../Sass/Game.scss";
 import MapLoader from "./MapLoader";
@@ -18,6 +19,7 @@ function Game() {
     [],
   ];
   const [npcMood, setNpcMood] = useState(100);
+  const [energy, setEnergy] = useState(100); // состояние энергии
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -60,7 +62,13 @@ function Game() {
           const { object, box } = hitboxes[i];
           if (box.containsPoint(intersection.point)) {
             const light = lightObjects[i].light;
-            light.visible = !light.visible;
+            // Проверка, хватает ли энергии для включения
+            if (!light.visible && energy > 0) {
+              setEnergy((prev) => Math.max(prev - 10, 0)); // Уменьшение энергии
+              light.visible = true;
+            } else if (light.visible) {
+              light.visible = false; // Отключаем фонарь, энергия не расходуется
+            }
 
             console.log("Свет переключен:", light.visible);
 
@@ -86,7 +94,6 @@ function Game() {
         const { model, path, speed } = npcData;
         const target = path[npcData.currentTarget];
 
-        // Вычисляем направление к следующей точке
         const direction = new THREE.Vector3(
           target.x - model.position.x,
           0,
@@ -94,14 +101,11 @@ function Game() {
         );
 
         if (direction.length() < speed) {
-          // Если NPC достигает текущей цели, переключаемся на следующую
           npcData.currentTarget = (npcData.currentTarget + 1) % path.length;
         } else {
-          // Обновляем позицию
           direction.normalize();
           model.position.addScaledVector(direction, speed);
 
-          // Поворот модели в направлении движения
           if (Math.abs(direction.x) > Math.abs(direction.z)) {
             model.rotation.y = direction.x > 0 ? Math.PI / 2 : -Math.PI / 2;
           } else {
@@ -149,6 +153,17 @@ function Game() {
     <div ref={mountRef}>
       <div className="Interface">
         Уровень настроения NPC: {Math.floor(npcMood)}
+      </div>
+      <div className="EnergyBar">
+        <Progressbar
+          input={energy}
+          shape={'semi circle'}
+          pathWidth={10}
+          pathColor={['#56ab2f', '#a8e063']}
+          trailWidth={25}
+          trailColor='#whitesmoke'
+          textStyle={{ fill: 'whitesmoke' }}
+        />
       </div>
     </div>
   );
