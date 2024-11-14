@@ -5,7 +5,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import "../Sass/Game.scss";
 import MapLoader from "./MapLoader";
 import NPCLoader from "./NPCLoader";
-import Interface from "./Interface"
+import Interface from "./Interface";
 
 function Game() {
   const mountRef = useRef(null);
@@ -19,7 +19,7 @@ function Game() {
     [],
   ];
   const [npcMood, setNpcMood] = useState(100);
-  const [energy, setEnergy] = useState(100); // состояние энергии
+  const [energy, setEnergy] = useState(100);
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -39,15 +39,29 @@ function Game() {
     renderer.shadowMap.enabled = true;
     renderer.physicallyCorrectLights = true;
 
-    mountRef.current.appendChild(renderer.domElement);
+    if (mountRef.current) {
+      mountRef.current.appendChild(renderer.domElement);
+    }
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.maxPolarAngle = Math.PI / 2;
 
+    // Загрузка карты и NPC
     MapLoader(lightObjects, hitboxes, collidableObjects, scene);
     NPCLoader(NPCObjects, mixers, scene);
+
+    const toggleLight = (light, index) => {
+      if (!light.visible && energy >= 10) {  // Убедитесь, что энергии достаточно для включения
+        setEnergy((prevEnergy) => Math.max(prevEnergy - 10, 0)); // Уменьшение на 10
+        light.visible = true;
+      } else if (light.visible) {
+        light.visible = false;
+      }
+      console.log(`Свет ${index} переключен:`, light.visible);
+    };
+    
 
     const onMouseClick = (event) => {
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -58,30 +72,12 @@ function Game() {
 
       if (intersects.length > 0) {
         const intersection = intersects[0];
-        for (let i = 0; i < hitboxes.length; i++) {
-          const { object, box } = hitboxes[i];
+        hitboxes.forEach(({ box }, index) => {
           if (box.containsPoint(intersection.point)) {
-            const light = lightObjects[i].light;
-            // Проверка, хватает ли энергии для включения
-            if (!light.visible && energy > 0) {
-              setEnergy((prev) => Math.max(prev - 10, 0)); // Уменьшение энергии
-              light.visible = true;
-            } else if (light.visible) {
-              light.visible = false; // Отключаем фонарь, энергия не расходуется
-            }
-
-            console.log("Свет переключен:", light.visible);
-
-            lightObjects.forEach(({ light, model }) => {
-              light.updateMatrixWorld(true);
-              model.updateMatrixWorld(true);
-              light.shadow.needsUpdate = true;
-            });
-
-            renderer.render(scene, camera);
-            return;
+            const light = lightObjects[index].light;
+            toggleLight(light, index);
           }
-        }
+        });
       } else {
         console.log("Нет пересечений для клика");
       }
@@ -131,22 +127,27 @@ function Game() {
       });
     };
 
-
     const animate = () => {
-      requestAnimationFrame(animate);
       controls.update();
-      mixers.forEach((mixer) => {
-        mixer.update(0.01);
-      });
+      mixers.forEach((mixer) => mixer.update(0.01));
       moveNpc();
       lightObjects.forEach(({ light }) => {
         light.updateMatrixWorld(true);
         light.shadow.needsUpdate = true;
       });
       renderer.render(scene, camera);
+      requestAnimationFrame(animate);
     };
 
     animate();
+
+    return () => {
+      window.removeEventListener("click", onMouseClick, false);
+      if (mountRef.current) {
+        mountRef.current.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+    };
   }, []);
 
   return (

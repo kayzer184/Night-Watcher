@@ -1,11 +1,11 @@
 // src/App.js
 import React from 'react';
-import Map from './Game'; // Импортируем компонент Map
+import Game from './Game'; // Импортируем компонент Map
 
 function App() {
   return (
     <div className="App">
-      <Map />
+      <Game />
     </div>
   );
 }
