@@ -1,11 +1,11 @@
 import React, { useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import Progressbar from 'react-js-progressbar';
 
 import "../Sass/Game.scss";
 import MapLoader from "./MapLoader";
 import NPCLoader from "./NPCLoader";
+import Interface from "./Interface"
 
 function Game() {
   const mountRef = useRef(null);
@@ -151,19 +151,8 @@ function Game() {
 
   return (
     <div ref={mountRef}>
-      <div className="Interface">
-        Уровень настроения NPC: {Math.floor(npcMood)}
-      </div>
-      <div className="EnergyBar">
-        <Progressbar
-          input={energy}
-          shape={'semi circle'}
-          pathWidth={10}
-          pathColor={['#56ab2f', '#a8e063']}
-          trailWidth={25}
-          trailColor='#whitesmoke'
-          textStyle={{ fill: 'whitesmoke' }}
-        />
+      <div className="Interface-Box">
+        <Interface NPCMood={Math.floor(npcMood)} Energy={energy} />
       </div>
     </div>
   );
