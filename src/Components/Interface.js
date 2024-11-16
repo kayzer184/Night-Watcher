@@ -3,6 +3,7 @@ import ProgressBar from "@ramonak/react-progress-bar";
 import Modal from "./Modal";
 import "../Sass/Interface.scss";
 import reset from "../Assets/Icons/ResetButton.svg";
+import { div } from "three/webgpu";
 
 function getMoodColor(mood) {
   const red = Math.max(255 - mood * 2.55, 0);
@@ -17,14 +18,15 @@ function Interface({
   onRestart,
   isPaused,
   timeLeft,
+  isWin,
 }) {
   const [isModalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    if (timeLeft === 0) {
+    if (isWin !== null) {
       setModalVisible(true); // Показываем модальное окно, если таймер достиг 0
     }
-  }, [timeLeft]);
+  }, [isWin]);
 
   const closeModal = () => setModalVisible(false);
 
@@ -76,25 +78,43 @@ function Interface({
       <button onClick={onRestart} className="reset-button">
         <img src={reset} alt="reset" />
       </button>
-
-      {/* Модальное окно для окончания уровня */}
-      <Modal isVisible={isModalVisible} onClose={closeModal}>
-        <h2>Level Completed!</h2>
-        <p>Your stats for this level:</p>
-        <ul>
-          <li>NPC Mood: {NPCMood}%</li>
-          <li>Energy Left: {Energy}%</li>
-        </ul>
-        <button
-          className="reset-modal-button"
-          onClick={() => {
-            closeModal();
-            onRestart(); // Перезапуск игры
-          }}
-        >
-          <img src={reset} alt="reset" />
-        </button>
-      </Modal>
+      {isWin ? (
+        <Modal isVisible={isModalVisible} onClose={closeModal}>
+          <h2>Level Completed!</h2>
+          <p>Your stats for this level:</p>
+          <ul>
+            <li>NPC Mood: {NPCMood}%</li>
+            <li>Energy Left: {Energy}%</li>
+          </ul>
+          <button
+            className="reset-modal-button"
+            onClick={() => {
+              closeModal();
+              onRestart(); // Перезапуск игры
+            }}
+          >
+            <img src={reset} alt="reset" />
+          </button>
+        </Modal>
+      ) : (
+        <Modal isVisible={isModalVisible} onClose={closeModal}>
+          <h2 className="lose-text">Defeat!</h2>
+          <p>Your stats for this level:</p>
+          <ul>
+            <li>NPC Mood: {NPCMood}%</li>
+            <li>Energy Left: {Energy}%</li>
+          </ul>
+          <button
+            className="reset-modal-button"
+            onClick={() => {
+              closeModal();
+              onRestart(); // Перезапуск игры
+            }}
+          >
+            <img src={reset} alt="reset" />
+          </button>
+        </Modal>
+      )}
     </div>
   );
 }

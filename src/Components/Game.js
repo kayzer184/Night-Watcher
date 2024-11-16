@@ -16,6 +16,7 @@ function Game() {
   const [npcMood, setNpcMood] = useState(100);
   const [energy, setEnergy] = useState(100);
   const [timeLeft, setTimeLeft] = useState(60); // Таймер игры (секунды)
+  const [isWin, setIsWin] = useState(null);
   const isPausedRef = useRef(false);
   const [isPaused, setIsPaused] = useState(false);
   const energyConsumptionInterval = 1000;
@@ -23,6 +24,7 @@ function Game() {
   const lightObjects = useRef([]);
 
   const resetGame = () => {
+    setIsWin(null);
     setNpcMood(100);
     setEnergy(100);
     setTimeLeft(60);
@@ -204,14 +206,29 @@ function Game() {
     if (timeLeft === 0 || npcMood === 0 || energy === 0) {
       isPausedRef.current = true;
       setIsPaused(true);
+      endGame();
     }
   }, [timeLeft, npcMood, energy]);
 
   const handlePause = () => {
-    isPausedRef.current = !isPausedRef.current;
-    setIsPaused((prevPause) => !prevPause);
+    if (isWin === null) {
+      isPausedRef.current = !isPausedRef.current;
+      setIsPaused((prevPause) => !prevPause);
+    } else {
+      alert("ЗАКОНЧИЛАСЬ ИГРА ДРУЖИЩЕ РЕСЕТНИ НАЪУЙ");
+    }
   };
+  const endGame = () => {
+    if (timeLeft === 0 && npcMood !== 0 && energy !== 0) {
+      console.log("Вы победили");
 
+      setIsWin(true);
+    } else if (npcMood === 0 || energy === 0) {
+      console.log("Проиграли");
+
+      setIsWin(false);
+    }
+  };
   return (
     <div ref={mountRef}>
       <div className="Interface-Box">
@@ -222,6 +239,7 @@ function Game() {
           onPause={handlePause}
           onRestart={resetGame}
           isPaused={isPaused}
+          isWin={isWin}
         />
       </div>
     </div>
