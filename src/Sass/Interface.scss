@@ -89,6 +89,9 @@ button {
 .reset-modal-button:hover img {
   animation: rotateAnimation 1s linear infinite;
 }
+.lose-text {
+  color: red;
+}
 .Timer {
   display: flex;
   position: fixed;
