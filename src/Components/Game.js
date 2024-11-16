@@ -15,14 +15,17 @@ function Game() {
   const NPCObjects = useRef([]);
   const [npcMood, setNpcMood] = useState(100);
   const [energy, setEnergy] = useState(100);
+  const [timeLeft, setTimeLeft] = useState(60); // Таймер игры (секунды)
   const isPausedRef = useRef(false);
   const [isPaused, setIsPaused] = useState(false);
-  const energyConsumptionInterval = 1000; // Интервал расхода энергии в миллисекундах
+  const energyConsumptionInterval = 1000;
   const lastEnergyUpdateRef = useRef(Date.now());
   const lightObjects = useRef([]);
+
   const resetGame = () => {
     setNpcMood(100);
     setEnergy(100);
+    setTimeLeft(60);
     isPausedRef.current = false;
     setIsPaused(false);
 
@@ -34,7 +37,6 @@ function Game() {
         npc.initialPosition.z
       );
     });
-    console.log(NPCObjects.current);
 
     lightObjects.current.forEach((lightObject) => {
       lightObject.light.visible = lightObject.initialState;
@@ -70,7 +72,6 @@ function Game() {
     controls.dampingFactor = 0.25;
     controls.maxPolarAngle = Math.PI / 2;
 
-    // Загрузка карты и NPC
     MapLoader(lightObjects.current, hitboxes, collidableObjects, scene);
     NPCLoader(NPCObjects.current, mixers, scene);
 
@@ -123,7 +124,6 @@ function Game() {
             model.rotation.y = direction.z > 0 ? 0 : Math.PI;
           }
         }
-
 
         let isInLight = false;
         lightObjects.current.forEach((lightObject) => {
@@ -191,6 +191,22 @@ function Game() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isPaused && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [isPaused, timeLeft]);
+
+  useEffect(() => {
+    if (timeLeft === 0 || npcMood === 0 || energy === 0) {
+      isPausedRef.current = true;
+      setIsPaused(true);
+    }
+  }, [timeLeft, npcMood, energy]);
+
   const handlePause = () => {
     isPausedRef.current = !isPausedRef.current;
     setIsPaused((prevPause) => !prevPause);
@@ -202,6 +218,7 @@ function Game() {
         <Interface
           NPCMood={Math.round(npcMood)}
           Energy={energy}
+          timeLeft={timeLeft}
           onPause={handlePause}
           onRestart={resetGame}
           isPaused={isPaused}
