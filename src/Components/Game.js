@@ -11,15 +11,37 @@ function Game() {
   const mountRef = useRef(null);
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
-  const [collidableObjects, mixers, lightObjects, hitboxes, NPCObjects] = [
-    [],
-    [],
-    [],
-    [],
-    [],
-  ];
+  const [collidableObjects, mixers, hitboxes] = [[], [], []];
+  const NPCObjects = useRef([]);
   const [npcMood, setNpcMood] = useState(100);
   const [energy, setEnergy] = useState(100);
+  const isPausedRef = useRef(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const energyConsumptionInterval = 1000; // Интервал расхода энергии в миллисекундах
+  const lastEnergyUpdateRef = useRef(Date.now());
+  const lightObjects = useRef([]);
+  const resetGame = () => {
+    setNpcMood(100);
+    setEnergy(100);
+    isPausedRef.current = false;
+    setIsPaused(false);
+
+    NPCObjects.current.forEach((npc) => {
+      npc.currentTarget = 0;
+      npc.model.position.set(
+        npc.initialPosition.x,
+        npc.initialPosition.y,
+        npc.initialPosition.z
+      );
+    });
+    console.log(NPCObjects.current);
+
+    lightObjects.current.forEach((lightObject) => {
+      lightObject.light.visible = lightObject.initialState;
+    });
+
+    lastEnergyUpdateRef.current = Date.now();
+  };
 
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -49,44 +71,37 @@ function Game() {
     controls.maxPolarAngle = Math.PI / 2;
 
     // Загрузка карты и NPC
-    MapLoader(lightObjects, hitboxes, collidableObjects, scene);
-    NPCLoader(NPCObjects, mixers, scene);
+    MapLoader(lightObjects.current, hitboxes, collidableObjects, scene);
+    NPCLoader(NPCObjects.current, mixers, scene);
 
     const toggleLight = (light, index) => {
-      if (!light.visible && energy >= 10) {  // Убедитесь, что энергии достаточно для включения
-        setEnergy((prevEnergy) => Math.max(prevEnergy - 10, 0)); // Уменьшение на 10
-        light.visible = true;
-      } else if (light.visible) {
-        light.visible = false;
-      }
-      console.log(`Свет ${index} переключен:`, light.visible);
+      light.visible = !light.visible;
     };
-    
 
     const onMouseClick = (event) => {
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      if (!isPausedRef.current) {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects(scene.children, true);
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(scene.children, true);
 
-      if (intersects.length > 0) {
-        const intersection = intersects[0];
-        hitboxes.forEach(({ box }, index) => {
-          if (box.containsPoint(intersection.point)) {
-            const light = lightObjects[index].light;
-            toggleLight(light, index);
-          }
-        });
-      } else {
-        console.log("Нет пересечений для клика");
+        if (intersects.length > 0) {
+          const intersection = intersects[0];
+          hitboxes.forEach(({ box }, index) => {
+            if (box.containsPoint(intersection.point)) {
+              const light = lightObjects.current[index].light;
+              toggleLight(light, index);
+            }
+          });
+        }
       }
     };
 
     window.addEventListener("click", onMouseClick, false);
 
     const moveNpc = () => {
-      NPCObjects.forEach((npcData) => {
+      NPCObjects.current.forEach((npcData) => {
         const { model, path, speed } = npcData;
         const target = path[npcData.currentTarget];
 
@@ -109,8 +124,9 @@ function Game() {
           }
         }
 
+
         let isInLight = false;
-        lightObjects.forEach((lightObject) => {
+        lightObjects.current.forEach((lightObject) => {
           const distance = model.position.distanceTo(
             lightObject.model.position
           );
@@ -120,21 +136,46 @@ function Game() {
         });
 
         setNpcMood((prevMood) => {
-          return isInLight
+          const targetMood = isInLight
             ? Math.min(100, prevMood + 0.1)
             : Math.max(0, prevMood - 0.1);
+
+          return prevMood + (targetMood - prevMood) * 0.05;
         });
       });
+    };
+
+    const updateEnergy = () => {
+      const currentTime = Date.now();
+      if (
+        currentTime - lastEnergyUpdateRef.current >=
+        energyConsumptionInterval
+      ) {
+        lastEnergyUpdateRef.current = currentTime;
+
+        const totalEnergyConsumption = lightObjects.current.reduce(
+          (acc, lightObject) => {
+            if (lightObject.light.visible) {
+              return acc + (lightObject.energyConsumption || 1);
+            }
+            return acc;
+          },
+          0
+        );
+
+        setEnergy((prevEnergy) =>
+          Math.max(0, prevEnergy - totalEnergyConsumption)
+        );
+      }
     };
 
     const animate = () => {
       controls.update();
       mixers.forEach((mixer) => mixer.update(0.01));
-      moveNpc();
-      lightObjects.forEach(({ light }) => {
-        light.updateMatrixWorld(true);
-        light.shadow.needsUpdate = true;
-      });
+      if (!isPausedRef.current) {
+        moveNpc();
+        updateEnergy();
+      }
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     };
@@ -150,10 +191,21 @@ function Game() {
     };
   }, []);
 
+  const handlePause = () => {
+    isPausedRef.current = !isPausedRef.current;
+    setIsPaused((prevPause) => !prevPause);
+  };
+
   return (
     <div ref={mountRef}>
       <div className="Interface-Box">
-        <Interface NPCMood={Math.floor(npcMood)} Energy={energy} />
+        <Interface
+          NPCMood={Math.round(npcMood)}
+          Energy={energy}
+          onPause={handlePause}
+          onRestart={resetGame}
+          isPaused={isPaused}
+        />
       </div>
     </div>
   );

@@ -1,0 +1,83 @@
+.Interface {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 10px;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+}
+
+.ProgressBar-Wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #f1f1f1;
+}
+
+button {
+  position: fixed;
+  width: 50px;
+  height: 50px;
+  background-color: #ff6347;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s, transform 0.3s;
+
+  svg,
+  img {
+    width: 24px;
+    height: 24px;
+    fill: white;
+    transition: fill 0.3s;
+  }
+
+  &:hover {
+    background-color: #ff4500;
+    transform: scale(1.1);
+  }
+
+  &:active {
+    background-color: #e63946;
+    transform: scale(1);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.pause-button {
+  top: 20px;
+  right: 20px;
+}
+
+.reset-button {
+  top: 80px;
+  right: 20px;
+}
+
+@keyframes rotateAnimation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.reset-button img {
+  transition: transform 0.5s ease;
+}
+
+.reset-button:hover img {
+  animation: rotateAnimation 1s linear infinite;
+}

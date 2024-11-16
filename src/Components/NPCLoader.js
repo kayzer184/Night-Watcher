@@ -2,8 +2,8 @@ import * as THREE from "three";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 
 const NPCSpawns = [
-  [80, 0, -80],
-  [-80, 0, -80],
+  [80, 2, -80],
+  [-80, 2, -80],
 ];
 
 const NPCPaths = [
@@ -26,54 +26,34 @@ export default function NPCLoader(NPCObjects, mixers, scene) {
 
   NPCSpawns.forEach((spawn, index) => {
     NPCModelLoader.load(
-      "/Models/Walking (4).fbx",
+      "/Models/NPC.fbx",
       (NPC) => {
-        console.log("NPC модель загружена:", NPC);
+        const mixer = new THREE.AnimationMixer(NPC);
+        mixers.push(mixer);
 
-        const NPCAnimationLoader = new FBXLoader();
-        NPCAnimationLoader.load(
-          "/Models/Walking (2).fbx",
-          (Animation) => {
-            if (Animation.animations.length === 0) {
-              console.error("Анимации не найдены в файле Walking (1).fbx");
-              return;
-            }
+        const action = mixer.clipAction(NPC.animations[0], NPC);
+        action.play();
 
-            //NPC.animations = Animation.animations;
-            console.log("Loaded animations:", Animation.animations);
+        NPC.scale.set(0.12, 0.12, 0.12);
+        NPC.position.set(...spawn);
+        scene.add(NPC);
 
-            const mixer = new THREE.AnimationMixer(NPC);
-            mixers.push(mixer);
+        const npcData = {
+          model: NPC,
+          mixer: mixer,
+          path: NPCPaths[index],
+          currentTarget: 1,
+          speed: 0.33,
+          initialPosition: { x: spawn[0], y: spawn[1], z: spawn[2] }, // Добавляем стартовую позицию
+        };
+        NPCObjects.push(npcData);
 
-            const action = mixer.clipAction(NPC.animations[0], NPC);
-            console.log("Animation action created:", action);
-            action.play();
-
-            NPC.scale.set(0.3, 0.3, 0.3);
-            NPC.position.set(...spawn);
-            scene.add(NPC);
-
-            const npcData = {
-              model: NPC,
-              mixer: mixer,
-              path: NPCPaths[index],
-              currentTarget: 1,
-              speed: 0.33,
-            };
-            NPCObjects.push(npcData);
-
-            NPC.traverse((child) => {
-              if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-              }
-            });
-          },
-          undefined,
-          (error) => {
-            console.error("Error loading NPC animation:", error);
+        NPC.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
           }
-        );
+        });
       },
       undefined,
       (error) => {
