@@ -24,6 +24,7 @@ function Game() {
   const lightObjects = useRef([]);
 
   const resetGame = () => {
+    setIsWin(null);
     setNpcMood(100);
     setEnergy(100);
     setTimeLeft(60);
@@ -210,8 +211,12 @@ function Game() {
   }, [timeLeft, npcMood, energy]);
 
   const handlePause = () => {
-    isPausedRef.current = !isPausedRef.current;
-    setIsPaused((prevPause) => !prevPause);
+    if (isWin === null) {
+      isPausedRef.current = !isPausedRef.current;
+      setIsPaused((prevPause) => !prevPause);
+    } else {
+      alert("ЗАКОНЧИЛАСЬ ИГРА ДРУЖИЩЕ РЕСЕТНИ НАЪУЙ");
+    }
   };
   const endGame = () => {
     if (timeLeft === 0 && npcMood !== 0 && energy !== 0) {
