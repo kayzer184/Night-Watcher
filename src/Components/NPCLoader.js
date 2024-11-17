@@ -4,29 +4,49 @@ import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 const NPCSpawns = [
   [80, 2, -80],
   [-80, 2, -80],
+  [-680, 2, -80],
 ];
 
 const NPCPaths = [
   [
     { x: 80, z: -80 },
-    { x: 80, z: 515 },
-    { x: -80, z: 515 },
+    { x: 80, z: 1280 },
+    { x: -680, z: 1280 },
+    { x: -680, z: -80 },
+    { x: -680, z: 520 },
+    { x: -80, z: 520 },
     { x: -80, z: -80 },
   ],
   [
     { x: -80, z: -80 },
-    { x: -80, z: 515 },
-    { x: 80, z: 515 },
     { x: 80, z: -80 },
+    { x: 75, z: 675 },
+    { x: -520, z: 680 },
+    { x: -520, z: 1280 },
+    { x: -680, z: 1280 },
+  ],
+  [
+    { x: -680, z: -80 },
+    { x: -660, z: 520 },
+    { x: -510, z: 520 },
+    { x: -80, z: 520 },
+    { x: -80, z: 1110 },
+    { x: -80, z: 1280 },
+    { x: -520, z: 1280 },
+    { x: -520, z: 1110 },
+    { x: -520, z: 680 },
+    { x: -80, z: 680 },
+    { x: -80, z: -80 },
+    { x: -680, z: -80 },
   ],
 ];
 
 export default function NPCLoader(NPCObjects, mixers, scene) {
   const NPCModelLoader = new FBXLoader();
-
+  
   NPCSpawns.forEach((spawn, index) => {
     NPCModelLoader.load(
-      "/Models/NPC.fbx",
+      `/Models/NPC_${Math.round(Math.random() * 0)}.fbx`,
       (NPC) => {
         const mixer = new THREE.AnimationMixer(NPC);
         mixers.push(mixer);
@@ -35,7 +55,7 @@ export default function NPCLoader(NPCObjects, mixers, scene) {
         action.play();
 
         NPC.scale.set(0.12, 0.12, 0.12);
-        NPC.position.set(...spawn);
+        NPC.position.set(spawn[0], spawn[1], spawn[2]);
         scene.add(NPC);
 
         const npcData = {

@@ -91,6 +91,7 @@ function Game() {
 
         if (intersects.length > 0) {
           const intersection = intersects[0];
+          console.log(`x: ${intersection.point.x}, y: ${intersection.point.y}, z: ${intersection.point.z}`);
           hitboxes.forEach(({ box }, index) => {
             if (box.containsPoint(intersection.point)) {
               const light = lightObjects.current[index].light;
