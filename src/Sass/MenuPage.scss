@@ -1,0 +1,45 @@
+.MenuPage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #1e90ff, #ff6347);
+  color: white;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+
+  .title {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    transition: transform 1s, opacity 1s;
+  }
+
+  .start-button {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    background: #ff6347;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+
+    &:hover {
+      background: #e63946;
+      transform: scale(1.1);
+    }
+  }
+
+  &.animate {
+    .title {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+
+    .start-button {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+  }
+}

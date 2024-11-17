@@ -5,140 +5,140 @@
   padding: 10px;
   color: #ffffff;
   font-family: Arial, sans-serif;
-}
 
-.ProgressBar-Wrapper {
-  width: 150px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-h3 {
-  margin: 0;
-  font-size: 14px;
-  color: #f1f1f1;
-}
-
-button {
-  position: fixed;
-  width: 50px;
-  height: 50px;
-  background-color: #ff6347;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: background-color 0.3s, transform 0.3s;
-
-  svg,
-  img {
-    width: 24px;
-    height: 24px;
-    fill: white;
-    transition: fill 0.3s;
+  .ProgressBar-Wrapper {
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
   }
-
-  &:hover {
-    background-color: #ff4500;
-    transform: scale(1.1);
-  }
-
-  &:active {
-    background-color: #e63946;
-    transform: scale(1);
-  }
-
-  &:focus {
-    outline: none;
-  }
-}
-
-.pause-button {
-  top: 20px;
-  right: 20px;
-}
-
-.reset-button {
-  top: 80px;
-  right: 20px;
-}
-
-@keyframes rotateAnimation {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.reset-button img {
-  transition: transform 0.5s ease;
-}
-
-.reset-button:hover img {
-  animation: rotateAnimation 1s linear infinite;
-}
-.reset-modal-button img {
-  transition: transform 0.5s ease;
-}
-
-.reset-modal-button:hover img {
-  animation: rotateAnimation 1s linear infinite;
-}
-.lose-text {
-  color: red;
-}
-.Timer {
-  display: flex;
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 15px;
-  padding: 10px;
-  background-color: #222;
-  border: 2px solid #fff;
-  border-radius: 10px;
-  color: #fff;
 
   h3 {
-    margin: 0 0 5px 0;
+    margin: 0;
     font-size: 14px;
     color: #f1f1f1;
   }
 
-  .Timer-Display {
-    font-size: 24px;
-    font-weight: bold;
-    color: #ff6347;
-    padding: 5px 10px;
-    background: #111;
+  button {
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    background-color: #ff6347;
+    border: none;
     border-radius: 5px;
-    border: 2px solid #ff6347;
-    width: 80px;
-    text-align: center;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s, transform 0.3s;
+
+    svg,
+    img {
+      width: 24px;
+      height: 24px;
+      fill: white;
+      transition: fill 0.3s;
+    }
+
+    &:hover {
+      background-color: #ff4500;
+      transform: scale(1.1);
+    }
+
+    &:active {
+      background-color: #e63946;
+      transform: scale(1);
+    }
+
+    &:focus {
+      outline: none;
+    }
   }
-}
 
-.show-modal-button {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  .pause-button {
+    top: 20px;
+    right: 20px;
+  }
 
-  &:hover {
-    background-color: #45a049;
+  .reset-button {
+    top: 80px;
+    right: 20px;
+  }
+
+  @keyframes rotateAnimation {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .reset-button img {
+    transition: transform 0.5s ease;
+  }
+
+  .reset-button:hover img {
+    animation: rotateAnimation 1s linear infinite;
+  }
+  .reset-modal-button img {
+    transition: transform 0.5s ease;
+  }
+
+  .reset-modal-button:hover img {
+    animation: rotateAnimation 1s linear infinite;
+  }
+  .lose-text {
+    color: red;
+  }
+  .Timer {
+    display: flex;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #222;
+    border: 2px solid #fff;
+    border-radius: 10px;
+    color: #fff;
+
+    h3 {
+      margin: 0 0 5px 0;
+      font-size: 14px;
+      color: #f1f1f1;
+    }
+
+    .Timer-Display {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ff6347;
+      padding: 5px 10px;
+      background: #111;
+      border-radius: 5px;
+      border: 2px solid #ff6347;
+      width: 80px;
+      text-align: center;
+    }
+  }
+
+  .show-modal-button {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #45a049;
+    }
   }
 }
