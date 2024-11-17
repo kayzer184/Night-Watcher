@@ -9,7 +9,6 @@ function MapLoader(lightObjects, hitboxes, collidableObjects, scene) {
   const MapModelLoader = new FBXLoader();
   MapModelLoader.load("/Models/Map.fbx",
     (object) => {
-      console.log("Map model loaded:", object);
       object.scale.set(0.1, 0.1, 0.1);
       object.position.set(0, 0, 0);
 

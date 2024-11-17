@@ -77,6 +77,13 @@ function Game() {
     MapLoader(lightObjects.current, hitboxes, collidableObjects, scene);
     NPCLoader(NPCObjects.current, mixers, scene);
 
+    const onWindowResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+  
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+
     const toggleLight = (light, index) => {
       light.visible = !light.visible;
     };
@@ -103,7 +110,7 @@ function Game() {
     };
 
     window.addEventListener("click", onMouseClick, false);
-
+    window.addEventListener("resize", onWindowResize);
     const moveNpc = () => {
       NPCObjects.current.forEach((npcData) => {
         const { model, path, speed } = npcData;
@@ -186,6 +193,7 @@ function Game() {
     animate();
 
     return () => {
+      window.removeEventListener("resize", onWindowResize);
       window.removeEventListener("click", onMouseClick, false);
       if (mountRef.current) {
         mountRef.current.removeChild(renderer.domElement);

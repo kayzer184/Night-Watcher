@@ -1,45 +1,57 @@
 .MenuPage {
+  background-color: #0d0d0d; /* Темный фон ночного города */
+  color: #f1f1f1; /* Белый текст для контраста */
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   height: 100vh;
-  background: linear-gradient(135deg, #1e90ff, #ff6347);
-  color: white;
-  font-family: Arial, sans-serif;
   overflow: hidden;
 
   .title {
+    font-family: 'Roboto', sans-serif;
     font-size: 3rem;
-    margin-bottom: 20px;
-    transition: transform 1s, opacity 1s;
+    text-align: center;
+    margin-bottom: 40px;
+    color: #f9b700; /* Теплый желтый цвет для названия */
+    text-shadow: 0 0 10px #f9b700, 0 0 20px #f9b700; /* Эффект неонового света */
+    transition: transform 1s, opacity 1s; /* Плавная анимация */
   }
 
-  .start-button {
-    padding: 10px 20px;
-    font-size: 1.2rem;
+  .start-button,
+  .fullscreen-button {
+    background-color: #f9b700;
     border: none;
-    border-radius: 5px;
-    background: #ff6347;
-    color: white;
+    padding: 20px 40px;
+    margin: 20px;
+    font-size: 1.2rem;
     cursor: pointer;
-    transition: background 0.3s, transform 0.3s;
+    border-radius: 5px;
+    color: #0d0d0d;
+    transition: all 0.3s ease-in-out;
+  }
 
-    &:hover {
-      background: #e63946;
-      transform: scale(1.1);
-    }
+  .start-button:hover,
+  .fullscreen-button:hover {
+    box-shadow: 0 0 20px #f9b700;
+    transform: scale(1.05);
+  }
+
+  .start-button:active,
+  .fullscreen-button:active {
+    transform: scale(0.95);
   }
 
   &.animate {
     .title {
-      transform: translateY(-100%);
-      opacity: 0;
+      transform: translateY(-100%); /* Двигаем заголовок вверх */
+      opacity: 0; /* Заголовок исчезает */
     }
 
-    .start-button {
-      transform: translateY(-100%);
-      opacity: 0;
+    .start-button,
+    .fullscreen-button {
+      transform: translateY(-100%); /* Двигаем кнопку вверх */
+      opacity: 0; /* Кнопка исчезает */
     }
   }
 }

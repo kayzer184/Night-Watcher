@@ -1,4 +1,5 @@
 import React from "react";
+import "../Sass/App.scss";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MenuPage from "../Pages/MenuPage";
 import GamePage from "../Pages/GamePage";
