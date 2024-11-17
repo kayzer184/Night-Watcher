@@ -1,12 +1,16 @@
-// src/App.js
 import React from "react";
-import Game from "./Game"; // Импортируем компонент Map
-import "../Sass/App.scss";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import MenuPage from "../Pages/MenuPage";
+import GamePage from "../Pages/GamePage";
+
 function App() {
   return (
-    <div className="App">
-      <Game />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<MenuPage />} />
+        <Route path="/game" element={<GamePage />} />
+      </Routes>
+    </Router>
   );
 }
 
