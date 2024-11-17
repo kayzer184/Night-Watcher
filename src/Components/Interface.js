@@ -3,7 +3,6 @@ import ProgressBar from "@ramonak/react-progress-bar";
 import Modal from "./Modal";
 import "../Sass/Interface.scss";
 import reset from "../Assets/Icons/ResetButton.svg";
-import { div } from "three/webgpu";
 
 function getMoodColor(mood) {
   const red = Math.max(255 - mood * 2.55, 0);
@@ -63,7 +62,7 @@ function Interface({
         <div className="Timer-Display">{timeLeft}</div>
       </div>
 
-      <button onClick={onPause} className="pause-button">
+      <button onClick={onPause} className="pause-button interface-button">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           {!isPaused ? (
             <g>
@@ -75,7 +74,7 @@ function Interface({
           )}
         </svg>
       </button>
-      <button onClick={onRestart} className="reset-button">
+      <button onClick={onRestart} className="reset-button interface-button">
         <img src={reset} alt="reset" />
       </button>
       {isWin ? (
@@ -87,7 +86,7 @@ function Interface({
             <li>Energy Left: {Energy}%</li>
           </ul>
           <button
-            className="reset-modal-button"
+            className="reset-modal-button interface-button"
             onClick={() => {
               closeModal();
               onRestart(); // Перезапуск игры
@@ -105,7 +104,7 @@ function Interface({
             <li>Energy Left: {Energy}%</li>
           </ul>
           <button
-            className="reset-modal-button"
+            className="reset-modal-button interface-button"
             onClick={() => {
               closeModal();
               onRestart(); // Перезапуск игры
