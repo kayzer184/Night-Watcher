@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Sass/MenuPage.scss";
+import Background from "../Components/Background";
 
 function MenuPage() {
   const [startAnimation, setStartAnimation] = useState(false);
@@ -43,6 +44,7 @@ function MenuPage() {
       <h1 className="title">Night Watcher 💡</h1>
       <button className="start-button" onClick={handleStartGame}>Начать игру</button>
       <button className="fullscreen-button" onClick={isFullScreen ? handleExitFullscreen : handleOpenFullScreen}>Fullscreen</button>
+      <Background />
     </div>
   );
 }

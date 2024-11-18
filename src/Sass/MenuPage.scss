@@ -20,6 +20,7 @@
 
   .start-button,
   .fullscreen-button {
+    z-index: 10; 
     background-color: #f9b700;
     border: none;
     padding: 20px 40px;
