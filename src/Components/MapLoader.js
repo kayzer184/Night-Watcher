@@ -76,6 +76,28 @@ function MapLoader(lightObjects, hitboxes, collidableObjects, scene) {
     Math.PI * 1.5,
     0
   );
+  addStreetLight(
+    lightObjects,
+    hitboxes,
+    scene,
+    -660,
+    108,
+    358,
+    0,
+    Math.PI * 1.5,
+    0
+  );
+  addStreetLight(
+    lightObjects,
+    hitboxes,
+    scene,
+    -240,
+    108,
+    650,
+    0,
+    0,
+    0
+  );
 }
 
 export default MapLoader;

@@ -15,7 +15,7 @@ function Game() {
   const NPCObjects = useRef([]);
   const [npcMood, setNpcMood] = useState(100);
   const [energy, setEnergy] = useState(100);
-  const [timeLeft, setTimeLeft] = useState(60); // Таймер игры (секунды)
+  const [timeLeft, setTimeLeft] = useState(600); // Таймер игры (секунды)
   const [isWin, setIsWin] = useState(null);
   const isPausedRef = useRef(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -148,8 +148,6 @@ function Game() {
         });
 
         setNpcMood((prevMood) => {
-          console.log(npcMood);
-
           const targetMood = isInLight
             ? Math.min(100, prevMood + 0.005)
             : Math.max(0, prevMood - 0.005);
@@ -227,18 +225,12 @@ function Game() {
     if (isWin === null) {
       isPausedRef.current = !isPausedRef.current;
       setIsPaused((prevPause) => !prevPause);
-    } else {
-      alert("ЗАКОНЧИЛАСЬ ИГРА ДРУЖИЩЕ РЕСЕТНИ НАЪУЙ");
     }
   };
   const endGame = () => {
     if (timeLeft === 0 && npcMood !== 0 && energy !== 0) {
-      console.log("Вы победили");
-
       setIsWin(true);
     } else if (npcMood === 0 || energy === 0) {
-      console.log("Проиграли");
-
       setIsWin(false);
     }
   };
