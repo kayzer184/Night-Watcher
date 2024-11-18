@@ -80,7 +80,7 @@ function Game() {
     const onWindowResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-  
+
       renderer.setSize(window.innerWidth, window.innerHeight);
     };
 
@@ -98,7 +98,9 @@ function Game() {
 
         if (intersects.length > 0) {
           const intersection = intersects[0];
-          console.log(`x: ${intersection.point.x}, y: ${intersection.point.y}, z: ${intersection.point.z}`);
+          console.log(
+            `x: ${intersection.point.x}, y: ${intersection.point.y}, z: ${intersection.point.z}`
+          );
           hitboxes.forEach(({ box }, index) => {
             if (box.containsPoint(intersection.point)) {
               const light = lightObjects.current[index].light;
@@ -146,11 +148,13 @@ function Game() {
         });
 
         setNpcMood((prevMood) => {
-          const targetMood = isInLight
-            ? Math.min(100, prevMood + 0.1)
-            : Math.max(0, prevMood - 0.1);
+          console.log(npcMood);
 
-          return prevMood + (targetMood - prevMood) * 0.05;
+          const targetMood = isInLight
+            ? Math.min(100, prevMood + 0.005)
+            : Math.max(0, prevMood - 0.005);
+
+          return prevMood + (targetMood - prevMood);
         });
       });
     };
