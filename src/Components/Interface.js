@@ -32,7 +32,7 @@ function Interface({
   return (
     <div className="Interface">
       <div className="ProgressBar-Wrapper">
-        <h3>NPC Mood</h3>
+        <h3>Настроение пешеходов</h3>
         <ProgressBar
           completed={NPCMood}
           bgColor={getMoodColor(NPCMood)}
@@ -44,7 +44,7 @@ function Interface({
         />
       </div>
       <div className="ProgressBar-Wrapper">
-        <h3>Energy</h3>
+        <h3>Запас энергии</h3>
         <ProgressBar
           completed={Energy}
           bgColor="#FFD700"
@@ -58,7 +58,7 @@ function Interface({
 
       {/* Таймер */}
       <div className="Timer">
-        <h3>Time Left</h3>
+        <h3>Осталось времени</h3>
         <div className="Timer-Display">{timeLeft}</div>
       </div>
 
@@ -79,11 +79,11 @@ function Interface({
       </button>
       {isWin ? (
         <Modal isVisible={isModalVisible} onClose={closeModal}>
-          <h2>Level Completed!</h2>
-          <p>Your stats for this level:</p>
+          <h2>Уровень пройден!</h2>
+          <p>Статистика за уровень:</p>
           <ul>
-            <li>NPC Mood: {NPCMood}%</li>
-            <li>Energy Left: {Energy}%</li>
+            <li>Настроение пешеходов: {NPCMood}%</li>
+            <li>Оставшееся энергия: {Energy}%</li>
           </ul>
           <button
             className="reset-modal-button interface-button"
@@ -97,11 +97,11 @@ function Interface({
         </Modal>
       ) : (
         <Modal isVisible={isModalVisible} onClose={closeModal}>
-          <h2 className="lose-text">Defeat!</h2>
-          <p>Your stats for this level:</p>
+          <h2 className="lose-text">Поражение!</h2>
+          <p>Статистика за уровень:</p>
           <ul>
-            <li>NPC Mood: {NPCMood}%</li>
-            <li>Energy Left: {Energy}%</li>
+            <li>Настроение пешеходов: {NPCMood}%</li>
+            <li>Оставшееся энергия: {Energy}%</li>
           </ul>
           <button
             className="reset-modal-button interface-button"

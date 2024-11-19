@@ -1,4 +1,4 @@
-.MenuPage {
+.SettingsPage {
   background-color: #0d0d0d; /* Темный фон ночного города */
   color: #f1f1f1; /* Белый текст для контраста */
   display: flex;
@@ -18,10 +18,7 @@
     transition: transform 1s, opacity 1s; /* Плавная анимация */
   }
 
-  .start-button,
-  .leaders-button,
-  .settings-button,
-  .fullscreen-button {
+  .back-button{
     z-index: 10; 
     background-color: #f9b700;
     border: none;
@@ -34,18 +31,12 @@
     transition: transform 1s, opacity 1s; /* Плавная анимация */
   }
 
-  .start-button:hover,
-  .leaders-button:hover,
-  .settings-button:hover,
-  .fullscreen-button:hover {  
+  .back-button:hover {  
     box-shadow: 0 0 20px #f9b700;
     transform: scale(1.05);
   }
 
-  .start-button:active,
-  .leaders-button:active,
-  .settings-button:active,
-  .fullscreen-button:active {
+  .back-button:active {
     transform: scale(0.95);
   }
 
@@ -55,10 +46,7 @@
       opacity: 0; /* Заголовок исчезает */
     }
 
-    .start-button,
-    .leaders-button,
-    .settings-button,
-    .fullscreen-button {
+    .back-button {
       transform: translateY(-100%); /* Двигаем кнопку вверх */
       opacity: 0; /* Кнопка исчезает */
     }

@@ -4,13 +4,23 @@ import "../Sass/MenuPage.scss";
 import Background from "../Components/Background";
 
 function MenuPage() {
-  const [startAnimation, setStartAnimation] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [startAnimation, setStartAnimation] = useState(false);
   const navigate = useNavigate();
 
   const handleStartGame = () => {
     setStartAnimation(true);
     setTimeout(() => navigate("/game"), 1000);
+  };
+
+  const handleOpenLeaders = () => {
+    setStartAnimation(true);
+    setTimeout(() => navigate("/leaders"), 1000);
+  }
+
+  const handleOpenSettings = () => {
+    setStartAnimation(true);
+    setTimeout(() => navigate("/settings"), 1000);
   };
 
   function handleOpenFullScreen() {
@@ -41,9 +51,11 @@ function MenuPage() {
 
   return (
     <div className={`MenuPage ${startAnimation ? "animate" : ""}`}>
-      <h1 className="title">Night Watcher 💡</h1>
+      <h1 className="title">Ночной смотритель 💡</h1>
       <button className="start-button" onClick={handleStartGame}>Начать игру</button>
-      <button className="fullscreen-button" onClick={isFullScreen ? handleExitFullscreen : handleOpenFullScreen}>Fullscreen</button>
+      <button className="leaders-button" onClick={handleOpenLeaders}>Лидеры</button>
+      <button className="settings-button" onClick={handleOpenSettings}>Настройки</button>
+      <button className="fullscreen-button" onClick={isFullScreen ? handleExitFullscreen : handleOpenFullScreen}>Полноэкранный режим</button>
       <Background />
     </div>
   );

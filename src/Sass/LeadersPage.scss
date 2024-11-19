@@ -1,0 +1,101 @@
+.LeadersPage {
+  background-color: #0d0d0d; /* Темный фон ночного города */
+  color: #f1f1f1; /* Белый текст для контраста */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+
+  .title {
+    font-family: 'Roboto', sans-serif;
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 40px;
+    color: #f9b700; /* Теплый желтый цвет для названия */
+    text-shadow: 0 0 10px #f9b700, 0 0 20px #f9b700; /* Эффект неонового света */
+    transition: transform 1s, opacity 1s; /* Плавная анимация */
+  }
+
+  .leaders-table {
+    margin-top: 20px;
+    width: 90%;
+    max-width: 1200px;
+    border-collapse: collapse;
+    background-color: #1d1d1d; /* Темный фон для таблицы */
+    border-radius: 10px; /* Скругленные углы */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Легкая тень для добавления глубины */
+    overflow: hidden; /* Для предотвращения вылазки содержимого за скругленные углы */
+    opacity: 1; /* Начальная непрозрачность */
+    transition: transform 1s, opacity 1s ease-out; /* Плавная анимация для обеих свойств */
+
+    th, td {
+      padding: 15px 20px;
+      text-align: center;
+      border-bottom: 1px solid #444;
+      font-size: 1.1rem;
+    }
+
+    th {
+      background-color: #222; /* Фон для заголовков */
+      color: #f9b700; /* Желтый цвет для текста заголовков */
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    tr {
+      background-color: #2a2a2a;
+      transition: background-color 1s ease;
+    }
+
+    tr:hover {
+      background-color: #3a3a3a; /* Подсветка строки при наведении */
+    }
+
+    /* Уменьшаем ширину первого столбца */
+    td:nth-child(1), th:nth-child(1) {
+      width: 80px; /* Задаем фиксированную ширину для первого столбца */
+      font-weight: bold;
+    }
+  }
+
+  .back-button{
+    z-index: 10; 
+    background-color: #f9b700;
+    border: none;
+    padding: 20px 40px;
+    margin: 20px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 5px;
+    color: #0d0d0d;
+    transition: transform 1s, opacity 1s; /* Плавная анимация */
+  }
+
+  .back-button:hover {  
+    box-shadow: 0 0 20px #f9b700;
+    transform: scale(1.05);
+  }
+
+  .back-button:active {
+    transform: scale(0.95);
+  }
+
+  &.animate {
+    .title {
+      transform: translateY(-100%); /* Двигаем заголовок вверх */
+      opacity: 0; /* Заголовок исчезает */
+    }
+
+    .leaders-table {
+      transform: translateY(-10vh);
+      opacity: 0;
+    }
+
+    .back-button {
+      transform: translateY(-100%); /* Двигаем кнопку вверх */
+      opacity: 0; /* Кнопка исчезает */
+    }
+  }
+}
