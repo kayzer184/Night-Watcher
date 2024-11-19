@@ -15,7 +15,7 @@ function Game() {
   const NPCObjects = useRef([]);
   const [npcMood, setNpcMood] = useState(100);
   const [energy, setEnergy] = useState(100);
-  const [timeLeft, setTimeLeft] = useState(600); // Таймер игры (секунды)
+  const [timeLeft, setTimeLeft] = useState(60); // Таймер игры (секунды)
   const [isWin, setIsWin] = useState(null);
   const isPausedRef = useRef(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -75,7 +75,7 @@ function Game() {
     controls.maxPolarAngle = Math.PI / 2;
 
     MapLoader(lightObjects.current, hitboxes, collidableObjects, scene);
-    NPCLoader(NPCObjects.current, mixers, scene);
+    NPCLoader(NPCObjects.current, 2, mixers, scene);
 
     const onWindowResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
