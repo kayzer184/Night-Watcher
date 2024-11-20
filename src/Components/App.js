@@ -5,6 +5,7 @@ import MenuPage from "../Pages/MenuPage";
 import LeadersPage from "../Pages/LeadersPage";
 import SettingsPage from "../Pages/SettingsPage";
 import GamePage from "../Pages/GamePage";
+import NotFoundPage from "../Pages/NotFoundPage";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/leaders" element={<LeadersPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/game" element={<GamePage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );

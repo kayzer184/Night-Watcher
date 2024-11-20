@@ -1,0 +1,54 @@
+.NotFoundPage {
+  background-color: #0d0d0d; /* Темный фон ночного города */
+  color: #f1f1f1; /* Белый текст для контраста */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+
+  .title {
+    font-family: 'Roboto', sans-serif;
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 40px;
+    color: #f9b700; /* Теплый желтый цвет для названия */
+    text-shadow: 0 0 10px #f9b700, 0 0 20px #f9b700; /* Эффект неонового света */
+    transition: transform 1s, opacity 1s; /* Плавная анимация */
+  }
+
+  .back-button{
+    z-index: 10; 
+    background-color: #f9b700;
+    border: none;
+    padding: 20px 40px;
+    margin: 20px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 5px;
+    color: #0d0d0d;
+    transition: transform 1s, opacity 1s; /* Плавная анимация */
+  }
+
+  .back-button:hover {  
+    box-shadow: 0 0 20px #f9b700;
+    transform: scale(1.05);
+  }
+
+  .back-button:active {
+    transform: scale(0.95);
+  }
+
+  &.animate {
+    .title {
+      transform: translateY(-100%); /* Двигаем заголовок вверх */
+      opacity: 0; /* Заголовок исчезает */
+    }
+
+    .back-button {
+      transform: translateY(-100%); /* Двигаем кнопку вверх */
+      opacity: 0; /* Кнопка исчезает */
+    }
+  }
+}
