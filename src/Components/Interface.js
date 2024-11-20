@@ -83,7 +83,7 @@ function Interface({
           <p>Статистика за уровень:</p>
           <ul>
             <li>Настроение пешеходов: {NPCMood}%</li>
-            <li>Оставшееся энергия: {Energy}%</li>
+            <li>Оставшаяся энергия: {Energy}%</li>
           </ul>
           <button
             className="reset-modal-button interface-button"
@@ -101,7 +101,7 @@ function Interface({
           <p>Статистика за уровень:</p>
           <ul>
             <li>Настроение пешеходов: {NPCMood}%</li>
-            <li>Оставшееся энергия: {Energy}%</li>
+            <li>Оставшаяся энергия: {Energy}%</li>
           </ul>
           <button
             className="reset-modal-button interface-button"
