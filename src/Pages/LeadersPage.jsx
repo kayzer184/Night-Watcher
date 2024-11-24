@@ -4,9 +4,24 @@ import { useNavigate } from "react-router-dom";
 import Background from "../Components/Background";
 import '../Sass/LeadersPage.scss';
 
+const getLeaderboard = async () => {
+  try {
+    const response = await fetch(`localhost:5000/leaderboard`);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error);
+    return [];
+  }
+};
+
 function LeadersPage() {
   const [startAnimation, setStartAnimation] = useState(false);
   const navigate = useNavigate();
+  console.log(getLeaderboard());
 
   function handleBack() {
     setStartAnimation(true);

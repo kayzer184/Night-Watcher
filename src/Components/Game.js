@@ -32,6 +32,7 @@ function Game() {
     setIsPaused(false);
 
     NPCObjects.current.forEach((npc) => {
+      npc.mixer.timeScale = isPausedRef.current ? 0 : 1;
       npc.currentTarget = 0;
       npc.model.position.set(
         npc.initialPosition.x,
@@ -224,10 +225,24 @@ function Game() {
   const handlePause = () => {
     if (isWin === null) {
       isPausedRef.current = !isPausedRef.current;
+      NPCObjects.current.forEach((npcData) => {
+        if (npcData.mixer) { // Убедитесь, что mixer существует
+          npcData.mixer.timeScale = isPausedRef.current ? 0 : 1;
+        } else {
+          console.warn('Mixer is undefined for NPC:', npcData);
+        }
+      });
       setIsPaused((prevPause) => !prevPause);
     }
-  };
+  };  
   const endGame = () => {
+    NPCObjects.current.forEach((npcData) => {
+      if (npcData.mixer) { // Убедитесь, что mixer существует
+        npcData.mixer.timeScale = isPausedRef.current ? 0 : 1;
+      } else {
+        console.warn('Mixer is undefined for NPC:', npcData);
+      }
+    });
     if (timeLeft === 0 && npcMood !== 0 && energy !== 0) {
       setIsWin(true);
     } else if (npcMood === 0 || energy === 0) {

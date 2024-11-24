@@ -10,7 +10,7 @@ function MenuPage() {
 
   const handleStartGame = () => {
     setStartAnimation(true);
-    setTimeout(() => navigate("/game"), 1000);
+    setTimeout(() => navigate("/levels"), 1000);
   };
 
   const handleOpenLeaders = () => {

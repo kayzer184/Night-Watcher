@@ -109,6 +109,7 @@ export default function NPCLoader(NPCObjects, NPCMaxCount, mixers, scene) {
           model: NPC,
           mixer: mixer,
           path: path,
+          action: action,
           currentTarget: 1,
           speed: 0.33,
           initialPosition: { x: spawn[0], y: spawn[1], z: spawn[2] },
