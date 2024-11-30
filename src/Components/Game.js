@@ -19,9 +19,8 @@ function Game() {
   const [isWin, setIsWin] = useState(null);
   const isPausedRef = useRef(false);
   const [isPaused, setIsPaused] = useState(false);
-  const energyConsumptionInterval = 1000;
-  const lastEnergyUpdateRef = useRef(Date.now());
   const lightObjects = useRef([]);
+  const lastEnergyUpdateRef = useRef(Date.now());
 
   const resetGame = () => {
     setIsWin(null);
@@ -52,12 +51,7 @@ function Game() {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
 
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      10,
-      10000
-    );
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 10, 10000);
     camera.position.set(0, 500, 20);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -66,9 +60,7 @@ function Game() {
     renderer.shadowMap.enabled = true;
     renderer.physicallyCorrectLights = true;
 
-    if (mountRef.current) {
-      mountRef.current.appendChild(renderer.domElement);
-    }
+    if (mountRef.current) mountRef.current.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -81,7 +73,6 @@ function Game() {
     const onWindowResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-
       renderer.setSize(window.innerWidth, window.innerHeight);
     };
 
@@ -99,9 +90,7 @@ function Game() {
 
         if (intersects.length > 0) {
           const intersection = intersects[0];
-          console.log(
-            `x: ${intersection.point.x}, y: ${intersection.point.y}, z: ${intersection.point.z}`
-          );
+          console.log(`x: ${intersection.point.x}, y: ${intersection.point.y}, z: ${intersection.point.z}`);
           hitboxes.forEach(({ box }, index) => {
             if (box.containsPoint(intersection.point)) {
               const light = lightObjects.current[index].light;
@@ -114,45 +103,29 @@ function Game() {
 
     window.addEventListener("click", onMouseClick, false);
     window.addEventListener("resize", onWindowResize);
+
     const moveNpc = () => {
       NPCObjects.current.forEach((npcData) => {
         const { model, path, speed } = npcData;
         const target = path[npcData.currentTarget];
-
-        const direction = new THREE.Vector3(
-          target.x - model.position.x,
-          0,
-          target.z - model.position.z
-        );
+        const direction = new THREE.Vector3(target.x - model.position.x, 0, target.z - model.position.z);
 
         if (direction.length() < speed) {
           npcData.currentTarget = (npcData.currentTarget + 1) % path.length;
         } else {
           direction.normalize();
           model.position.addScaledVector(direction, speed);
-
-          if (Math.abs(direction.x) > Math.abs(direction.z)) {
-            model.rotation.y = direction.x > 0 ? Math.PI / 2 : -Math.PI / 2;
-          } else {
-            model.rotation.y = direction.z > 0 ? 0 : Math.PI;
-          }
+          model.rotation.y = Math.abs(direction.x) > Math.abs(direction.z)
+            ? direction.x > 0 ? Math.PI / 2 : -Math.PI / 2
+            : direction.z > 0 ? 0 : Math.PI;
         }
 
-        let isInLight = false;
-        lightObjects.current.forEach((lightObject) => {
-          const distance = model.position.distanceTo(
-            lightObject.model.position
-          );
-          if (lightObject.light.visible && distance < 300) {
-            isInLight = true;
-          }
+        let isInLight = lightObjects.current.some((lightObject) => {
+          return lightObject.light.visible && model.position.distanceTo(lightObject.model.position) < 300;
         });
 
         setNpcMood((prevMood) => {
-          const targetMood = isInLight
-            ? Math.min(100, prevMood + 0.005)
-            : Math.max(0, prevMood - 0.005);
-
+          const targetMood = isInLight ? Math.min(100, prevMood + 0.005) : Math.max(0, prevMood - 0.005);
           return prevMood + (targetMood - prevMood);
         });
       });
@@ -160,25 +133,14 @@ function Game() {
 
     const updateEnergy = () => {
       const currentTime = Date.now();
-      if (
-        currentTime - lastEnergyUpdateRef.current >=
-        energyConsumptionInterval
-      ) {
+      if (currentTime - lastEnergyUpdateRef.current >= 1000) {
         lastEnergyUpdateRef.current = currentTime;
 
-        const totalEnergyConsumption = lightObjects.current.reduce(
-          (acc, lightObject) => {
-            if (lightObject.light.visible) {
-              return acc + (lightObject.energyConsumption || 1);
-            }
-            return acc;
-          },
-          0
-        );
+        const totalEnergyConsumption = lightObjects.current.reduce((acc, lightObject) => {
+          return lightObject.light.visible ? acc + (lightObject.energyConsumption || 1) : acc;
+        }, 0);
 
-        setEnergy((prevEnergy) =>
-          Math.max(0, prevEnergy - totalEnergyConsumption)
-        );
+        setEnergy((prevEnergy) => Math.max(0, prevEnergy - totalEnergyConsumption));
       }
     };
 
@@ -197,10 +159,8 @@ function Game() {
 
     return () => {
       window.removeEventListener("resize", onWindowResize);
-      window.removeEventListener("click", onMouseClick, false);
-      if (mountRef.current) {
-        mountRef.current.removeChild(renderer.domElement);
-      }
+      window.removeEventListener("click", onMouseClick);
+      if (mountRef.current) mountRef.current.removeChild(renderer.domElement);
       renderer.dispose();
     };
   }, []);
@@ -226,29 +186,19 @@ function Game() {
     if (isWin === null) {
       isPausedRef.current = !isPausedRef.current;
       NPCObjects.current.forEach((npcData) => {
-        if (npcData.mixer) { // Убедитесь, что mixer существует
-          npcData.mixer.timeScale = isPausedRef.current ? 0 : 1;
-        } else {
-          console.warn('Mixer is undefined for NPC:', npcData);
-        }
+        if (npcData.mixer) npcData.mixer.timeScale = isPausedRef.current ? 0 : 1;
       });
       setIsPaused((prevPause) => !prevPause);
     }
-  };  
+  };
+
   const endGame = () => {
     NPCObjects.current.forEach((npcData) => {
-      if (npcData.mixer) { // Убедитесь, что mixer существует
-        npcData.mixer.timeScale = isPausedRef.current ? 0 : 1;
-      } else {
-        console.warn('Mixer is undefined for NPC:', npcData);
-      }
+      if (npcData.mixer) npcData.mixer.timeScale = isPausedRef.current ? 0 : 1;
     });
-    if (timeLeft === 0 && npcMood !== 0 && energy !== 0) {
-      setIsWin(true);
-    } else if (npcMood === 0 || energy === 0) {
-      setIsWin(false);
-    }
+    setIsWin(timeLeft === 0 && npcMood !== 0 && energy !== 0);
   };
+
   return (
     <div ref={mountRef}>
       <div className="Interface-Box">
