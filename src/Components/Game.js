@@ -147,13 +147,17 @@ function Game() {
     const animate = () => {
       controls.update();
       mixers.forEach((mixer) => mixer.update(0.01));
+      
+      // Обновление NPC и энергии только при необходимости
       if (!isPausedRef.current) {
         moveNpc();
         updateEnergy();
       }
+    
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     };
+    
 
     animate();
 
