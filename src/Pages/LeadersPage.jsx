@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Background from "../Components/Background";
@@ -6,10 +6,8 @@ import '../Sass/LeadersPage.scss';
 
 const getLeaderboard = async () => {
   try {
-    const response = await fetch(`localhost:5000/leaderboard`);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
+    const response = await fetch('http://localhost:5000/getLeaderBoard');
+    console.log(response)
     const data = await response.json();
     return data;
   } catch (error) {
@@ -18,25 +16,24 @@ const getLeaderboard = async () => {
   }
 };
 
+
 function LeadersPage() {
   const [startAnimation, setStartAnimation] = useState(false);
+  const [leaders, setLeaders] = useState([]);  // State to hold the leaderboard data
   const navigate = useNavigate();
-  console.log(getLeaderboard());
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      const leaderboard = await getLeaderboard();
+      setLeaders(leaderboard);  // Update state with fetched data
+    };
+    fetchLeaderboard();
+  }, []);  // This runs once when the component mounts
 
   function handleBack() {
     setStartAnimation(true);
     setTimeout(() => navigate("/"), 1000);
   }
-
-  function getLeaders() {
-    return [
-      { rate: 1, name: "kapcheni", left_energy: 1642 },
-      { rate: 2, name: "Nikita", left_energy: 1620 },
-      { rate: 3, name: "bomj", left_energy: 1580 },
-    ];
-  }
-
-  const leaders = getLeaders();
 
   return (
     <div className={`LeadersPage ${startAnimation ? "animate" : ""}`}>
@@ -50,13 +47,19 @@ function LeadersPage() {
           </tr>
         </thead>
         <tbody>
-          {leaders.map((leader, index) => (
-            <tr key={index}>
-              <td>{leader.rate}</td>
-              <td>{leader.name}</td>
-              <td>{leader.left_energy}</td>
+          {leaders.length > 0 ? (
+            leaders.map((leader, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td> {/* Adjust field name if needed */}
+                <td>{leader.username}</td> {/* Adjust field name if needed */}
+                <td>{leader.score}</td> {/* Adjust field name if needed */}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="3">Загрузка...</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
       <button onClick={handleBack} className="back-button">Назад</button>
