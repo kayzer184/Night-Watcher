@@ -6,7 +6,7 @@ import '../Sass/LeadersPage.scss';
 
 const getLeaderboard = async () => {
   try {
-    const response = await fetch('http://localhost:5000/getLeaderBoard');
+    const response = await fetch('http://api.night-watcher.vercel.app/getLeaderBoard');
     console.log(response)
     const data = await response.json();
     return data;
