@@ -6,7 +6,12 @@ const leaderboardRoutes = require('./routes/leaderboard');
 const app = express();
 
 // Middleware
-app.use(cors());
+const cors = require('cors');
+app.use(cors({ 
+    origin: 'https://api-night-watcher.vercel.app',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+    allowedHeaders: ['Content-Type', 'Authorization'] 
+}));
 app.use(express.json());
 
 // MongoDB URI
