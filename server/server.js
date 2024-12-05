@@ -5,14 +5,14 @@ const cors = require('cors');
 const leaderboardRoutes = require('./routes/leaderboard');
 
 const app = express();
-const PORT = 5000;
+const PORT = proccess.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // MongoDB URI
-const mongoURI = 'mongodb+srv://api_backend_user:bNm6rjubtsyEELwh@night-watcher.1nbdj.mongodb.net/Game';
+const mongoURI = process.env.MONGODB_URI;
 
 // Подключение к MongoDB
 mongoose.connect(mongoURI, {
