@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB URI
-const mongoURI = process.env.MONGODB_URI;
+const mongoURI = 'mongodb+srv://api_backend_user:bNm6rjubtsyEELwh@night-watcher.1nbdj.mongodb.net/Game';
 
 // Подключение к MongoDB
 mongoose.connect(mongoURI, {
