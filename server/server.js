@@ -5,7 +5,7 @@ const cors = require('cors');
 const leaderboardRoutes = require('./routes/leaderboard');
 
 const app = express();
-const PORT = proccess.env.PORT || 5000;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
