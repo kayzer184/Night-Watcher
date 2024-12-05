@@ -1,11 +1,9 @@
-// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const leaderboardRoutes = require('./routes/leaderboard');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -17,17 +15,14 @@ const mongoURI = 'mongodb+srv://api_backend_user:bNm6rjubtsyEELwh@night-watcher.
 // Подключение к MongoDB
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
 })
   .then(() => {
     console.log('MongoDB connected');
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
   })
-  .catch(err => {
+  .catch((err) => {
     console.error('Failed to connect to MongoDB:', err);
-    process.exit(1); // Завершаем приложение, если подключение не удалось
+    process.exit(1);
   });
 
 // Роут для таблицы лидеров
@@ -37,3 +32,6 @@ app.use('/getLeaderBoard', leaderboardRoutes);
 app.get('/', (req, res) => {
   res.send('Welcome to the Leaderboard API');
 });
+
+// Экспорт обработчика
+module.exports = app;
