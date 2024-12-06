@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Button = (onClick) => {
+const LoginGoogleButton = (onClick) => {
   return (
     <StyledWrapper>
       <button className="button" onClick={onClick}>
@@ -233,4 +233,4 @@ const StyledWrapper = styled.div`
     }
   }`;
 
-export default Button;
+export default LoginGoogleButton;

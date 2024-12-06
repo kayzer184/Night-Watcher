@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
-import GoogleButton from "../Components/GoogleButton";
+import LoginGoogleButton from "../Components/LoginGoogleButton";
 
 import Background from "../Components/Background";
 import '../Sass/SettingsPage.scss';
@@ -27,7 +27,7 @@ function SettingsPage() {
   return (
     <div className={`SettingsPage ${startAnimation ? "animate" : ""}`}>
       <h1 className="title">Настройки</h1>
-      <GoogleButton onClick={() => alert("Test Click")} />
+      <LoginGoogleButton onClick={() => alert("Test Click")} />
       <button onClick={handleBack} className="back-button">Назад</button>
       <Background />
     </div>
