@@ -1,18 +1,7 @@
 import React from "react";
-import { useGoogleLogin } from "@react-oauth/google";
-import GoogleButton from "../Components/GoogleButton";
 import "../Sass/Modal.scss";
 
 function Modal({ isVisible, onClose, children }) {
-  const handleGoogleLogin = useGoogleLogin({
-    onSuccess:(response) => {
-      console.log(response)
-    },
-    onError: (error) => {
-      console.log(error)
-    }
-  })
-
   if (!isVisible) return null;
 
   return (
@@ -22,7 +11,6 @@ function Modal({ isVisible, onClose, children }) {
           &times;
         </button>
         <div className="Modal-Content">{children}</div>
-        <GoogleButton onClick={handleGoogleLogin} />
       </div>
     </div>
   );
