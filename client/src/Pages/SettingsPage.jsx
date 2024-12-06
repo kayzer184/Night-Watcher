@@ -27,7 +27,7 @@ function SettingsPage() {
   return (
     <div className={`SettingsPage ${startAnimation ? "animate" : ""}`}>
       <h1 className="title">Настройки</h1>
-      <GoogleButton onClick={handleGoogleLogin} />
+      <GoogleButton onClick={() => alert("Test Click")} />
       <button onClick={handleBack} className="back-button">Назад</button>
       <Background />
     </div>

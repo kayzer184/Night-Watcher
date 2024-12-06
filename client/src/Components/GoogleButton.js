@@ -18,8 +18,6 @@ const Button = (onClick) => {
 }
 
 const StyledWrapper = styled.div`
-  /* Fancy Google hover button made by: csozi | Website: www.csozi.hu*/
-
   .button {
     padding: 10px;
     font-weight: bold;
