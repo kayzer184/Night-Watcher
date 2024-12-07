@@ -18,8 +18,7 @@ router.post('/google', async (req, res) => {
     //const { sub: googleId, name, email, picture } = response.data;
 
     res.status(200).json({
-      message: 'User authenticated successfully',
-      response: response.data,
+      message: `User authenticated successfully: ${response.data}`,
       //user: { googleId, name, email, picture },
     });
   } catch (error) {
