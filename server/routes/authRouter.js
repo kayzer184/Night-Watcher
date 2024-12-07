@@ -3,7 +3,7 @@ const router = express.Router();
 
 // Эндпоинт для получения данных пользователя
 router.post('/google', async (req, res) => {
-  const { accessToken } = req.body;
+  const { access_token } = req.body;
   console.log('Access token received:', accessToken);
   
   if (!accessToken) {
@@ -12,7 +12,7 @@ router.post('/google', async (req, res) => {
 
   try {
     // Запрос данных пользователя с Google API
-    const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`);
+    const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`);
 
     // Если ответ не успешный (не статус 200), возвращаем ошибку
     if (!response.ok) {
