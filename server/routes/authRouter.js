@@ -4,7 +4,7 @@ const router = express.Router();
 // Эндпоинт для получения данных пользователя
 router.post('/google', async (req, res) => {
   const { accessToken } = req.body;
-  console.log(req.body)
+  console.log(accessToken)
   if (!accessToken) {
     return res.status(400).json({ error: 'Access token is required' });
   }
