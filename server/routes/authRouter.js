@@ -6,7 +6,7 @@ router.post('/google', async (req, res) => {
   const { accessToken } = req.body;
   console.log(accessToken)
   if (!accessToken) {
-    return res.status(400).json({ error: 'Access token is required' });
+    return res.status(400).json({ message: 'Access token is required', error: error.message });
   }
 
   try {
