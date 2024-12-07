@@ -16,7 +16,7 @@ router.post('/google', async (req, res) => {
 
     res.status(200).json({
       message: `User authenticated successfully`,
-      user: { googleId, name, email, picture },
+      user: name,
     });
   } catch (error) {
     console.error('Error fetching user info:', error.response?.data || error.message);
