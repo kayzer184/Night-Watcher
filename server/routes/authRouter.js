@@ -12,11 +12,11 @@ router.post('/google', async (req, res) => {
   try {
     // Запрос данных пользователя с Google API
     const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`);
-    const { sub: googleId, name: name, email: email, picture: picture } = await response.json();
+    const data = await response.json();
 
     res.status(200).json({
       message: `User authenticated successfully`,
-      user: name,
+      data: data,
     });
   } catch (error) {
     console.error('Error fetching user info:', error.response?.data || error.message);
