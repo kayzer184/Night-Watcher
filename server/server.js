@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const leaderboardRoutes = require('./routes/leaderboard');
+const authRouter = require('./routes/authRouter');
 
 const app = express();
 
@@ -29,8 +30,8 @@ mongoose.connect(mongoURI, {
     process.exit(1);
   });
 
-// Роут для таблицы лидеров
 app.use('/getLeaderBoard', leaderboardRoutes);
+app.use('/auth', authRouter);
 
 // Обработчик корневого маршрута
 app.get('/', (req, res) => {
