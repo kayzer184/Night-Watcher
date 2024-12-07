@@ -1,6 +1,4 @@
 const express = require('express');
-const axios = require('axios');
-
 const router = express.Router();
 
 // Эндпоинт для получения данных пользователя
@@ -13,7 +11,7 @@ router.post('/google', async (req, res) => {
 
   try {
     // Запрос данных пользователя с Google API
-    const response = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
