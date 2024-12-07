@@ -12,7 +12,7 @@ function SettingsPage() {
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess:(response) => {
-      console.log(response)
+      console.log(response.access_token)
     },
     onError: (error) => {
       console.log(error)
