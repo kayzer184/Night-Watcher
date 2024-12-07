@@ -4,22 +4,31 @@ const router = express.Router();
 // Эндпоинт для получения данных пользователя
 router.post('/google', async (req, res) => {
   const { accessToken } = req.body;
-  console.log(accessToken)
+  console.log('Access token received:', accessToken);
+  
   if (!accessToken) {
-    return res.status(400).json({ message: 'Access token is required', error: error.message });
+    return res.status(400).json({ message: 'Access token is required' });
   }
 
   try {
     // Запрос данных пользователя с Google API
     const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`);
+
+    // Если ответ не успешный (не статус 200), возвращаем ошибку
+    if (!response.ok) {
+      throw new Error(`Google API responded with status ${response.status}`);
+    }
+
     const data = await response.json();
-    console.log(data)
+    console.log('User data from Google API:', data);
+    
+    // Возвращаем данные пользователя
     res.status(200).json({
-      message: `User authenticated successfully`,
+      message: 'User authenticated successfully',
       data: data,
     });
   } catch (error) {
-    console.error('Error fetching user info:', error.response?.data || error.message);
+    console.error('Error fetching user info:', error.message || error);
     res.status(500).json({ message: 'Failed to fetch user info', error: error.message });
   }
 });
