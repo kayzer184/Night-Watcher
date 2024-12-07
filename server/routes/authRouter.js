@@ -23,7 +23,7 @@ router.post('/google', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching user info:', error.response?.data || error.message);
-    res.status(500).json({ error: 'Failed to fetch user info' });
+    res.status(500).json({ message: 'Failed to fetch user info', error: error.message });
   }
 });
 
