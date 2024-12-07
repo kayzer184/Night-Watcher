@@ -15,11 +15,12 @@ router.post('/google', async (req, res) => {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
-    const { sub: googleId, name, email, picture } = response.data;
+    //const { sub: googleId, name, email, picture } = response.data;
 
     res.status(200).json({
       message: 'User authenticated successfully',
-      user: { googleId, name, email, picture },
+      response: response.data,
+      //user: { googleId, name, email, picture },
     });
   } catch (error) {
     console.error('Error fetching user info:', error.response?.data || error.message);
