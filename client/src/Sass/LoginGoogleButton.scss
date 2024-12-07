@@ -1,13 +1,18 @@
 .button {
-  padding: 10px;
-  font-weight: bold;
+  z-index: 2;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  height: 50px;
+  font-weight: bold;
   position: relative;
   overflow: hidden;
   border-radius: 35px;
-  align-items: center;
   border: solid black 2px;
   outline: none;
+  cursor: pointer;
+  background-color: white;
 }
 
 .svg {
@@ -22,7 +27,7 @@
 
 .button:hover .text {
   animation: text forwards 0.3s;
-  /*color: white;*/
+  color: white;
 }
 
 @keyframes text {
