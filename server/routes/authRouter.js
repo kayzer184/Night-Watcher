@@ -1,6 +1,7 @@
 // authRouter.js
 const express = require('express');
 const router = express.Router();
+const User = require('../models/User');
 
 router.post('/google', async (req, res) => {
   const { access_token, username } = req.body;

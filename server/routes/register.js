@@ -9,10 +9,11 @@ router.post('/', async (req, res) => {
     // Проверка на существование пользователя с таким googleId
     let user = await User.findOne({ googleId });
 
-    if (!user) {
-      // Если пользователя нет, создаем нового
-      user = await User.create({ googleId, username, email, createdAt });
+    if (user) {
+      res.status(409).json({ message: 'User already exists' });
     }
+
+    user = await User.create({ googleId, username, email, createdAt });
 
     res.status(200).json({
       message: user ? 'User created or updated successfully' : 'Error',
