@@ -10,11 +10,13 @@ function SettingsPage() {
   const [startAnimation, setStartAnimation] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [accessToken, setAccessToken] = useState(""); // Сохраняем access_token
   const navigate = useNavigate();
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: (response) => {
       console.log("Google login successful:", response);
+      setAccessToken(response.access_token); // Сохраняем токен
       setShowModal(true); // Показываем модальное окно
     },
     onError: (error) => {
@@ -27,17 +29,22 @@ function SettingsPage() {
     setTimeout(() => navigate("/"), 1000);
   }
 
-  function handleSendRequest({ response }) {
-    console.log(response);
+  function handleSendRequest() {
+    // Проверяем, что есть токен
+    if (!accessToken) {
+      console.error("Access token is missing!");
+      return;
+    }
+
     // Отправляем запрос на сервер
     fetch("https://api-night-watcher.vercel.app/auth/google", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ 
-        access_token: response.access_token,
-        username: inputValue
+      body: JSON.stringify({
+        access_token: accessToken,
+        username: inputValue,
       }),
     })
       .then((response) => response.json())
