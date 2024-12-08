@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 
+// Схема пользователя
 const userSchema = new mongoose.Schema({
   googleId: {
     type: String,
     required: true,
-    unique: true,
+    unique: true,  // Уникальность googleId
   },
   username: {
     type: String,
@@ -13,7 +14,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
+    unique: true, // Уникальность email
     validate: {
       validator: function (v) {
         return /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v); // Простая проверка email
@@ -27,6 +28,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const User = mongoose.model('User', userSchema);
+// Создание модели пользователя
+const User = mongoose.model('User', userSchema, 'Users');
 
 module.exports = User;

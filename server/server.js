@@ -31,8 +31,9 @@ mongoose.connect(mongoURI, {
     process.exit(1);
   });
 
+// Подключение маршрутов
 app.use('/getLeaderBoard', leaderboardRoutes);
-app.use ('/register', registerRouter);
+app.use('/register', registerRouter);
 app.use('/auth', authRouter);
 
 // Обработчик корневого маршрута
