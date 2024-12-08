@@ -1,0 +1,60 @@
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto 0;
+}
+@keyframes bounce {
+  0%,
+  100% {
+    translate: 0px 36px;
+  }
+  50% {
+    translate: 0px 46px;
+  }
+}
+@keyframes bounce2 {
+  0%,
+  100% {
+    translate: 0px 46px;
+  }
+  50% {
+    translate: 0px 56px;
+  }
+}
+
+@keyframes umbral {
+  0% {
+    stop-color: #d3a5102e;
+  }
+  50% {
+    stop-color: rgba(211, 165, 16, 0.519);
+  }
+  100% {
+    stop-color: #d3a5102e;
+  }
+}
+@keyframes partciles {
+  0%,
+  100% {
+    translate: 0px 16px;
+  }
+  50% {
+    translate: 0px 6px;
+  }
+}
+#particles {
+  animation: partciles 4s ease-in-out infinite;
+}
+#animatedStop {
+  animation: umbral 4s infinite;
+}
+#bounce {
+  animation: bounce 4s ease-in-out infinite;
+  translate: 0px 36px;
+}
+#bounce2 {
+  animation: bounce2 4s ease-in-out infinite;
+  translate: 0px 46px;
+  animation-delay: 0.5s;
+}

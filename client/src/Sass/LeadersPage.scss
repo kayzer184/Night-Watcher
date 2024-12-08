@@ -15,7 +15,7 @@
     margin-bottom: 40px;
     color: #f9b700; /* Теплый желтый цвет для названия */
     text-shadow: 0 0 10px #f9b700, 0 0 20px #f9b700; /* Эффект неонового света */
-    transition: transform 1s, opacity 1s; /* Плавная анимация */
+    transition: transform 2s ease-in-out, opacity 2s ease-in-out; /* Увеличиваем время анимации */
   }
 
   .leaders-table {
@@ -28,39 +28,39 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Легкая тень для добавления глубины */
     overflow: hidden; /* Для предотвращения вылазки содержимого за скругленные углы */
     opacity: 1; /* Начальная непрозрачность */
-    transition: transform 1s, opacity 1s ease-out; /* Плавная анимация для обеих свойств */
-
-    th, td {
-      padding: 15px 20px;
-      text-align: center;
-      border-bottom: 1px solid #444;
-      font-size: 1.1rem;
-    }
-
-    th {
-      background-color: #222; /* Фон для заголовков */
-      color: #f9b700; /* Желтый цвет для текста заголовков */
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    tr {
-      background-color: #2a2a2a;
-      transition: background-color 1s ease;
-    }
-
-    tr:hover {
-      background-color: #3a3a3a; /* Подсветка строки при наведении */
-    }
-
-    /* Уменьшаем ширину первого столбца */
-    td:nth-child(1), th:nth-child(1) {
-      width: 80px; /* Задаем фиксированную ширину для первого столбца */
-      font-weight: bold;
-    }
+    transition: transform 2s ease-in-out; /* Плавная анимация только для трансформации */
   }
 
-  .back-button{
+  th, td {
+    padding: 15px 20px;
+    text-align: center;
+    border-bottom: 1px solid #444;
+    font-size: 1.1rem;
+  }
+
+  th {
+    background-color: #222; /* Фон для заголовков */
+    color: #f9b700; /* Желтый цвет для текста заголовков */
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  tr {
+    background-color: #2a2a2a;
+    transition: background-color 0.5s ease;
+  }
+
+  tr:hover {
+    background-color: #3a3a3a; /* Подсветка строки при наведении */
+  }
+
+  /* Уменьшаем ширину первого столбца */
+  td:nth-child(1), th:nth-child(1) {
+    width: 80px; /* Задаем фиксированную ширину для первого столбца */
+    font-weight: bold;
+  }
+
+  .back-button {
     z-index: 10; 
     background-color: #f9b700;
     border: none;
@@ -70,7 +70,7 @@
     cursor: pointer;
     border-radius: 5px;
     color: #0d0d0d;
-    transition: transform 1s, opacity 1s; /* Плавная анимация */
+    transition: transform 2s ease-in-out, opacity 2s ease-in-out; /* Плавная анимация */
   }
 
   .back-button:hover {  
@@ -84,18 +84,21 @@
 
   &.animate {
     .title {
-      transform: translateY(-100%); /* Двигаем заголовок вверх */
+      transform: translateY(-20%); /* Плавно двигаем заголовок вверх */
       opacity: 0; /* Заголовок исчезает */
+      transition-delay: 0.2s; /* Задержка анимации заголовка */
     }
 
     .leaders-table {
-      transform: translateY(-10vh);
+      transform: translateY(-10vh); /* Двигаем таблицу вниз */
       opacity: 0;
+      transition-delay: 0.4s; /* Задержка анимации таблицы */
     }
 
     .back-button {
-      transform: translateY(-100%); /* Двигаем кнопку вверх */
+      transform: translateY(-20%); /* Двигаем кнопку вверх */
       opacity: 0; /* Кнопка исчезает */
+      transition-delay: 0.6s; /* Задержка анимации кнопки */
     }
   }
 }
