@@ -35,7 +35,7 @@ app.use('/auth', authRouter);
 
 // Обработчик корневого маршрута
 app.get('/', (req, res) => {
-  res.send('Welcome to the Leaderboard API');
+  res.send('Welcome to the Night-Watcher API');
 });
 
 // Экспорт обработчика
