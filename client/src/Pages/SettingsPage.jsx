@@ -28,6 +28,7 @@ function SettingsPage() {
   }
 
   function handleSendRequest({ response }) {
+    console.log(response);
     // Отправляем запрос на сервер
     fetch("https://api-night-watcher.vercel.app/auth/google", {
       method: "POST",
