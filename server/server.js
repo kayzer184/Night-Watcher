@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const leaderboardRoutes = require('./routes/leaderboard');
+const registerRouter = require('./routes/register');
 const authRouter = require('./routes/authRouter');
 
 const app = express();
@@ -31,6 +32,7 @@ mongoose.connect(mongoURI, {
   });
 
 app.use('/getLeaderBoard', leaderboardRoutes);
+app.use ('/register', registerRouter);
 app.use('/auth', authRouter);
 
 // Обработчик корневого маршрута
