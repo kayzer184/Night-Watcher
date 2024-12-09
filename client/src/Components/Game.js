@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import Stats from "stats.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
@@ -48,6 +49,10 @@ function Game() {
   };
 
   useEffect(() => {
+    const stats = new Stats();
+    stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild(stats.dom);
+    
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
 
@@ -145,19 +150,21 @@ function Game() {
     };
 
     const animate = () => {
+      stats.begin();  // Начало отслеживания FPS
+    
       controls.update();
       mixers.forEach((mixer) => mixer.update(0.01));
-      
-      // Обновление NPC и энергии только при необходимости
+    
       if (!isPausedRef.current) {
         moveNpc();
         updateEnergy();
       }
     
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    };
     
+      stats.end();  // Конец отслеживания FPS
+      requestAnimationFrame(animate);
+    };        
 
     animate();
 
