@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ProgressBar from "@ramonak/react-progress-bar";
+
+import createDevTools from './DevTools';
 import Modal from "./Modal";
 import "../Sass/Interface.scss";
 import reset from "../Assets/Icons/ResetButton.svg";
@@ -12,18 +14,87 @@ function getMoodColor(mood) {
 
 function Interface({
   NPCMood,
+  setNPCMood,
   Energy,
+  setEnergy,
   onPause,
   onRestart,
   isPaused,
   timeLeft,
+  setTimeLeft,
   isWin,
 }) {
   const [isModalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
+    const { stats, gui } = createDevTools();
+  
+    const Settings = {
+      fps: false,
+    };
+  
+    const toggleFPS = () => {
+      if (Settings.fps) {
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
+      } else {
+        stats.dom?.parentNode?.removeChild(stats.dom);
+      }
+    };
+  
+    // Инициализация GUI папок
+    const GameEvents = gui.addFolder("Game Events");
+    const PlayerStats = gui.addFolder("Player Stats");
+    const GameSettings = gui.addFolder("Game Settings");
+  
+    GameEvents.add({ pause: onPause }, "pause").name("Пауза");
+    GameEvents.add({ reset: onRestart }, "reset").name("Сбросить");
+  
+    PlayerStats.add({ NPCMood }, "NPCMood")
+      .min(0)
+      .max(100)
+      .step(1)
+      .name("Настроение")
+      .onChange(setNPCMood);
+    PlayerStats.add({ Energy }, "Energy")
+      .min(0)
+      .max(100)
+      .step(1)
+      .name("Энергия")
+      .onChange(setEnergy);
+    PlayerStats.add({ timeLeft }, "timeLeft")
+      .min(0)
+      .max(300)
+      .step(1)
+      .name("Время")
+      .onChange(setTimeLeft);
+  
+    GameSettings.add(Settings, "fps")
+      .name("Показывать FPS")
+      .onChange(toggleFPS);
+  
+    const animationFrame = () => {
+      if (Settings.fps) {
+        stats.begin();
+        stats.end();
+      }
+      requestAnimationFrame(animationFrame); // Рекурсивный вызов
+    };
+  
+    requestAnimationFrame(animationFrame); // Запуск цикла
+  
+    toggleFPS(); // Инициализация состояния FPS
+  
+    return () => {
+      // Очистка
+      gui.destroy();
+      stats.dom?.parentNode?.removeChild(stats.dom); // Удаляем FPS-панель
+    };
+  }, []);   
+
+  useEffect(() => {
     if (isWin !== null) {
-      setModalVisible(true); // Показываем модальное окно, если таймер достиг 0
+      setModalVisible(true); // Показываем модальное окно
     }
   }, [isWin]);
 

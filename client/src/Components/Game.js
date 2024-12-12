@@ -1,9 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
-import Stats from "stats.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-import "../Sass/Game.scss";
+import "../Sass/Game.scss"; 
 import MapLoader from "./MapLoader";
 import NPCLoader from "./NPCLoader";
 import Interface from "./Interface";
@@ -49,10 +48,6 @@ function Game() {
   };
 
   useEffect(() => {
-    const stats = new Stats();
-    stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild(stats.dom);
-    
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
 
@@ -150,8 +145,6 @@ function Game() {
     };
 
     const animate = () => {
-      stats.begin();  // Начало отслеживания FPS
-    
       controls.update();
       mixers.forEach((mixer) => mixer.update(0.01));
     
@@ -161,8 +154,6 @@ function Game() {
       }
     
       renderer.render(scene, camera);
-    
-      stats.end();  // Конец отслеживания FPS
       requestAnimationFrame(animate);
     };        
 
@@ -215,8 +206,11 @@ function Game() {
       <div className="Interface-Box">
         <Interface
           NPCMood={Math.round(npcMood)}
+          setNPCMood={setNpcMood}
           Energy={energy}
+          setEnergy={setEnergy}
           timeLeft={timeLeft}
+          setTimeLeft={setTimeLeft}
           onPause={handlePause}
           onRestart={resetGame}
           isPaused={isPaused}
