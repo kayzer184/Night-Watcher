@@ -27,23 +27,23 @@ function Interface({
 }) {
   const [isModalVisible, setModalVisible] = useState(false);
 
-  // Function to handle changing the speed of NPCs
-  const setNPCSpeed = (newSpeed) => {
-    if (Array.isArray(NPCObjects.current)) {
-      NPCObjects.current.forEach(npc => {
-        npc.speed = newSpeed; // Обновляем скорость
-      });
-    } else {
-      console.error('NPCObjects.current не является массивом');
-    }
-  };  
-
   useEffect(() => {
     const { stats, gui } = createDevTools();
   
     const Settings = {
       fps: false,
     };
+
+    const setNPCSpeed = (newSpeed) => {
+      if (Array.isArray(NPCObjects.current)) {
+        NPCObjects.current.forEach(npc => {
+          npc.speed = newSpeed; 
+          npc.mixer.timeScale = newSpeed * 2;
+        });
+      } else {
+        console.error('NPCObjects.current не является массивом');
+      }
+    };  
   
     const toggleFPS = () => {
       if (Settings.fps) {
