@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import ProgressBar from "@ramonak/react-progress-bar";
-
 import createDevTools from './DevTools';
 import Modal from "./Modal";
 import "../Sass/Interface.scss";
 import reset from "../Assets/Icons/ResetButton.svg";
 
+// Helper function to determine mood color
 function getMoodColor(mood) {
   const red = Math.max(255 - mood * 2.55, 0);
   const green = Math.max(mood * 2.55, 0);
@@ -13,6 +13,7 @@ function getMoodColor(mood) {
 }
 
 function Interface({
+  NPCObjects,
   NPCMood,
   setNPCMood,
   Energy,
@@ -25,6 +26,17 @@ function Interface({
   isWin,
 }) {
   const [isModalVisible, setModalVisible] = useState(false);
+
+  // Function to handle changing the speed of NPCs
+  const setNPCSpeed = (newSpeed) => {
+    if (Array.isArray(NPCObjects.current)) {
+      NPCObjects.current.forEach(npc => {
+        npc.speed = newSpeed; // Обновляем скорость
+      });
+    } else {
+      console.error('NPCObjects.current не является массивом');
+    }
+  };  
 
   useEffect(() => {
     const { stats, gui } = createDevTools();
@@ -42,7 +54,7 @@ function Interface({
       }
     };
   
-    // Инициализация GUI папок
+    // GUI setup
     const GameEvents = gui.addFolder("Game Events");
     const PlayerStats = gui.addFolder("Player Stats");
     const GameSettings = gui.addFolder("Game Settings");
@@ -69,6 +81,14 @@ function Interface({
       .name("Время")
       .onChange(setTimeLeft);
   
+    // Add NPC Speed control to the GUI
+    GameSettings.add({ NPCSpeed: 0.33 }, "NPCSpeed")
+      .min(0)
+      .max(1)
+      .step(0.01)
+      .name("Скорость NPC")
+      .onChange(setNPCSpeed); // Bind speed update function to GUI control
+  
     GameSettings.add(Settings, "fps")
       .name("Показывать FPS")
       .onChange(toggleFPS);
@@ -78,23 +98,23 @@ function Interface({
         stats.begin();
         stats.end();
       }
-      requestAnimationFrame(animationFrame); // Рекурсивный вызов
+      requestAnimationFrame(animationFrame); // Recursive call
     };
   
-    requestAnimationFrame(animationFrame); // Запуск цикла
+    requestAnimationFrame(animationFrame); // Start the loop
   
-    toggleFPS(); // Инициализация состояния FPS
+    toggleFPS(); // Initialize FPS state
   
     return () => {
-      // Очистка
+      // Cleanup
       gui.destroy();
-      stats.dom?.parentNode?.removeChild(stats.dom); // Удаляем FPS-панель
+      stats.dom?.parentNode?.removeChild(stats.dom); // Remove FPS panel
     };
   }, []);   
 
   useEffect(() => {
     if (isWin !== null) {
-      setModalVisible(true); // Показываем модальное окно
+      setModalVisible(true); // Show modal
     }
   }, [isWin]);
 
@@ -102,6 +122,7 @@ function Interface({
 
   return (
     <div className="Interface">
+      {/* Mood Progress Bar */}
       <div className="ProgressBar-Wrapper">
         <h3>Настроение пешеходов</h3>
         <ProgressBar
@@ -114,6 +135,8 @@ function Interface({
           labelAlignment="center"
         />
       </div>
+
+      {/* Energy Progress Bar */}
       <div className="ProgressBar-Wrapper">
         <h3>Запас энергии</h3>
         <ProgressBar
@@ -127,12 +150,13 @@ function Interface({
         />
       </div>
 
-      {/* Таймер */}
+      {/* Timer */}
       <div className="Timer">
         <h3>Осталось времени</h3>
         <div className="Timer-Display">{timeLeft}</div>
       </div>
 
+      {/* Pause and Reset Buttons */}
       <button onClick={onPause} className="pause-button interface-button">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           {!isPaused ? (
@@ -148,6 +172,8 @@ function Interface({
       <button onClick={onRestart} className="reset-button interface-button">
         <img src={reset} alt="reset" />
       </button>
+
+      {/* Modal for Win or Lose */}
       {isWin ? (
         <Modal isVisible={isModalVisible} onClose={closeModal}>
           <h2>Уровень пройден!</h2>
@@ -160,7 +186,7 @@ function Interface({
             className="reset-modal-button interface-button"
             onClick={() => {
               closeModal();
-              onRestart(); // Перезапуск игры
+              onRestart(); // Restart game
             }}
           >
             <img src={reset} alt="reset" />
@@ -178,7 +204,7 @@ function Interface({
             className="reset-modal-button interface-button"
             onClick={() => {
               closeModal();
-              onRestart(); // Перезапуск игры
+              onRestart(); // Restart game
             }}
           >
             <img src={reset} alt="reset" />

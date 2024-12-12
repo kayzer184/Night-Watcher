@@ -205,6 +205,7 @@ function Game() {
     <div ref={mountRef}>
       <div className="Interface-Box">
         <Interface
+          NPCObjects={NPCObjects}
           NPCMood={Math.round(npcMood)}
           setNPCMood={setNpcMood}
           Energy={energy}
