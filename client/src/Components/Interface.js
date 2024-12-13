@@ -18,11 +18,15 @@ function Interface({
   setNPCMood,
   Energy,
   setEnergy,
+  timeLeft,
+  setTimeLeft,
+  NPCMoodDecayRate,
+  setNPCMoodDecayRate,
+  energyDecayRate,
+  setEnergyDecayRate,
   onPause,
   onRestart,
   isPaused,
-  timeLeft,
-  setTimeLeft,
   isWin,
 }) {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -81,13 +85,26 @@ function Interface({
       .name("Время")
       .onChange(setTimeLeft);
   
-    // Add NPC Speed control to the GUI
-    GameSettings.add({ NPCSpeed: 0.33 }, "NPCSpeed")
+    PlayerStats.add({ NPCSpeed: 0.33 }, "NPCSpeed")
       .min(0)
       .max(1)
       .step(0.01)
       .name("Скорость NPC")
-      .onChange(setNPCSpeed); // Bind speed update function to GUI control
+      .onChange(setNPCSpeed);
+
+    PlayerStats.add({ NPCMoodDecayRate: 0.005 }, "NPCMoodDecayRate")
+      .min(0)
+      .max(1)
+      .step(0.001)
+      .name("Скорость расхода настроения")
+      .onChange(setNPCMoodDecayRate);
+
+    PlayerStats.add({ energyDecayRate: 1 }, "energyDecayRate")
+      .min(0)
+      .max(10)
+      .step(0.01)
+      .name("Скорость расхода энергии")
+      .onChange(setEnergyDecayRate);
   
     GameSettings.add(Settings, "fps")
       .name("Показывать FPS")

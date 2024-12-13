@@ -16,6 +16,8 @@ function Game() {
   const [npcMood, setNpcMood] = useState(100);
   const [energy, setEnergy] = useState(100);
   const [timeLeft, setTimeLeft] = useState(60);
+  const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.005);
+  const [energyDecayRate, setEnergyDecayRate] = useState(1);
   const [isWin, setIsWin] = useState(null);
   const isPausedRef = useRef(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -125,7 +127,7 @@ function Game() {
         });
 
         setNpcMood((prevMood) => {
-          const targetMood = isInLight ? Math.min(100, prevMood + 0.005) : Math.max(0, prevMood - 0.005);
+          const targetMood = isInLight ? Math.min(100, prevMood + NPCMoodDecayRate) : Math.max(0, prevMood - NPCMoodDecayRate);
           return prevMood + (targetMood - prevMood);
         });
       });
@@ -137,7 +139,7 @@ function Game() {
         lastEnergyUpdateRef.current = currentTime;
 
         const totalEnergyConsumption = lightObjects.current.reduce((acc, lightObject) => {
-          return lightObject.light.visible ? acc + (lightObject.energyConsumption || 1) : acc;
+          return lightObject.light.visible ? acc + (energyDecayRate) : acc;
         }, 0);
 
         setEnergy((prevEnergy) => Math.max(0, prevEnergy - totalEnergyConsumption));
@@ -212,6 +214,10 @@ function Game() {
           setEnergy={setEnergy}
           timeLeft={timeLeft}
           setTimeLeft={setTimeLeft}
+          NPCMoodDecayRate={NPCMoodDecayRate}
+          setNPCMoodDecayRate={setNPCMoodDecayRate}
+          energyDecayRate={energyDecayRate}
+          setEnergyDecayRate={setEnergyDecayRate}
           onPause={handlePause}
           onRestart={resetGame}
           isPaused={isPaused}
