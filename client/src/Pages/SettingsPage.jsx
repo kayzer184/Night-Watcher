@@ -70,9 +70,10 @@ function SettingsPage() {
 
       {/* Модальное окно */}
       {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>Введите данные</h2>
+        <div class="modal">
+          <span class="modal__title">Регистрация</span>
+          <p class="modal__content">Введите своё имя, под которым попадёте в таблицу лидеров</p>
+          <div class="modal__form">
             <input
               type="text"
               name="username"
@@ -81,10 +82,7 @@ function SettingsPage() {
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Введите ваш никнейм"
             />
-            <div className="modal-buttons">
-              <button onClick={handleSendRequest}>Отправить</button>
-              <button onClick={() => setShowModal(false)}>Отмена</button>
-            </div>
+            <button class="modal__sign-up">Зарегистрироваться</button>
           </div>
         </div>
       )}
