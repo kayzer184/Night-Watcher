@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
@@ -12,17 +11,20 @@ function SettingsPage() {
   const [startAnimation, setStartAnimation] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [accessToken, setAccessToken] = useState(""); // Сохраняем access_token
+  const [accessToken, setAccessToken] = useState("");
+  const [notifications, setNotifications] = useState([]); // Состояние для уведомлений
   const navigate = useNavigate();
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: (response) => {
       console.log("Google login successful:", response);
-      setAccessToken(response.access_token); // Сохраняем токен
-      setShowModal(true); // Показываем модальное окно
+      setAccessToken(response.access_token);
+      setShowModal(true);
+      addNotification("success", "Google login successful!");
     },
     onError: (error) => {
       console.log(error);
+      addNotification("error", "Google login failed.");
     },
   });
 
@@ -32,13 +34,12 @@ function SettingsPage() {
   }
 
   function handleSendRequest() {
-    // Проверяем, что есть токен
     if (!accessToken) {
       console.error("Access token is missing!");
+      addNotification("error", "Access token is missing!");
       return;
     }
 
-    // Отправляем запрос на сервер
     fetch("https://api-night-watcher.vercel.app/auth/google", {
       method: "POST",
       headers: {
@@ -52,11 +53,25 @@ function SettingsPage() {
       .then((response) => response.json())
       .then((data) => {
         console.log("Server response:", data);
-        setShowModal(false); // Закрываем модальное окно
+        setShowModal(false);
+        addNotification("success", "Registration successful!");
       })
       .catch((error) => {
         console.error("Error sending request:", error);
+        addNotification("error", "Failed to register. Please try again.");
       });
+  }
+
+  // Функция для добавления уведомления
+  function addNotification(type, message) {
+    const id = Date.now(); // Уникальный идентификатор
+    setNotifications((prev) => [...prev, { id, type, message }]);
+    setTimeout(() => removeNotification(id), 5000); // Автоматическое удаление через 5 секунд
+  }
+
+  // Функция для удаления уведомления
+  function removeNotification(id) {
+    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
   }
 
   return (
@@ -71,11 +86,13 @@ function SettingsPage() {
 
       {/* Модальное окно */}
       {showModal && (
-        <div class="modal__backdrop">
-          <div class="modal">
-            <span class="modal__title">Регистрация</span>
-            <p class="modal__content">Введите своё имя, под которым попадёте в таблицу лидеров</p>
-            <div class="modal__form">
+        <div className="modal__backdrop">
+          <div className="modal">
+            <span className="modal__title">Регистрация</span>
+            <p className="modal__content">
+              Введите своё имя, под которым попадёте в таблицу лидеров
+            </p>
+            <div className="modal__form">
               <input
                 type="text"
                 name="username"
@@ -84,11 +101,25 @@ function SettingsPage() {
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Введите ваш никнейм"
               />
-              <button class="modal__sign-up">Зарегистрироваться</button>
+              <button className="modal__sign-up" onClick={handleSendRequest}>
+                Зарегистрироваться
+              </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Контейнер для уведомлений */}
+      <div className="notifications">
+        {notifications.map((notif) => (
+          <div
+            key={notif.id}
+            className={`notification ${notif.type === "success" ? "success" : "error"}`}
+          >
+            {notif.message}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
