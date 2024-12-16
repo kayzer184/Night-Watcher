@@ -1,7 +1,5 @@
-// authRouter.js
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
 
 router.post('/google', async (req, res) => {
   const { access_token, username } = req.body;
@@ -9,53 +7,49 @@ router.post('/google', async (req, res) => {
   if (!access_token) {
     return res.status(400).json({ message: 'Access token is required' });
   }
+  if (!username) {
+    return res.status(400).json({ message: 'Username is required' });
+  }
 
   try {
-    const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`);
+    // Запрос к Google API
+    const googleResponse = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`);
 
-    if (!response.ok) {
-      if (response.status === 401) {
-        return res.status(401).json({ message: 'Unauthorized: Invalid access token' });
-      } else if (response.status === 403) {
-        return res.status(403).json({ message: 'Forbidden: Access denied' });
-      } else {
-        return res.status(response.status).json({ message: `Error from Google API: ${response.statusText}` });
-      }
+    if (!googleResponse.ok) {
+      const errorMessage = `Error from Google API: ${googleResponse.statusText}`;
+      return res.status(googleResponse.status).json({ message: errorMessage });
     }
 
-    const data = await response.json();
+    const googleData = await googleResponse.json();
 
-    const registerUser = await fetch('https://api-night-watcher.vercel.app/register', {
+    // Регистрация пользователя в вашем сервисе
+    const registerResponse = await fetch('https://api-night-watcher.vercel.app/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        googleId: data.sub,
+        googleId: googleData.sub,
         username: username,
-        email: data.email,
+        email: googleData.email,
         createdAt: Date.now(),
       }),
     });
 
-    if (!registerUser.ok) {
-      if (registerUser.status === 409) {
-        return res.status(409).json({ message: 'Conflict: User already exists' });
-      } else if (registerUser.status === 500) {
-        return res.status(500).json({ message: 'Internal Server Error: Registration failed' });
-      } else {
-        return res.status(registerUser.status).json({ message: `Error from Registration API: ${registerUser.statusText}` });
-      }
+    if (!registerResponse.ok) {
+      const errorMessage = `Error from Registration API: ${registerResponse.statusText}`;
+      return res.status(registerResponse.status).json({ message: errorMessage });
     }
 
     return res.status(200).json({ message: 'User authenticated and registered successfully' });
   } catch (error) {
-    if (error.message.includes('Failed to fetch')) {
-      return res.status(503).json({ message: 'Service Unavailable: Could not connect to Google API or Registration API' });
-    }
+    const isFetchError = error.message.includes('Failed to fetch');
+    const errorMessage = isFetchError
+      ? 'Service Unavailable: Could not connect to external services'
+      : 'Internal Server Error: Unexpected failure';
 
     console.error('Unexpected Error:', error);
-    return res.status(500).json({ message: 'Internal Server Error: Unexpected failure', error: error.message });
+    return res.status(isFetchError ? 503 : 500).json({ message: errorMessage, error: error.message });
   }
 });
 
