@@ -9,7 +9,7 @@ import Card from "../Components/Notification";
 
 function SettingsPage() {
   const [startAnimation, setStartAnimation] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false); // Показывать модальное окно?
   const [inputValue, setInputValue] = useState("");
   const [accessToken, setAccessToken] = useState(""); // Сохраняем access_token
   const navigate = useNavigate();
@@ -18,10 +18,35 @@ function SettingsPage() {
     onSuccess: (response) => {
       console.log("Google login successful:", response);
       setAccessToken(response.access_token); // Сохраняем токен
-      setShowModal(true); // Показываем модальное окно
+
+      // Отправляем токен на сервер
+      fetch("https://api-night-watcher.vercel.app/auth/google", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          access_token: response.access_token,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Server response:", data);
+
+          // Логика показа модального окна в зависимости от статуса ответа
+          if (data.status === "registration") {
+            setShowModal(true); // Показываем модальное окно для регистрации
+          } else if (data.status === "login") {
+            console.log("Login successful!");
+            setShowModal(false); // Модальное окно не нужно
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
     },
     onError: (error) => {
-      console.log(error);
+      console.error(error);
     },
   });
 
@@ -37,8 +62,8 @@ function SettingsPage() {
       return;
     }
 
-    // Отправляем запрос на сервер
-    fetch("https://api-night-watcher.vercel.app/auth/google", {
+    // Отправляем запрос на сервер для завершения регистрации
+    fetch("https://api-night-watcher.vercel.app/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -50,11 +75,11 @@ function SettingsPage() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Server response:", data);
-        setShowModal(false); // Закрываем модальное окно
+        console.log("Registration response:", data);
+        setShowModal(false); // Закрываем модальное окно после успешной регистрации
       })
       .catch((error) => {
-        console.error("Error sending request:", error);
+        console.error("Error sending registration request:", error);
       });
   }
 
@@ -68,21 +93,25 @@ function SettingsPage() {
       </button>
       <Background />
 
-      {/* Модальное окно */}
+      {/* Модальное окно для регистрации */}
       {showModal && (
-        <div class="modal">
-          <span class="modal__title">Регистрация</span>
-          <p class="modal__content">Введите своё имя, под которым попадёте в таблицу лидеров</p>
-          <div class="modal__form">
+        <div className="modal">
+          <span className="modal__title">Регистрация</span>
+          <p className="modal__content">
+            Введите своё имя, под которым попадёте в таблицу лидеров
+          </p>
+          <div className="modal__form">
             <input
               type="text"
               name="username"
               className="modal-input"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Введите ваш никнейм"
+              placeholder="Введите ваш никнейм"
             />
-            <button class="modal__sign-up">Зарегистрироваться</button>
+            <button className="modal__sign-up" onClick={handleSendRequest}>
+              Зарегистрироваться
+            </button>
           </div>
         </div>
       )}
