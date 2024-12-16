@@ -7,12 +7,12 @@ const authRouter = require('./routes/authRouter');
 
 const app = express();
 
-// Middleware
-app.use(cors({ 
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-    allowedHeaders: ['Content-Type', 'Authorization'] 
+app.use(cors({
+  origin: 'https://night-watcher.vercel.app', // Укажите ваш домен
+  methods: ['GET', 'POST', 'OPTIONS'], // Разрешенные методы
+  allowedHeaders: ['Content-Type', 'Authorization'], // Разрешенные заголовки
 }));
+
 app.use(express.json());
 
 // MongoDB URI
