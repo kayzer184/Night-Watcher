@@ -1,0 +1,54 @@
+.alerts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+
+.alert {
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-left: 4px solid;
+  border-radius: 8px;
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.alert:hover {
+  transform: scale(1.05);
+}
+
+.alert-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+.alert-text {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Success */
+.alert-success {
+  background-color: #14532d;
+  border-color: #15803d;
+  color: #dcfce7;
+}
+
+.alert-success:hover {
+  background-color: #166534;
+}
+
+/* Error */
+.alert-error {
+  background-color: #7f1d1d;
+  border-color: #b91c1c;
+  color: #fee2e2;
+}
+
+.alert-error:hover {
+  background-color: #991b1b;
+}

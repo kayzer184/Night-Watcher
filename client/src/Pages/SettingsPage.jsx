@@ -5,6 +5,7 @@ import LoginGoogleButton from "../Components/LoginGoogleButton";
 
 import Background from "../Components/Background";
 import "../Sass/SettingsPage.scss";
+import Card from "../Components/Notification";
 
 function SettingsPage() {
   const [startAnimation, setStartAnimation] = useState(false);
@@ -61,6 +62,7 @@ function SettingsPage() {
     <div className={`SettingsPage ${startAnimation ? "animate" : ""}`}>
       <h1 className="title">Настройки</h1>
       <LoginGoogleButton onClick={handleGoogleLogin} />
+      <Card />
       <button onClick={handleBack} className="back-button">
         Назад
       </button>
@@ -73,9 +75,11 @@ function SettingsPage() {
             <h2>Введите данные</h2>
             <input
               type="text"
+              name="username"
+              className="modal-input"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Введите значение"
+              placeholder="Введите ваш никнейм"
             />
             <div className="modal-buttons">
               <button onClick={handleSendRequest}>Отправить</button>

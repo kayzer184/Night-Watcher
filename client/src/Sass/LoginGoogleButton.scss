@@ -1,5 +1,6 @@
 .button {
   z-index: 2;
+  backface-visibility: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,6 +17,9 @@
 }
 
 .svg {
+  shape-rendering: geometricPrecision;
+  image-rendering: optimizeQuality;
+  vector-effect: non-scaling-stroke;
   height: 25px;
   margin-right: 10px;
 }
