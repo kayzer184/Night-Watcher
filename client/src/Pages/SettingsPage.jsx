@@ -2,18 +2,19 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 import LoginGoogleButton from "../Components/LoginGoogleButton";
-
 import Background from "../Components/Background";
 import "../Sass/SettingsPage.scss";
 import Card from "../Components/Notification";
 
 function SettingsPage() {
   const [startAnimation, setStartAnimation] = useState(false);
-  const [showModal, setShowModal] = useState(false); // Показывать модальное окно?
-  const [inputValue, setInputValue] = useState("");
+  const [showModal, setShowModal] = useState(false); // Показывать модальное окно
+  const [inputValue, setInputValue] = useState(""); // Поле для ввода ника
   const [accessToken, setAccessToken] = useState(""); // Сохраняем access_token
+  const [errorMessage, setErrorMessage] = useState(""); // Для ошибок
   const navigate = useNavigate();
 
+  // Авторизация через Google
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: (response) => {
       console.log("Google login successful:", response);
@@ -33,36 +34,48 @@ function SettingsPage() {
         .then((data) => {
           console.log("Server response:", data);
 
-          // Логика показа модального окна в зависимости от статуса ответа
+          // Обработка статусов
           if (data.status === "registration") {
             setShowModal(true); // Показываем модальное окно для регистрации
           } else if (data.status === "login") {
             console.log("Login successful!");
             setShowModal(false); // Модальное окно не нужно
+            navigate("/dashboard"); // Перенаправляем пользователя
+          } else {
+            setErrorMessage("Неизвестный статус ответа от сервера.");
           }
         })
         .catch((error) => {
           console.error("Error:", error);
+          setErrorMessage("Ошибка при обращении к серверу.");
         });
     },
     onError: (error) => {
-      console.error(error);
+      console.error("Google Login Error:", error);
+      setErrorMessage("Ошибка авторизации через Google.");
     },
   });
 
+  // Обработчик кнопки "Назад"
   function handleBack() {
     setStartAnimation(true);
     setTimeout(() => navigate("/"), 1000);
   }
 
+  // Обработка завершения регистрации
   function handleSendRequest() {
-    // Проверяем, что есть токен
     if (!accessToken) {
       console.error("Access token is missing!");
+      setErrorMessage("Access token отсутствует. Попробуйте снова авторизоваться.");
       return;
     }
 
-    // Отправляем запрос на сервер для завершения регистрации
+    if (!inputValue.trim()) {
+      setErrorMessage("Поле имени не может быть пустым.");
+      return;
+    }
+
+    // Отправляем запрос на завершение регистрации
     fetch("https://api-night-watcher.vercel.app/register", {
       method: "POST",
       headers: {
@@ -70,16 +83,22 @@ function SettingsPage() {
       },
       body: JSON.stringify({
         access_token: accessToken,
-        username: inputValue,
+        username: inputValue.trim(),
       }),
     })
       .then((response) => response.json())
       .then((data) => {
         console.log("Registration response:", data);
-        setShowModal(false); // Закрываем модальное окно после успешной регистрации
+        if (data.success) {
+          setShowModal(false); // Закрываем модальное окно
+          navigate("/dashboard"); // Перенаправляем пользователя
+        } else {
+          setErrorMessage(data.message || "Ошибка регистрации.");
+        }
       })
       .catch((error) => {
         console.error("Error sending registration request:", error);
+        setErrorMessage("Ошибка сети при отправке данных.");
       });
   }
 
@@ -92,6 +111,9 @@ function SettingsPage() {
         Назад
       </button>
       <Background />
+
+      {/* Ошибки */}
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
 
       {/* Модальное окно для регистрации */}
       {showModal && (
