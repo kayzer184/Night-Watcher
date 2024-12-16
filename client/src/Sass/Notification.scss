@@ -1,18 +1,23 @@
 .alerts-container {
+  position: fixed; /* Fix the container to the screen */
+  top: 16px; /* Add some space from the top */
+  right: 16px; /* Add some space from the right */
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
+  flex-direction: column; /* Stack alerts vertically */
+  gap: 8px; /* Space between alerts */
+  padding: 0; /* Remove padding to avoid extra space */
+  z-index: 999; /* Ensure container is always above other elements */
 }
 
 .alert {
-  z-index: 1;
   display: flex;
   align-items: center;
   padding: 8px;
   border-left: 4px solid;
   border-radius: 8px;
   transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+  opacity: 0; /* Start with invisible */
+  animation: fadeIn 0.5s forwards; /* Fade in effect */
 }
 
 .alert:hover {
@@ -51,4 +56,16 @@
 
 .alert-error:hover {
   background-color: #991b1b;
+}
+
+/* Animation for fade-in effect */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px); /* Start from above */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0); /* End in original position */
+  }
 }
