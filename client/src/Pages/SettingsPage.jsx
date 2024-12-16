@@ -71,19 +71,21 @@ function SettingsPage() {
 
       {/* Модальное окно */}
       {showModal && (
-        <div class="modal">
-          <span class="modal__title">Регистрация</span>
-          <p class="modal__content">Введите своё имя, под которым попадёте в таблицу лидеров</p>
-          <div class="modal__form">
-            <input
-              type="text"
-              name="username"
-              className="modal-input"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Введите ваш никнейм"
-            />
-            <button class="modal__sign-up">Зарегистрироваться</button>
+        <div class="modal__backdrop">
+          <div class="modal">
+            <span class="modal__title">Регистрация</span>
+            <p class="modal__content">Введите своё имя, под которым попадёте в таблицу лидеров</p>
+            <div class="modal__form">
+              <input
+                type="text"
+                name="username"
+                className="modal-input"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="Введите ваш никнейм"
+              />
+              <button class="modal__sign-up">Зарегистрироваться</button>
+            </div>
           </div>
         </div>
       )}
