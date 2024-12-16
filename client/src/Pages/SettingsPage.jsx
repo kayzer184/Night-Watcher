@@ -110,7 +110,7 @@ function SettingsPage() {
 
       <div className="notifications">
         {notifications.map((notif) => (
-          <Notification key={notif.id} Notification__text={notif.message} />
+          <Notification key={notif.id} status={notif.type} Notification__text={notif.message} />
         ))}
       </div>
     </div>
