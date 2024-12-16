@@ -38,7 +38,7 @@ router.post('/google', async (req, res) => {
 
     if (!registerResponse.ok) {
       const errorMessage = `Error from Registration API: ${registerResponse.statusText}`;
-      return res.status(registerResponse.status).json({ message: errorMessage });
+      return res.status(registerResponse.status).json({ message: registerResponse.message });
     }
 
     return res.status(200).json({ message: 'User authenticated and registered successfully' });

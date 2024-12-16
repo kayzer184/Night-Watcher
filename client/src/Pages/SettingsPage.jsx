@@ -5,7 +5,7 @@ import LoginGoogleButton from "../Components/LoginGoogleButton";
 
 import Background from "../Components/Background";
 import "../Sass/SettingsPage.scss";
-import Card from "../Components/Notification";
+import Notification from "../Components/Notification";
 
 function SettingsPage() {
   const [startAnimation, setStartAnimation] = useState(false);
@@ -78,7 +78,6 @@ function SettingsPage() {
     <div className={`SettingsPage ${startAnimation ? "animate" : ""}`}>
       <h1 className="title">Настройки</h1>
       <LoginGoogleButton onClick={handleGoogleLogin} />
-      <Card />
       <button onClick={handleBack} className="back-button">
         Назад
       </button>
@@ -109,15 +108,9 @@ function SettingsPage() {
         </div>
       )}
 
-      {/* Контейнер для уведомлений */}
       <div className="notifications">
         {notifications.map((notif) => (
-          <div
-            key={notif.id}
-            className={`notification ${notif.type === "success" ? "success" : "error"}`}
-          >
-            {notif.message}
-          </div>
+          <Notification key={notif.id} Notification__text={notif.message} />
         ))}
       </div>
     </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import "../Sass/Notification.scss"; // Подключаем CSS файл для стилей
 
-const Alert = () => {
+const Alert = ({ Notification__text }) => {
   return (
     <div className="alerts-container">
       <div role="alert" className="alert alert-success">
@@ -19,7 +19,7 @@ const Alert = () => {
             strokeLinejoin="round"
           />
         </svg>
-        <p className="alert-text">Success - Everything went smoothly!</p>
+        <p className="alert-text">{Notification__text}</p>
       </div>
 
       <div role="alert" className="alert alert-error">
@@ -37,7 +37,7 @@ const Alert = () => {
             strokeLinejoin="round"
           />
         </svg>
-        <p className="alert-text">Error - Something went wrong.</p>
+        <p className="alert-text">Notification__text</p>
       </div>
     </div>
   );
