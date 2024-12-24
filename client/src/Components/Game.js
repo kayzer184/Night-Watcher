@@ -16,7 +16,7 @@ function Game() {
 	const [npcMood, setNpcMood] = useState(100)
 	const [energy, setEnergy] = useState(100)
 	const [timeLeft, setTimeLeft] = useState(60)
-	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.01)
+	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.02)
 	const [energyDecayRate, setEnergyDecayRate] = useState(1)
 	const [isWin, setIsWin] = useState(null)
 	const isPausedRef = useRef(false)
@@ -26,7 +26,7 @@ function Game() {
 
 	// Константы для контроля итераций
 	const ITERATIONS_PER_SECOND = 120 // Желаемое количество итераций в секунду
-	const TICK_LENGTH = 724 / ITERATIONS_PER_SECOND // Длительность одной итерации в мс
+	const TICK_LENGTH = 700 / ITERATIONS_PER_SECOND // Длительность одной итерации в мс
 
 	// Рефы для контроля времени
 	const lastTickRef = useRef(0)
@@ -118,23 +118,16 @@ function Game() {
 			}
 		}
 
-		window.addEventListener('click', onMouseClick, false)
-		window.addEventListener('resize', onWindowResize)
-
 		const gameLoop = timestamp => {
 			if (!lastFrameTimeRef.current) lastFrameTimeRef.current = timestamp
 			const deltaTime = timestamp - lastFrameTimeRef.current
 			lastFrameTimeRef.current = timestamp
 
 			if (!isPausedRef.current) {
-				// Проверяем, нужно ли выполнить итерацию
 				if (timestamp - lastTickRef.current >= TICK_LENGTH) {
-					// Выполняем фиксированное количество обновлений
 					const numOfTicks = Math.floor(
 						(timestamp - lastTickRef.current) / TICK_LENGTH
 					)
-
-					// Ограничиваем количество тиков, чтобы избежать спирали смерти
 					const maxTicksPerFrame = 3
 					const ticksToProcess = Math.min(numOfTicks, maxTicksPerFrame)
 
@@ -145,11 +138,11 @@ function Game() {
 					lastTickRef.current = timestamp
 				}
 
-				// Обновляем только визуальную часть
 				mixers.forEach(mixer => {
 					mixer.update(deltaTime / 1000)
 				})
 
+				updateEnergy()
 				renderer.render(scene, camera)
 			}
 
@@ -157,10 +150,6 @@ function Game() {
 		}
 
 		const updateGameState = () => {
-			// Фиксированный шаг обновления
-			const fixedDelta = TICK_LENGTH / 1000 // в секундах
-
-			// Обновление NPC
 			NPCObjects.current.forEach(npcData => {
 				const { model, path, speed } = npcData
 				const target = path[npcData.currentTarget]
@@ -174,7 +163,6 @@ function Game() {
 					npcData.currentTarget = (npcData.currentTarget + 1) % path.length
 				} else {
 					direction.normalize()
-					// Используем фиксированный шаг для движения
 					model.position.addScaledVector(direction, speed)
 					model.rotation.y =
 						Math.abs(direction.x) > Math.abs(direction.z)
@@ -187,9 +175,26 @@ function Game() {
 				}
 			})
 
-			// Обновление настроения NPC с фиксированным шагом
 			setNpcMood(prev => Math.max(0, prev - NPCMoodDecayRate))
 		}
+
+		const updateEnergy = () => {
+			const now = Date.now()
+			const deltaTime = now - lastEnergyUpdateRef.current
+
+			if (deltaTime >= 1000) {
+				const activeLights = lightObjects.current.filter(
+					obj => obj.light.visible
+				).length
+				if (activeLights > 0) {
+					setEnergy(prev => Math.max(0, prev - energyDecayRate * activeLights))
+				}
+				lastEnergyUpdateRef.current = now
+			}
+		}
+
+		window.addEventListener('resize', onWindowResize)
+		window.addEventListener('click', onMouseClick)
 
 		requestAnimationFrame(gameLoop)
 
