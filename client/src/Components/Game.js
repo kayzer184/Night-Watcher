@@ -189,7 +189,9 @@ function Game() {
 				if (isInLight) {
 					setNpcMood(prev => Math.min(100, prev + NPCMoodDecayRate * 2))
 				} else {
-					setNpcMood(prev => Math.max(0, prev - NPCMoodDecayRate))
+					setNpcMood(prev =>
+						Math.max(0, prev - NPCMoodDecayRate / ITERATIONS_PER_SECOND)
+					)
 				}
 			})
 		}
