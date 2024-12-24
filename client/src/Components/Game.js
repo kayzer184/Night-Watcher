@@ -26,7 +26,7 @@ function Game() {
 
 	// Константы для контроля итераций
 	const ITERATIONS_PER_SECOND = 120 // Желаемое количество итераций в секунду
-	const TICK_LENGTH = 100 / ITERATIONS_PER_SECOND // Длительность одной итерации в мс
+	const TICK_LENGTH = 512 / ITERATIONS_PER_SECOND // Длительность одной итерации в мс
 
 	// Рефы для контроля времени
 	const lastTickRef = useRef(0)
