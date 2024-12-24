@@ -25,7 +25,7 @@ function Game() {
 	const lastEnergyUpdateRef = useRef(Date.now())
 
 	// Константы для контроля итераций
-	const ITERATIONS_PER_SECOND = 120 // Желаемое количество итераций в секунду
+	const ITERATIONS_PER_SECOND = 60 // Желаемое количество итераций в секунду
 	const TICK_LENGTH = 512 / ITERATIONS_PER_SECOND // Длительность одной итерации в мс
 
 	// Рефы для контроля времени
