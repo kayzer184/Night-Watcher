@@ -182,12 +182,28 @@ function Game() {
 						const distance = model.position.distanceTo(lightPosition)
 						if (distance < 100) {
 							isInLight = true
+							console.log('NPC в свете:', {
+								distance,
+								position: model.position,
+								lightPosition,
+								currentMood: npcMood,
+							})
 						}
 					}
 				})
 
 				if (isInLight) {
-					setNpcMood(prev => Math.min(100, prev + NPCMoodDecayRate * 2))
+					const increase = NPCMoodDecayRate * 2
+					setNpcMood(prev => {
+						const newMood = Math.min(100, prev + increase)
+						console.log('Увеличение настроения:', {
+							prevMood: prev,
+							increase,
+							newMood,
+							NPCMoodDecayRate,
+						})
+						return newMood
+					})
 				} else {
 					setNpcMood(prev => Math.max(0, prev - NPCMoodDecayRate))
 				}
