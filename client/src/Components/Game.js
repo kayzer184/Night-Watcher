@@ -150,9 +150,6 @@ function Game() {
 		}
 
 		const updateGameState = () => {
-			let totalInLight = 0
-			let totalNPCs = NPCObjects.current.length
-
 			NPCObjects.current.forEach(npcData => {
 				const { model, path, speed } = npcData
 				const target = path[npcData.currentTarget]
@@ -177,28 +174,26 @@ function Game() {
 							: Math.PI
 				}
 
+				let isInLight = false
 				lightObjects.current.forEach(({ light, model: lightModel }) => {
 					if (light.visible) {
 						const lightPosition = new THREE.Vector3()
 						lightModel.getWorldPosition(lightPosition)
 						const distance = model.position.distanceTo(lightPosition)
 						if (distance < 100) {
-							totalInLight++
-							return
+							isInLight = true
 						}
 					}
 				})
-			})
 
-			// Обновляем настроение на основе процента NPC в свете
-			const percentInLight = totalInLight / totalNPCs
-			if (percentInLight > 0) {
-				setNpcMood(prev =>
-					Math.min(100, prev + NPCMoodDecayRate * 2 * percentInLight)
-				)
-			} else {
-				setNpcMood(prev => Math.max(0, prev - NPCMoodDecayRate / 2))
-			}
+				if (isInLight) {
+					setNpcMood(prev => Math.min(100, prev + NPCMoodDecayRate * 2))
+				} else {
+					setNpcMood(prev =>
+						Math.max(0, prev - NPCMoodDecayRate / ITERATIONS_PER_SECOND)
+					)
+				}
+			})
 		}
 
 		const updateEnergy = () => {
