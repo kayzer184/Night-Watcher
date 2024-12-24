@@ -173,9 +173,25 @@ function Game() {
 							? 0
 							: Math.PI
 				}
-			})
 
-			setNpcMood(prev => Math.max(0, prev - NPCMoodDecayRate))
+				let isInLight = false
+				lightObjects.current.forEach(({ light, model: lightModel }) => {
+					if (light.visible) {
+						const lightPosition = new THREE.Vector3()
+						lightModel.getWorldPosition(lightPosition)
+						const distance = model.position.distanceTo(lightPosition)
+						if (distance < 100) {
+							isInLight = true
+						}
+					}
+				})
+
+				if (isInLight) {
+					setNpcMood(prev => Math.min(100, prev + NPCMoodDecayRate * 2))
+				} else {
+					setNpcMood(prev => Math.max(0, prev - NPCMoodDecayRate))
+				}
+			})
 		}
 
 		const updateEnergy = () => {
