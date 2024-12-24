@@ -16,7 +16,7 @@ function Game() {
 	const [npcMood, setNpcMood] = useState(100)
 	const [energy, setEnergy] = useState(100)
 	const [timeLeft, setTimeLeft] = useState(60)
-	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.005)
+	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.05)
 	const [energyDecayRate, setEnergyDecayRate] = useState(1)
 	const [isWin, setIsWin] = useState(null)
 	const isPausedRef = useRef(false)
