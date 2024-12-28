@@ -72,7 +72,7 @@ function LeadersPage() {
               ))
             ) : (
               <tr>
-                <td colSpan="3">No data available</td>
+                <td colSpan="3">Ошибка загрузки данных</td>
               </tr>
             )}
           </tbody>
