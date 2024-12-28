@@ -16,22 +16,16 @@ function Game() {
 	const [npcMood, setNpcMood] = useState(100)
 	const [energy, setEnergy] = useState(100)
 	const [timeLeft, setTimeLeft] = useState(60)
-	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.02)
+	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.005)
 	const [energyDecayRate, setEnergyDecayRate] = useState(1)
 	const [isWin, setIsWin] = useState(null)
 	const isPausedRef = useRef(false)
 	const [isPaused, setIsPaused] = useState(false)
 	const lightObjects = useRef([])
 	const lastEnergyUpdateRef = useRef(Date.now())
-
-	// Константы для контроля итераций
-	const ITERATIONS_PER_SECOND = 120 // Желаемое количество итераций в секунду
-	const TICK_LENGTH = 700 / ITERATIONS_PER_SECOND // Длительность одной итерации в мс
-
-	// Рефы для контроля времени
-	const lastTickRef = useRef(0)
-	const lastFrameTimeRef = useRef(0)
-
+	const lastUpdateRef = useRef(performance.now())
+	const UPDATES_PER_SECOND = 120
+	const UPDATE_INTERVAL = 180 / UPDATES_PER_SECOND
 	const resetGame = () => {
 		setIsWin(null)
 		setNpcMood(100)
@@ -39,7 +33,6 @@ function Game() {
 		setTimeLeft(60)
 		isPausedRef.current = false
 		setIsPaused(false)
-
 		NPCObjects.current.forEach(npc => {
 			npc.mixer.timeScale = isPausedRef.current ? 0 : 1
 			npc.currentTarget = 0
@@ -49,18 +42,14 @@ function Game() {
 				npc.initialPosition.z
 			)
 		})
-
 		lightObjects.current.forEach(lightObject => {
 			lightObject.light.visible = lightObject.initialState
 		})
-
 		lastEnergyUpdateRef.current = Date.now()
 	}
-
 	useEffect(() => {
 		const scene = new THREE.Scene()
 		scene.background = new THREE.Color(0x000000)
-
 		const camera = new THREE.PerspectiveCamera(
 			75,
 			window.innerWidth / window.innerHeight,
@@ -68,41 +57,32 @@ function Game() {
 			10000
 		)
 		camera.position.set(0, 500, 20)
-
 		const renderer = new THREE.WebGLRenderer({ antialias: true })
 		renderer.setSize(window.innerWidth, window.innerHeight)
 		renderer.setPixelRatio(window.devicePixelRatio)
 		renderer.shadowMap.enabled = true
 		renderer.physicallyCorrectLights = true
-
 		if (mountRef.current) mountRef.current.appendChild(renderer.domElement)
-
 		const controls = new OrbitControls(camera, renderer.domElement)
 		controls.enableDamping = true
 		controls.dampingFactor = 0.25
 		controls.maxPolarAngle = Math.PI / 2
-
 		MapLoader(lightObjects.current, hitboxes, collidableObjects, scene)
 		NPCLoader(NPCObjects.current, 3, mixers, scene)
-
 		const onWindowResize = () => {
 			camera.aspect = window.innerWidth / window.innerHeight
 			camera.updateProjectionMatrix()
 			renderer.setSize(window.innerWidth, window.innerHeight)
 		}
-
 		const toggleLight = (light, index) => {
 			light.visible = !light.visible
 		}
-
 		const onMouseClick = event => {
 			if (!isPausedRef.current) {
 				mouse.x = (event.clientX / window.innerWidth) * 2 - 1
 				mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
-
 				raycaster.setFromCamera(mouse, camera)
 				const intersects = raycaster.intersectObjects(scene.children, true)
-
 				if (intersects.length > 0) {
 					const intersection = intersects[0]
 					console.log(
@@ -117,39 +97,9 @@ function Game() {
 				}
 			}
 		}
-
-		const gameLoop = timestamp => {
-			if (!lastFrameTimeRef.current) lastFrameTimeRef.current = timestamp
-			const deltaTime = timestamp - lastFrameTimeRef.current
-			lastFrameTimeRef.current = timestamp
-
-			if (!isPausedRef.current) {
-				if (timestamp - lastTickRef.current >= TICK_LENGTH) {
-					const numOfTicks = Math.floor(
-						(timestamp - lastTickRef.current) / TICK_LENGTH
-					)
-					const maxTicksPerFrame = 3
-					const ticksToProcess = Math.min(numOfTicks, maxTicksPerFrame)
-
-					for (let i = 0; i < ticksToProcess; i++) {
-						updateGameState()
-					}
-
-					lastTickRef.current = timestamp
-				}
-
-				mixers.forEach(mixer => {
-					mixer.update(deltaTime / 1000)
-				})
-
-				updateEnergy()
-				renderer.render(scene, camera)
-			}
-
-			requestAnimationFrame(gameLoop)
-		}
-
-		const updateGameState = () => {
+		window.addEventListener('click', onMouseClick, false)
+		window.addEventListener('resize', onWindowResize)
+		const moveNpc = () => {
 			NPCObjects.current.forEach(npcData => {
 				const { model, path, speed } = npcData
 				const target = path[npcData.currentTarget]
@@ -158,7 +108,6 @@ function Game() {
 					0,
 					target.z - model.position.z
 				)
-
 				if (direction.length() < speed) {
 					npcData.currentTarget = (npcData.currentTarget + 1) % path.length
 				} else {
@@ -173,63 +122,61 @@ function Game() {
 							? 0
 							: Math.PI
 				}
-
-				let isInLight = false
-				lightObjects.current.forEach(({ light, model: lightModel }) => {
-					if (light.visible) {
-						const lightPosition = new THREE.Vector3()
-						lightModel.getWorldPosition(lightPosition)
-						const distance = model.position.distanceTo(lightPosition)
-						if (distance < 100) {
-							isInLight = true
-							console.log('NPC в свете:', {
-								distance,
-								position: model.position,
-								lightPosition,
-								currentMood: npcMood,
-							})
-						}
-					}
+				let isInLight = lightObjects.current.some(lightObject => {
+					return (
+						lightObject.light.visible &&
+						model.position.distanceTo(lightObject.model.position) < 300
+					)
 				})
-
-				if (isInLight) {
-					const increase = NPCMoodDecayRate * 2
-					setNpcMood(prev => {
-						const newMood = Math.min(100, prev + increase)
-						console.log('Увеличение настроения:', {
-							prevMood: prev,
-							increase,
-							newMood,
-							NPCMoodDecayRate,
-						})
-						return newMood
-					})
-				} else {
-					setNpcMood(prev => Math.max(0, prev - NPCMoodDecayRate))
-				}
+				setNpcMood(prevMood => {
+					const targetMood = isInLight
+						? Math.min(100, prevMood + NPCMoodDecayRate)
+						: Math.max(0, prevMood - NPCMoodDecayRate)
+					return prevMood + (targetMood - prevMood)
+				})
 			})
 		}
-
 		const updateEnergy = () => {
-			const now = Date.now()
-			const deltaTime = now - lastEnergyUpdateRef.current
-
-			if (deltaTime >= 1000) {
-				const activeLights = lightObjects.current.filter(
-					obj => obj.light.visible
-				).length
-				if (activeLights > 0) {
-					setEnergy(prev => Math.max(0, prev - energyDecayRate * activeLights))
-				}
-				lastEnergyUpdateRef.current = now
+			const currentTime = Date.now()
+			if (currentTime - lastEnergyUpdateRef.current >= 1000) {
+				lastEnergyUpdateRef.current = currentTime
+				const totalEnergyConsumption = lightObjects.current.reduce(
+					(acc, lightObject) => {
+						return lightObject.light.visible ? acc + energyDecayRate : acc
+					},
+					0
+				)
+				setEnergy(prevEnergy =>
+					Math.max(0, prevEnergy - totalEnergyConsumption)
+				)
 			}
 		}
+		const animate = () => {
+			const currentTime = performance.now()
 
-		window.addEventListener('resize', onWindowResize)
-		window.addEventListener('click', onMouseClick)
+			if (currentTime - lastUpdateRef.current >= UPDATE_INTERVAL) {
+				if (!isPausedRef.current) {
+					moveNpc()
+					updateEnergy()
 
-		requestAnimationFrame(gameLoop)
+					NPCObjects.current.forEach(npcData => {
+						if (npcData.mixer) {
+							npcData.mixer.timeScale = npcData.speed * 2
+						}
+					})
+				}
 
+				const deltaTime = 1 / UPDATES_PER_SECOND
+				mixers.forEach(mixer => mixer.update(deltaTime))
+
+				lastUpdateRef.current = currentTime
+			}
+
+			controls.update()
+			renderer.render(scene, camera)
+			requestAnimationFrame(animate)
+		}
+		animate()
 		return () => {
 			window.removeEventListener('resize', onWindowResize)
 			window.removeEventListener('click', onMouseClick)
@@ -237,7 +184,6 @@ function Game() {
 			renderer.dispose()
 		}
 	}, [])
-
 	useEffect(() => {
 		if (!isPaused && timeLeft > 0) {
 			const timer = setInterval(() => {
@@ -246,7 +192,6 @@ function Game() {
 			return () => clearInterval(timer)
 		}
 	}, [isPaused, timeLeft])
-
 	useEffect(() => {
 		if (timeLeft === 0 || npcMood === 0 || energy === 0) {
 			isPausedRef.current = true
@@ -254,7 +199,6 @@ function Game() {
 			endGame()
 		}
 	}, [timeLeft, npcMood, energy])
-
 	const handlePause = () => {
 		if (isWin === null) {
 			isPausedRef.current = !isPausedRef.current
@@ -264,14 +208,12 @@ function Game() {
 			setIsPaused(prevPause => !prevPause)
 		}
 	}
-
 	const endGame = () => {
 		NPCObjects.current.forEach(npcData => {
 			if (npcData.mixer) npcData.mixer.timeScale = isPausedRef.current ? 0 : 1
 		})
 		setIsWin(timeLeft === 0 && npcMood !== 0 && energy !== 0)
 	}
-
 	return (
 		<div ref={mountRef}>
 			<div className='Interface-Box'>
