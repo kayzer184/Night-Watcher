@@ -16,7 +16,7 @@ function Game() {
 	const [npcMood, setNpcMood] = useState(100)
 	const [energy, setEnergy] = useState(100)
 	const [timeLeft, setTimeLeft] = useState(60)
-	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.005)
+	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.001)
 	const [energyDecayRate, setEnergyDecayRate] = useState(1)
 	const [isWin, setIsWin] = useState(null)
 	const isPausedRef = useRef(false)
@@ -24,8 +24,10 @@ function Game() {
 	const lightObjects = useRef([])
 	const lastEnergyUpdateRef = useRef(Date.now())
 	const lastUpdateRef = useRef(performance.now())
-	const UPDATES_PER_SECOND = 120
-	const UPDATE_INTERVAL = 180 / UPDATES_PER_SECOND
+	const UPDATES_PER_SECOND = 144
+	const UPDATE_INTERVAL = 720 / UPDATES_PER_SECOND
+	const accumulatedTimeRef = useRef(0)
+
 	const resetGame = () => {
 		setIsWin(null)
 		setNpcMood(100)
@@ -102,17 +104,18 @@ function Game() {
 		const moveNpc = () => {
 			NPCObjects.current.forEach(npcData => {
 				const { model, path, speed } = npcData
+				const normalizedSpeed = speed * (1 / UPDATES_PER_SECOND) * 60
 				const target = path[npcData.currentTarget]
 				const direction = new THREE.Vector3(
 					target.x - model.position.x,
 					0,
 					target.z - model.position.z
 				)
-				if (direction.length() < speed) {
+				if (direction.length() < normalizedSpeed) {
 					npcData.currentTarget = (npcData.currentTarget + 1) % path.length
 				} else {
 					direction.normalize()
-					model.position.addScaledVector(direction, speed)
+					model.position.addScaledVector(direction, normalizedSpeed)
 					model.rotation.y =
 						Math.abs(direction.x) > Math.abs(direction.z)
 							? direction.x > 0
@@ -153,23 +156,26 @@ function Game() {
 		}
 		const animate = () => {
 			const currentTime = performance.now()
+			const frameTime = currentTime - lastUpdateRef.current
+			lastUpdateRef.current = currentTime
 
-			if (currentTime - lastUpdateRef.current >= UPDATE_INTERVAL) {
+			accumulatedTimeRef.current += frameTime
+
+			while (accumulatedTimeRef.current >= UPDATE_INTERVAL) {
 				if (!isPausedRef.current) {
 					moveNpc()
 					updateEnergy()
 
 					NPCObjects.current.forEach(npcData => {
 						if (npcData.mixer) {
-							npcData.mixer.timeScale = npcData.speed * 2
+							npcData.mixer.timeScale = npcData.speed
 						}
 					})
+
+					mixers.forEach(mixer => mixer.update(1 / UPDATES_PER_SECOND))
 				}
 
-				const deltaTime = 1 / UPDATES_PER_SECOND
-				mixers.forEach(mixer => mixer.update(deltaTime))
-
-				lastUpdateRef.current = currentTime
+				accumulatedTimeRef.current -= UPDATE_INTERVAL
 			}
 
 			controls.update()
