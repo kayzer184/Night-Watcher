@@ -15,8 +15,8 @@ function Game() {
 	const NPCObjects = useRef([])
 	const [npcMood, setNpcMood] = useState(100)
 	const [energy, setEnergy] = useState(100)
-	const [timeLeft, setTimeLeft] = useState(60)
-	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.001)
+	const [timeLeft, setTimeLeft] = useState(90)
+	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.003)
 	const [energyDecayRate, setEnergyDecayRate] = useState(1)
 	const [isWin, setIsWin] = useState(null)
 	const isPausedRef = useRef(false)
@@ -27,6 +27,7 @@ function Game() {
 	const UPDATES_PER_SECOND = 144
 	const UPDATE_INTERVAL = 720 / UPDATES_PER_SECOND
 	const accumulatedTimeRef = useRef(0)
+	const ANIMATION_SPEED_MULTIPLIER = 1.75
 
 	const resetGame = () => {
 		setIsWin(null)
@@ -168,7 +169,8 @@ function Game() {
 
 					NPCObjects.current.forEach(npcData => {
 						if (npcData.mixer) {
-							npcData.mixer.timeScale = npcData.speed
+							npcData.mixer.timeScale =
+								npcData.speed * ANIMATION_SPEED_MULTIPLIER
 						}
 					})
 
