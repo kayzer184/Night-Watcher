@@ -1,13 +1,18 @@
 import React, { useRef, useEffect, useState } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { useSearchParams } from 'react-router-dom'
 
 import '../Sass/Game.scss'
 import MapLoader from './MapLoader'
 import NPCLoader from './NPCLoader'
 import Interface from './Interface'
+import { LEVELS_CONFIG } from '../Config/LevelsConfig'
 
 function Game() {
+	const [searchParams] = useSearchParams()
+	const level = parseInt(searchParams.get('level')) || 1
+
 	const mountRef = useRef(null)
 	const raycaster = new THREE.Raycaster()
 	const mouse = new THREE.Vector2()
@@ -70,8 +75,14 @@ function Game() {
 		controls.enableDamping = true
 		controls.dampingFactor = 0.25
 		controls.maxPolarAngle = Math.PI / 2
-		MapLoader(lightObjects.current, hitboxes, collidableObjects, scene)
-		NPCLoader(NPCObjects.current, 3, mixers, scene)
+		MapLoader(lightObjects.current, hitboxes, collidableObjects, scene, level)
+		NPCLoader(
+			NPCObjects.current,
+			LEVELS_CONFIG[level].npcCount,
+			mixers,
+			scene,
+			level
+		)
 		const onWindowResize = () => {
 			camera.aspect = window.innerWidth / window.innerHeight
 			camera.updateProjectionMatrix()
@@ -191,7 +202,7 @@ function Game() {
 			if (mountRef.current) mountRef.current.removeChild(renderer.domElement)
 			renderer.dispose()
 		}
-	}, [])
+	}, [level])
 	useEffect(() => {
 		if (!isPaused && timeLeft > 0) {
 			const timer = setInterval(() => {

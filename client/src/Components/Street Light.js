@@ -14,7 +14,7 @@ function addStreetLight(
 ) {
   const StreetLightModelLoader = new FBXLoader();
   StreetLightModelLoader.load(
-    `/Models/Street Light_${Math.ceil(Math.random() * 2)}.fbx`,
+    `/Models/Street Light_${Math.ceil(Math.random())}.fbx`,
     (object) => {
       object.scale.set(0.09, 0.09, 0.09);
 
