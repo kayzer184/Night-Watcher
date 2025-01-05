@@ -42,7 +42,7 @@ function MapLoader(
 	levelConfig.streetLights.forEach(light => {
 		const [x, y, z] = light.position
 		const [xR, yR, zR] = light.rotation
-		addStreetLight(lightObjects, hitboxes, scene, x, y, z, xR, yR, zR)
+		addStreetLight(lightObjects, hitboxes, scene, x, y, z, xR, yR, zR, level)
 	})
 }
 

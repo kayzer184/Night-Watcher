@@ -30,8 +30,13 @@ export default function NPCLoader(
 	)
 
 	spawnIndices.forEach(index => {
+		const modelPath =
+			levelConfig.npcModels[
+				Math.floor(Math.random() * levelConfig.npcModels.length)
+			]
+
 		NPCModelLoader.load(
-			`/Models/NPC_${Math.round(Math.random() * 0)}.fbx`,
+			modelPath,
 			NPC => {
 				const mixer = new THREE.AnimationMixer(NPC)
 				mixers.push(mixer)
@@ -47,6 +52,7 @@ export default function NPCLoader(
 				scene.add(NPC)
 
 				const npcData = {
+					id: `npc-${Math.random().toString(36).substr(2, 9)}`,
 					model: NPC,
 					mixer: mixer,
 					path: path,

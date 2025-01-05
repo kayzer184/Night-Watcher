@@ -12,6 +12,8 @@
     "@testing-library/user-event": "^13.5.0",
     "cors": "^2.8.5",
     "express": "^4.21.1",
+    "ifvisible": "^1.1.0",
+    "ifvisible.js": "^1.0.6",
     "lil-gui": "^0.20.0",
     "mongoose": "^8.8.2",
     "react": "^18.3.1",

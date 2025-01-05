@@ -3,11 +3,14 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { useSearchParams } from 'react-router-dom'
 
+import ifvisible from 'ifvisible.js'
+
 import '../Sass/Game.scss'
 import MapLoader from './MapLoader'
 import NPCLoader from './NPCLoader'
 import Interface from './Interface'
 import { LEVELS_CONFIG } from '../Config/LevelsConfig'
+import { EVENTS_CONFIG } from '../Config/EventsConfig'
 
 function Game() {
 	const [searchParams] = useSearchParams()
@@ -18,7 +21,7 @@ function Game() {
 	const mouse = new THREE.Vector2()
 	const [collidableObjects, mixers, hitboxes] = [[], [], []]
 	const NPCObjects = useRef([])
-	const [npcMood, setNpcMood] = useState(100)
+	const [npcMood, setNpcMood] = useState(0)
 	const [energy, setEnergy] = useState(100)
 	const [timeLeft, setTimeLeft] = useState(90)
 	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.003)
@@ -33,28 +36,69 @@ function Game() {
 	const UPDATE_INTERVAL = 720 / UPDATES_PER_SECOND
 	const accumulatedTimeRef = useRef(0)
 	const ANIMATION_SPEED_MULTIPLIER = 1.75
+	const [activeEvents, setActiveEvents] = useState(new Map())
+	const lastEventCheckRef = useRef(Date.now())
+	const [maxNpcMood, setMaxNpcMood] = useState(0)
+	const [isSystemPaused, setIsSystemPaused] = useState(null)
+
+	const updateNPCAnimations = paused => {
+		NPCObjects.current.forEach(npcData => {
+			if (npcData.mixer) {
+				npcData.mixer.timeScale = paused ? 0 : 1
+			}
+		})
+	}
 
 	const resetGame = () => {
 		setIsWin(null)
-		setNpcMood(100)
+		setNpcMood(0)
+		setMaxNpcMood(0)
 		setEnergy(100)
 		setTimeLeft(60)
 		isPausedRef.current = false
 		setIsPaused(false)
+		setIsSystemPaused(false)
+		updateNPCAnimations(false)
+		lastUpdateRef.current = performance.now()
 		NPCObjects.current.forEach(npc => {
-			npc.mixer.timeScale = isPausedRef.current ? 0 : 1
-			npc.currentTarget = 0
-			npc.model.position.set(
-				npc.initialPosition.x,
-				npc.initialPosition.y,
-				npc.initialPosition.z
-			)
+			if (npc.mixer) npc.mixer.timeScale = 1
 		})
-		lightObjects.current.forEach(lightObject => {
-			lightObject.light.visible = lightObject.initialState
-		})
-		lastEnergyUpdateRef.current = Date.now()
 	}
+
+	useEffect(() => {
+		ifvisible.on('blur', () => {
+			if (isPausedRef.current === false) {
+				isPausedRef.current = true
+				setIsPaused(true)
+				setIsSystemPaused(true)
+				NPCObjects.current.forEach(npcData => {
+					if (npcData.mixer) {
+						npcData.mixer.timeScale = 0
+					}
+				})
+			}
+		})
+
+		ifvisible.on('focus', () => {
+			if (isSystemPaused) {
+				isPausedRef.current = false
+				setIsPaused(false)
+				setIsSystemPaused(null)
+				lastUpdateRef.current = performance.now()
+				NPCObjects.current.forEach(npcData => {
+					if (npcData.mixer) {
+						npcData.mixer.timeScale = 1
+					}
+				})
+			}
+		})
+
+		return () => {
+			ifvisible.off('blur')
+			ifvisible.off('focus')
+		}
+	}, [isSystemPaused])
+
 	useEffect(() => {
 		const scene = new THREE.Scene()
 		scene.background = new THREE.Color(0x000000)
@@ -144,10 +188,11 @@ function Game() {
 					)
 				})
 				setNpcMood(prevMood => {
-					const targetMood = isInLight
-						? Math.min(100, prevMood + NPCMoodDecayRate)
-						: Math.max(0, prevMood - NPCMoodDecayRate)
-					return prevMood + (targetMood - prevMood)
+					const newMood = isInLight
+						? Math.min(100, prevMood - NPCMoodDecayRate)
+						: Math.max(0, prevMood + NPCMoodDecayRate)
+					setMaxNpcMood(prev => Math.max(prev, newMood))
+					return prevMood + (newMood - prevMood)
 				})
 			})
 		}
@@ -162,9 +207,78 @@ function Game() {
 					0
 				)
 				setEnergy(prevEnergy =>
-					Math.max(0, prevEnergy - totalEnergyConsumption)
+					Math.min(100, Math.max(0, prevEnergy - totalEnergyConsumption))
 				)
 			}
+		}
+		const handleRandomEvents = () => {
+			const currentTime = Date.now()
+
+			if (currentTime - lastEventCheckRef.current >= 10000) {
+				lastEventCheckRef.current = currentTime
+
+				if (Math.random() <= 1) {
+					const availableEvents = Object.values(
+						EVENTS_CONFIG[`LEVEL_${level}`] || {}
+					).filter(event =>
+						event.conditions({
+							npcMood,
+							NPCObjects: NPCObjects.current,
+							energy,
+							timeLeft,
+						})
+					)
+
+					if (availableEvents.length > 0) {
+						const randomEvent =
+							availableEvents[
+								Math.floor(Math.random() * availableEvents.length)
+							]
+
+						const availableNPCs = NPCObjects.current.filter(
+							npc => !npc.isInEvent
+						)
+						if (availableNPCs.length > 0) {
+							const targetNPC =
+								availableNPCs[Math.floor(Math.random() * availableNPCs.length)]
+
+							randomEvent.action(
+								{ npcMood, NPCObjects: NPCObjects.current, energy, timeLeft },
+								targetNPC
+							)
+
+							setActiveEvents(
+								prev =>
+									new Map(
+										prev.set(targetNPC.id, {
+											event: randomEvent,
+											endTime: currentTime + randomEvent.duration,
+										})
+									)
+							)
+						}
+					}
+				}
+			}
+
+			activeEvents.forEach((eventData, npcId) => {
+				if (currentTime >= eventData.endTime) {
+					const npc = NPCObjects.current.find(n => n.id === npcId)
+					if (npc) {
+						eventData.event.cleanup(npc, {
+							npcMood,
+							NPCObjects: NPCObjects.current,
+							energy,
+							timeLeft,
+						})
+					}
+					setActiveEvents(prev => {
+						const newMap = new Map(prev)
+						newMap.delete(npcId)
+						return newMap
+					})
+				}
+			})
 		}
 		const animate = () => {
 			const currentTime = performance.now()
@@ -177,6 +291,7 @@ function Game() {
 				if (!isPausedRef.current) {
 					moveNpc()
 					updateEnergy()
+					handleRandomEvents()
 
 					NPCObjects.current.forEach(npcData => {
 						if (npcData.mixer) {
@@ -196,6 +311,7 @@ function Game() {
 			requestAnimationFrame(animate)
 		}
 		animate()
+
 		return () => {
 			window.removeEventListener('resize', onWindowResize)
 			window.removeEventListener('click', onMouseClick)
@@ -212,26 +328,36 @@ function Game() {
 		}
 	}, [isPaused, timeLeft])
 	useEffect(() => {
-		if (timeLeft === 0 || npcMood === 0 || energy === 0) {
+		if (timeLeft === 0 || npcMood >= 100 || energy === 0) {
 			isPausedRef.current = true
 			setIsPaused(true)
 			endGame()
 		}
 	}, [timeLeft, npcMood, energy])
+	useEffect(() => {
+		setEnergy(prevEnergy => Math.min(100, Math.max(0, prevEnergy)))
+	}, [energy])
 	const handlePause = () => {
 		if (isWin === null) {
 			isPausedRef.current = !isPausedRef.current
-			NPCObjects.current.forEach(npcData => {
-				if (npcData.mixer) npcData.mixer.timeScale = isPausedRef.current ? 0 : 1
-			})
 			setIsPaused(prevPause => !prevPause)
+
+			if (!isPausedRef.current) {
+				lastUpdateRef.current = performance.now()
+			}
+
+			NPCObjects.current.forEach(npcData => {
+				if (npcData.mixer) {
+					npcData.mixer.timeScale = isPausedRef.current ? 0 : 1
+				}
+			})
 		}
 	}
 	const endGame = () => {
 		NPCObjects.current.forEach(npcData => {
 			if (npcData.mixer) npcData.mixer.timeScale = isPausedRef.current ? 0 : 1
 		})
-		setIsWin(timeLeft === 0 && npcMood !== 0 && energy !== 0)
+		setIsWin(timeLeft === 0 && npcMood <= 100 && energy !== 0)
 	}
 	return (
 		<div ref={mountRef}>
@@ -252,6 +378,8 @@ function Game() {
 					onRestart={resetGame}
 					isPaused={isPaused}
 					isWin={isWin}
+					level={level}
+					maxNpcMood={maxNpcMood}
 				/>
 			</div>
 		</div>
