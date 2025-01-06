@@ -1,7 +1,7 @@
 export const LEVELS_CONFIG = {
 	1: {
 		mapModel: '/Models/Map_1.fbx',
-		npcModels: ['/Models/NPC_0.fbx'],
+		npcModels: ['/Models/NPC_1_1.fbx', '/Models/NPC_1_2.fbx'],
 		streetLightModels: ['/Models/Street Light_1.fbx'],
 		npcCount: 3,
 		npcSpeed: 0.33,
@@ -108,7 +108,7 @@ export const LEVELS_CONFIG = {
 	},
 	2: {
 		mapModel: '/Models/Map_2.fbx',
-		npcModels: ['/Models/NPC_0.fbx'],
+		npcModels: ['/Models/NPC_2_1.fbx', '/Models/NPC_2_2.fbx'],
 		streetLightModels: ['/Models/Street Light_2.fbx'],
 		npcCount: 4,
 		npcSpeed: 0.4,
