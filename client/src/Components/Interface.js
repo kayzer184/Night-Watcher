@@ -35,6 +35,14 @@ function Interface({
 	const [isModalVisible, setModalVisible] = useState(false)
 
 	useEffect(() => {
+		// Проверяем наличие Dev Mode в localStorage
+		const isDevMode = localStorage.getItem('Dev Mode') === 'true'
+		
+		// Если Dev Mode не включен, прекращаем выполнение
+		if (!isDevMode) {
+			return
+		}
+
 		const { stats, gui } = createDevTools()
 
 		const Settings = {
