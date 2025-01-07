@@ -11,7 +11,7 @@ import NPCLoader from './NPCLoader'
 import Interface from './Interface'
 import { LEVELS_CONFIG } from '../Config/LevelsConfig'
 import { EVENTS_CONFIG } from '../Config/EventsConfig'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../Context/AuthContext'
 
 function shuffle(array) {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -174,8 +174,9 @@ function Game() {
 		renderer.setSize(window.innerWidth, window.innerHeight)
 		renderer.setPixelRatio(window.devicePixelRatio)
 		renderer.shadowMap.enabled = true
-		renderer.physicallyCorrectLights = true
-		if (mountRef.current) mountRef.current.appendChild(renderer.domElement)
+		if (mountRef.current) {
+			mountRef.current.appendChild(renderer.domElement)
+		}
 		const controls = new OrbitControls(camera, renderer.domElement)
 		controls.enableDamping = true
 		controls.dampingFactor = 0.25
@@ -387,8 +388,13 @@ function Game() {
 		return () => {
 			window.removeEventListener('resize', onWindowResize)
 			window.removeEventListener('click', onMouseClick)
-			if (mountRef.current) mountRef.current.removeChild(renderer.domElement)
+
+			if (mountRef.current && mountRef.current.contains(renderer.domElement)) {
+				mountRef.current.removeChild(renderer.domElement)
+			}
+
 			renderer.dispose()
+			scene.clear()
 		}
 	}, [level])
 	useEffect(() => {

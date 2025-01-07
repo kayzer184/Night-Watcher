@@ -5,6 +5,9 @@ import Modal from './Modal'
 import { LEVELS_CONFIG } from '../Config/LevelsConfig'
 import '../Sass/Interface.scss'
 import reset from '../Assets/Icons/ResetButton.svg'
+import LoginGoogleButton from './LoginGoogleButton'
+import { ReactComponent as StarIcon } from '../Assets/Icons/Star.svg'
+import { useAuth } from '../Context/AuthContext'
 
 // Helper function to determine mood color
 function getMoodColor(mood) {
@@ -32,11 +35,12 @@ function Interface({
 	level,
 	maxNpcMood,
 }) {
+	const { user, setUser } = useAuth()
 	const [isModalVisible, setModalVisible] = useState(false)
 
 	useEffect(() => {
 		const isDevMode = localStorage.getItem('Dev Mode') === 'true'
-		
+
 		if (!isDevMode) {
 			return
 		}
@@ -142,7 +146,13 @@ function Interface({
 		}
 	}, [isWin])
 
-	const closeModal = () => setModalVisible(false)
+	const handleRestart = () => {
+		setModalVisible(false) // Сначала скрываем модальное окно
+		setTimeout(() => {
+			// Даем время на анимацию закрытия
+			onRestart() // Затем перезапускаем игру
+		}, 300)
+	}
 
 	return (
 		<div className='Interface'>
@@ -207,13 +217,8 @@ function Interface({
 
 			{/* Modal for Win or Lose */}
 			{isWin ? (
-				<Modal isVisible={isModalVisible} onClose={closeModal}>
+				<Modal isVisible={isModalVisible}>
 					<h2>Уровень пройден!</h2>
-					<p>Статистика за уровень:</p>
-					<ul>
-						<li>Недовольство пешеходов: {NPCMood}%</li>
-						<li>Оставшаяся энергия: {Energy}%</li>
-					</ul>
 					<div className='stars-container'>
 						<h3>Достижения уровня:</h3>
 						{Object.values(LEVELS_CONFIG[level].starConditions).map(
@@ -231,16 +236,51 @@ function Interface({
 											: ''
 									}`}
 								>
-									<span className='star-icon'>
-										{condition.check({
-											isWin: isWin,
-											npcMood: NPCMood,
-											maxNpcMood: maxNpcMood,
-											energy: Energy,
-										})
-											? '⭐'
-											: '☆'}
+									<StarIcon
+										className={`star-icon ${
+											condition.check({
+												isWin: isWin,
+												npcMood: NPCMood,
+												maxNpcMood: maxNpcMood,
+												energy: Energy,
+											})
+												? 'filled'
+												: ''
+										}`}
+									/>
+									<span className='condition-description'>
+										{condition.description}
 									</span>
+								</div>
+							)
+						)}
+						{!user && (
+							<div className='login-section'>
+								<div className='login-content'>
+									<p className='login-text'>
+										Войдите, чтобы сохранить прогресс
+									</p>
+									<LoginGoogleButton />
+								</div>
+							</div>
+						)}
+					</div>
+					<button
+						className='reset-modal-button interface-button'
+						onClick={handleRestart}
+					>
+						<img src={reset} alt='reset' />
+					</button>
+				</Modal>
+			) : (
+				<Modal isVisible={isModalVisible}>
+					<h2 className='lose-text'>Поражение!</h2>
+					<div className='stars-container'>
+						<h3>Достижения уровня:</h3>
+						{Object.values(LEVELS_CONFIG[level].starConditions).map(
+							condition => (
+								<div key={condition.id} className='star-condition'>
+									<StarIcon className='star-icon' />
 									<span className='condition-description'>
 										{condition.description}
 									</span>
@@ -250,28 +290,7 @@ function Interface({
 					</div>
 					<button
 						className='reset-modal-button interface-button'
-						onClick={() => {
-							closeModal()
-							onRestart()
-						}}
-					>
-						<img src={reset} alt='reset' />
-					</button>
-				</Modal>
-			) : (
-				<Modal isVisible={isModalVisible} onClose={closeModal}>
-					<h2 className='lose-text'>Поражение!</h2>
-					<p>Статистика за уровень:</p>
-					<ul>
-						<li>Недовольство пешеходов: {NPCMood}%</li>
-						<li>Оставшаяся энергия: {Energy}%</li>
-					</ul>
-					<button
-						className='reset-modal-button interface-button'
-						onClick={() => {
-							closeModal()
-							onRestart() // Restart game
-						}}
+						onClick={handleRestart}
 					>
 						<img src={reset} alt='reset' />
 					</button>

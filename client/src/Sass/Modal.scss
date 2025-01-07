@@ -1,56 +1,67 @@
 .Modal-Backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.7);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
 }
 
 .Modal {
-  background: #fff;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 400px;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  position: relative;
-  animation: fadeIn 0.3s ease-in-out;
+	background: #fff;
+	border-radius: 10px;
+	width: 90%;
+	max-width: 400px;
+	padding: 20px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	position: relative;
+	animation: fadeIn 0.3s ease-in-out;
 
-  .Modal-Close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #333;
-    transition: transform 0.2s;
+	h2 {
+		text-align: center;
+		margin-bottom: 20px;
+		font-size: 1.8em;
+		font-weight: bold;
 
-    &:hover {
-      transform: scale(1.2);
-      color: #ff6347;
-    }
-  }
+		&.lose-text {
+			color: #ff6347;
+		}
+	}
 
-  .Modal-Content {
-    font-size: 16px;
-    color: #333;
-  }
+	.Modal-Close {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		background: none;
+		border: none;
+		font-size: 24px;
+		cursor: pointer;
+		color: #333;
+		transition: transform 0.2s;
+
+		&:hover {
+			transform: scale(1.2);
+			color: #ff6347;
+		}
+	}
+
+	.Modal-Content {
+		font-size: 16px;
+		color: #333;
+	}
 }
 
 @keyframes fadeIn {
-  from {
-    transform: scale(0.9);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+	from {
+		transform: scale(0.9);
+		opacity: 0;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
 }
