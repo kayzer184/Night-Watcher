@@ -220,7 +220,7 @@ function Interface({
 				<Modal isVisible={isModalVisible}>
 					<h2>Уровень пройден!</h2>
 					<div className='stars-container'>
-						<h3>Достижения уровня:</h3>
+						<h3>Достижения уровня</h3>
 						{Object.values(LEVELS_CONFIG[level].starConditions).map(
 							condition => (
 								<div

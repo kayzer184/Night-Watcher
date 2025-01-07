@@ -1,71 +1,72 @@
 .alerts-container {
-  position: fixed; /* Fix the container to the screen */
-  top: 16px; /* Add some space from the top */
-  right: 16px; /* Add some space from the right */
-  display: flex;
-  flex-direction: column; /* Stack alerts vertically */
-  gap: 8px; /* Space between alerts */
-  padding: 0; /* Remove padding to avoid extra space */
-  z-index: 999; /* Ensure container is always above other elements */
+	position: fixed; /* Fix the container to the screen */
+	top: 16px; /* Add some space from the top */
+	right: 16px; /* Add some space from the right */
+	display: flex;
+	flex-direction: column; /* Stack alerts vertically */
+	gap: 8px; /* Space between alerts */
+	padding: 0; /* Remove padding to avoid extra space */
+	z-index: 10000; /* Ensure container is always above other elements */
 }
 
 .alert {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  border-left: 4px solid;
-  border-radius: 8px;
-  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
-  opacity: 0; /* Start with invisible */
-  animation: fadeIn 0.5s forwards; /* Fade in effect */
+	display: flex;
+	align-items: center;
+	padding: 8px;
+	border-left: 4px solid;
+	border-radius: 8px;
+	transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+	opacity: 0; /* Start with invisible */
+	animation: fadeIn 0.5s forwards; /* Fade in effect */
+	z-index: 10001; /* Ensure alert is above other elements */
 }
 
 .alert:hover {
-  transform: scale(1.05);
+	transform: scale(1.05);
 }
 
 .alert-icon {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
+	width: 20px;
+	height: 20px;
+	margin-right: 8px;
 }
 
 .alert-text {
-  font-size: 12px;
-  font-weight: 600;
-  margin: 0;
+	font-size: 12px;
+	font-weight: 600;
+	margin: 0;
 }
 
 /* Success */
 .alert-success {
-  background-color: #14532d;
-  border-color: #15803d;
-  color: #dcfce7;
+	background-color: #14532d;
+	border-color: #15803d;
+	color: #dcfce7;
 }
 
 .alert-success:hover {
-  background-color: #166534;
+	background-color: #166534;
 }
 
 /* Error */
 .alert-error {
-  background-color: #7f1d1d;
-  border-color: #b91c1c;
-  color: #fee2e2;
+	background-color: #7f1d1d;
+	border-color: #b91c1c;
+	color: #fee2e2;
 }
 
 .alert-error:hover {
-  background-color: #991b1b;
+	background-color: #991b1b;
 }
 
 /* Animation for fade-in effect */
 @keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px); /* Start from above */
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0); /* End in original position */
-  }
+	0% {
+		opacity: 0;
+		transform: translateY(-10px); /* Start from above */
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0); /* End in original position */
+	}
 }

@@ -41,7 +41,6 @@ const LoginGoogleButton = () => {
 				)
 
 				const data = await checkResponse.json()
-				console.log('User exist check:', data)
 
 				if (!data.exists) {
 					setShowModal(true)
@@ -49,7 +48,6 @@ const LoginGoogleButton = () => {
 					await handleAuthRequest(response.access_token)
 				}
 			} catch (error) {
-				console.error('Error checking user:', error)
 				addNotification('error', 'Ошибка при проверке пользователя')
 			}
 		},
@@ -77,16 +75,12 @@ const LoginGoogleButton = () => {
 			)
 
 			const data = await response.json()
-			console.log('Auth response:', data)
-
 			if (data.user) {
 				setUser(data.user)
 				localStorage.setItem('user', JSON.stringify(data.user))
 				addNotification('success', 'Успешный вход!')
-				console.log('Notification added: success')
 			} else {
 				addNotification('error', 'Ошибка при входе')
-				console.log('Notification added: error')
 			}
 		} catch (error) {
 			console.error('Auth error:', error)
@@ -97,7 +91,6 @@ const LoginGoogleButton = () => {
 	const handleSendRequest = () => {
 		if (!accessToken || !inputValue) {
 			addNotification('error', 'Необходимо ввести имя пользователя')
-			console.log('Notification added: error - empty input')
 			return
 		}
 
