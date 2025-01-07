@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useAuth } from '../context/AuthContext'
 import Alert from './Notification'
@@ -46,7 +46,7 @@ const LoginGoogleButton = () => {
 				if (!data.exists) {
 					setShowModal(true)
 				} else {
-					handleAuthRequest(response.access_token)
+					await handleAuthRequest(response.access_token)
 				}
 			} catch (error) {
 				console.error('Error checking user:', error)
@@ -77,13 +77,16 @@ const LoginGoogleButton = () => {
 			)
 
 			const data = await response.json()
+			console.log('Auth response:', data)
 
 			if (data.user) {
 				setUser(data.user)
 				localStorage.setItem('user', JSON.stringify(data.user))
 				addNotification('success', 'Успешный вход!')
+				console.log('Notification added: success')
 			} else {
 				addNotification('error', 'Ошибка при входе')
+				console.log('Notification added: error')
 			}
 		} catch (error) {
 			console.error('Auth error:', error)
@@ -94,6 +97,7 @@ const LoginGoogleButton = () => {
 	const handleSendRequest = () => {
 		if (!accessToken || !inputValue) {
 			addNotification('error', 'Необходимо ввести имя пользователя')
+			console.log('Notification added: error - empty input')
 			return
 		}
 
@@ -111,13 +115,16 @@ const LoginGoogleButton = () => {
 		})
 			.then(response => response.json())
 			.then(data => {
+				console.log('Registration response:', data)
 				if (data.user) {
 					setUser(data.user)
 					localStorage.setItem('user', JSON.stringify(data.user))
 					setShowModal(false)
 					addNotification('success', 'Регистрация успешно завершена!')
+					console.log('Notification added: success - registration')
 				} else {
 					addNotification('error', data.message || 'Ошибка при регистрации')
+					console.log('Notification added: error - registration failed')
 				}
 			})
 			.catch(error => {
@@ -125,6 +132,10 @@ const LoginGoogleButton = () => {
 				addNotification('error', 'Ошибка при регистрации')
 			})
 	}
+
+	useEffect(() => {
+		console.log('Current notifications:', notifications)
+	}, [notifications])
 
 	return (
 		<div className='google-login-container'>
