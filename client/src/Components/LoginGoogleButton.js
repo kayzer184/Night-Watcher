@@ -121,7 +121,7 @@ const LoginGoogleButton = () => {
 	}
 
 	return (
-		<div>
+		<div className='google-login-container'>
 			<button className='button' onClick={handleGoogleLogin}>
 				<svg
 					xmlns='http://www.w3.org/2000/svg'
