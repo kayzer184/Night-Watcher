@@ -11,6 +11,7 @@ import NPCLoader from './NPCLoader'
 import Interface from './Interface'
 import { LEVELS_CONFIG } from '../Config/LevelsConfig'
 import { EVENTS_CONFIG } from '../Config/EventsConfig'
+import { useAuth } from '../context/AuthContext'
 
 function shuffle(array) {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -54,6 +55,29 @@ function Game() {
 	const lastEventCheckRef = useRef(Date.now())
 	const [maxNpcMood, setMaxNpcMood] = useState(0)
 	const [isSystemPaused, setIsSystemPaused] = useState(null)
+	const { user } = useAuth()
+
+	const sendGameResults = async (stars, score) => {
+		if (!user) return
+
+		try {
+			await fetch('https://api-night-watcher.vercel.app/progress/update', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					userId: user.id,
+					username: user.username,
+					levelId: level,
+					stars,
+					score: Math.round(score),
+				}),
+			})
+		} catch (error) {
+			console.error('Error sending game results:', error)
+		}
+	}
 
 	const resetGame = () => {
 		console.log('Starting reset...')
@@ -408,6 +432,10 @@ function Game() {
 			if (npcData.mixer) npcData.mixer.timeScale = isPausedRef.current ? 0 : 1
 		})
 		setIsWin(timeLeft === 0 && npcMood <= 100 && energy !== 0)
+
+		const stars = calculateStars(timeLeft, npcMood, energy)
+
+		sendGameResults(stars, maxNpcMood)
 	}
 	return (
 		<div ref={mountRef}>
