@@ -216,10 +216,10 @@ function Interface({
 									key={condition.id}
 									className={`star-condition ${
 										condition.check({
+											isWin: isWin,
 											npcMood: NPCMood,
 											maxNpcMood: maxNpcMood,
 											energy: Energy,
-											timeLeft,
 										})
 											? 'completed'
 											: ''
@@ -227,10 +227,10 @@ function Interface({
 								>
 									<span className='star-icon'>
 										{condition.check({
+											isWin: isWin,
 											npcMood: NPCMood,
 											maxNpcMood: maxNpcMood,
 											energy: Energy,
-											timeLeft,
 										})
 											? '⭐'
 											: '☆'}

@@ -6,9 +6,14 @@ export const LEVELS_CONFIG = {
 		npcCount: 3,
 		npcSpeed: 0.33,
 		timeLimit: 90,
-		moodDecayRate: 0.002,
-		energyDecayRate: 1,
+		moodDecayRate: 0.001,
+		energyDecayRate: 0.5,
 		starConditions: {
+			MISSION_COMPLETED: {
+				id: 'MISSION_COMPLETED',
+				description: 'Пройдите уровень',
+				check: gameState => gameState.isWin === true,
+			},
 			MOOD_CONTROL: {
 				id: 'MOOD_CONTROL',
 				description: 'Держите недовольство ниже 80%',
@@ -16,14 +21,9 @@ export const LEVELS_CONFIG = {
 			},
 			ENERGY_SAVE: {
 				id: 'ENERGY_SAVE',
-				description: 'Сохраните более 60% энергии',
-				check: gameState => gameState.energy > 60,
-			},
-			QUICK_WIN: {
-				id: 'QUICK_WIN',
-				description: 'Завершите уровень за 60 секунд',
-				check: gameState => gameState.timeLeft > 30,
-			},
+				description: 'Сохраните более 25% энергии',
+				check: gameState => gameState.energy >= 25,
+			}
 		},
 		streetLights: [
 			{ position: [-223, 108, 55], rotation: [0, 0, 0] },
