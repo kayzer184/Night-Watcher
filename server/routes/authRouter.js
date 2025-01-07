@@ -55,16 +55,30 @@ router.post('/google', async (req, res) => {
 		}
 
 		// Если пользователя нет - создаем нового
-		console.log('Creating new user...')
+		console.log('Creating new user with data:', {
+			googleId: googleData.sub,
+			username,
+			email: googleData.email,
+		})
+
 		user = new User({
 			googleId: googleData.sub,
 			username: username,
 			email: googleData.email,
+			achievements: {},
 			createdAt: new Date(),
 		})
 
-		await user.save()
-		console.log('New user created successfully')
+		try {
+			await user.save()
+			console.log('New user created successfully')
+		} catch (saveError) {
+			console.error('User save error:', {
+				message: saveError.message,
+				errors: saveError.errors,
+			})
+			throw saveError
+		}
 
 		res.json({
 			message: 'Registration successful',
