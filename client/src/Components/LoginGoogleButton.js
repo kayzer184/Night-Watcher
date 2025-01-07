@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useAuth } from '../context/AuthContext'
-import Notification from './Notification'
+import Alert from './Notification'
 import '../Sass/LoginGoogleButton.scss'
 
 const LoginGoogleButton = () => {
@@ -14,11 +14,9 @@ const LoginGoogleButton = () => {
 	const addNotification = (type, message) => {
 		const id = Date.now()
 		setNotifications(prev => [...prev, { id, type, message }])
-		setTimeout(() => removeNotification(id), 5000)
-	}
-
-	const removeNotification = id => {
-		setNotifications(prev => prev.filter(notif => notif.id !== id))
+		setTimeout(() => {
+			setNotifications(prev => prev.filter(notif => notif.id !== id))
+		}, 5000)
 	}
 
 	const handleGoogleLogin = useGoogleLogin({
@@ -185,9 +183,9 @@ const LoginGoogleButton = () => {
 				</div>
 			)}
 
-			<div className='notifications'>
+			<div className='alerts-container'>
 				{notifications.map(notif => (
-					<Notification
+					<Alert
 						key={notif.id}
 						status={notif.type}
 						Notification__text={notif.message}
