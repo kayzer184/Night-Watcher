@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '../context/AuthContext'
 import '../Sass/LevelsPage.scss';
 import Background from "../Components/Background";
 
@@ -30,9 +31,11 @@ const levelData = [
 ];
 
 function LevelsPage() {
+  const { user } = useAuth();
   const [startAnimation, setStartAnimation] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(null); // Для выбранного уровня
   const navigate = useNavigate();
+  console.log(user)
 
   function handleBack() {
     setStartAnimation(true);
