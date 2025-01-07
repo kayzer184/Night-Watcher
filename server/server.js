@@ -22,6 +22,11 @@ app.use(express.json())
 const mongoURI =
 	'mongodb+srv://api_backend_user:bNm6rjubtsyEELwh@night-watcher.1nbdj.mongodb.net/Game'
 
+// Подключаем роуты до подключения к MongoDB
+app.use('/auth', authRouter)
+app.use('/getLeaderBoard', leaderboardRoutes)
+app.use('/register', registerRouter)
+
 // Подключение к MongoDB
 mongoose
 	.connect(mongoURI, {
@@ -30,9 +35,6 @@ mongoose
 	})
 	.then(() => {
 		console.log('MongoDB connected')
-		app.use('/auth', authRouter)
-    app.use('/getLeaderBoard', leaderboardRoutes)
-    app.use('/register', registerRouter)
 	})
 	.catch(err => {
 		console.error('MongoDB connection error:', err)
@@ -40,8 +42,6 @@ mongoose
 	})
 
 app.options('*', cors())
-
-
 
 app.get('/', (req, res) => {
 	res.send('Welcome to the Night-Watcher API')
