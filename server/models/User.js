@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  achievements: {
+    type: Object,
+    default: {},
+  }
 });
 
 // Создание модели пользователя
