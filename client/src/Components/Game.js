@@ -80,8 +80,6 @@ function Game() {
 	}
 
 	const resetGame = () => {
-		console.log('Starting reset...')
-
 		setNpcMood(0)
 		setMaxNpcMood(0)
 		setEnergy(100)
@@ -432,10 +430,6 @@ function Game() {
 			if (npcData.mixer) npcData.mixer.timeScale = isPausedRef.current ? 0 : 1
 		})
 		setIsWin(timeLeft === 0 && npcMood <= 100 && energy !== 0)
-
-		const stars = calculateStars(timeLeft, npcMood, energy)
-
-		sendGameResults(stars, maxNpcMood)
 	}
 	return (
 		<div ref={mountRef}>

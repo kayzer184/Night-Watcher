@@ -23,7 +23,6 @@ function SettingsPage() {
 			setAccessToken(response.access_token)
 			setShowModal(true)
 			addNotification('success', 'Google login successful!')
-			handleGoogleLogin(response)
 		},
 		onError: error => {
 			console.log(error)
@@ -75,15 +74,6 @@ function SettingsPage() {
 	// Функция для удаления уведомления
 	function removeNotification(id) {
 		setNotifications(prev => prev.filter(notif => notif.id !== id))
-	}
-
-	function handleGoogleLogin(response) {
-		// После успешной авторизации
-		setUser({
-			accessToken: response.access_token,
-			username: inputValue,
-			// другие данные пользователя
-		})
 	}
 
 	function handleLogout() {
