@@ -1,49 +1,93 @@
 const mongoose = require('mongoose')
 
-// Схема пользователя
-const userSchema = new mongoose.Schema(
-	{
-		_id: {
-			type: mongoose.Schema.Types.ObjectId,
-			auto: true,
-		},
-		googleId: {
-			type: String,
-			required: true,
-			unique: true,
-		},
-		username: {
-			type: String,
-			required: true,
-		},
-		email: {
-			type: String,
-			required: true,
-			unique: true,
-		},
-		achievements: {
-			type: Object,
-			default: {},
-		},
-		createdAt: {
-			type: Date,
-			default: Date.now,
-		},
-		__v: {
-			type: Number,
-			default: 0,
-		},
+// Создаем простую схему без лишних валидаций
+const userSchema = new mongoose.Schema({
+	googleId: String,
+	username: String,
+	email: String,
+	achievements: {
+		type: Object,
+		default: {},
 	},
-	{
-		collection: 'Users',
-		versionKey: '__v',
+	createdAt: {
+		type: Date,
+		default: Date.now,
+	},
+})
+
+// Добавляем логирование всех операций
+userSchema.pre('save', function (next) {
+	console.log('Before save:', {
+		_id: this._id,
+		googleId: this.googleId,
+		username: this.username,
+		email: this.email,
+	})
+	next()
+})
+
+userSchema.post('save', function (doc) {
+	console.log('After save:', {
+		_id: doc._id,
+		googleId: doc.googleId,
+		username: doc.username,
+		email: doc.email,
+	})
+})
+
+// Обработка ошибок
+userSchema.post('save', function (error, doc, next) {
+	if (error.name === 'MongoServerError') {
+		console.log('MongoDB Error:', {
+			code: error.code,
+			message: error.message,
+			keyPattern: error.keyPattern,
+		})
 	}
-)
+	next(error)
+})
 
-// Добавляем индексы в соответствии с существующей структурой
-userSchema.index({ googleId: 1 }, { unique: true })
-userSchema.index({ email: 1 }, { unique: true })
+// Создаем модель
+const User = mongoose.model('User', userSchema, 'Users')
 
-const User = mongoose.model('User', userSchema)
+// Экспортируем модель и функцию создания пользователя
+module.exports = {
+	User,
+	// Вспомогательная функция для создания пользователя
+	async createUser(userData) {
+		try {
+			console.log('Creating user with:', userData)
 
-module.exports = User
+			// Проверяем существующего пользователя
+			const existingUser = await User.findOne({
+				$or: [{ googleId: userData.googleId }, { email: userData.email }],
+			})
+
+			if (existingUser) {
+				console.log('User exists:', existingUser)
+				return {
+					success: true,
+					user: existingUser,
+					isNew: false,
+				}
+			}
+
+			// Создаем нового пользователя
+			const user = new User(userData)
+			await user.save()
+
+			console.log('User created:', user)
+			return {
+				success: true,
+				user,
+				isNew: true,
+			}
+		} catch (error) {
+			console.error('Create user error:', error)
+			return {
+				success: false,
+				error,
+			}
+		}
+	},
+}
