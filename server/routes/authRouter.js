@@ -11,77 +11,80 @@ console.log('User model:', {
 })
 
 router.post('/google', async (req, res) => {
-	const { access_token, username } = req.body
-
-	if (!access_token) {
-		return res.status(400).json({ message: 'Access token is required' })
-	}
-	if (!username) {
-		return res.status(400).json({ message: 'Username is required' })
-	}
-
 	try {
-		// Запрос к Google API
+		const { access_token, username } = req.body
+
+		if (!access_token || !username) {
+			return res
+				.status(400)
+				.json({ message: 'Access token and username are required' })
+		}
+
 		const googleResponse = await fetch(
-			`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`
+			`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`,
+			{
+				headers: {
+					Authorization: `Bearer ${access_token}`,
+				},
+			}
 		)
 
 		if (!googleResponse.ok) {
-			const errorMessage = `Error from Google API: ${googleResponse.statusText}`
-			return res.status(googleResponse.status).json({ message: errorMessage })
+			console.error('Google API error:', await googleResponse.text())
+			return res.status(400).json({ message: 'Invalid access token' })
 		}
 
 		const googleData = await googleResponse.json()
 
-		try {
-			// Проверяем, существует ли пользователь
-			const existingUser = await User.findOne({
-				googleId: googleData.sub,
-			}).exec()
+		// Проверяем наличие необходимых данных от Google
+		if (!googleData.sub || !googleData.email) {
+			console.error('Missing Google data:', googleData)
+			return res.status(400).json({ message: 'Invalid Google response' })
+		}
 
-			if (existingUser) {
-				console.log('Found existing user:', existingUser._id)
-				return res.status(200).json({
-					message: 'User already exists',
-					user: {
-						googleId: existingUser.googleId,
-						username: existingUser.username,
-						email: existingUser.email,
-						achievements: existingUser.achievements,
-					},
-				})
-			}
+		// Ищем существующего пользователя
+		let user = await User.findOne({ googleId: googleData.sub })
 
-			// Создаем нового пользователя
-			const newUser = new User({
-				googleId: googleData.sub,
-				username: username,
-				email: googleData.email,
-				achievements: {},
-				createdAt: new Date(),
-			})
-
-			const savedUser = await newUser.save()
-			console.log('Created new user:', savedUser._id)
-
+		if (user) {
 			return res.status(200).json({
-				message: 'User created successfully',
+				message: 'User authenticated successfully',
 				user: {
-					googleId: savedUser.googleId,
-					username: savedUser.username,
-					email: savedUser.email,
-					achievements: savedUser.achievements,
+					googleId: user.googleId,
+					username: user.username,
+					email: user.email,
+					achievements: user.achievements,
 				},
 			})
-		} catch (dbError) {
-			console.error('Database error:', dbError)
-			throw dbError
 		}
+
+		// Создаем нового пользователя с проверкой всех обязательных полей
+		const newUser = {
+			googleId: googleData.sub,
+			username: username,
+			email: googleData.email,
+			achievements: {},
+			createdAt: new Date(),
+		}
+
+		console.log('Creating new user:', newUser) // Для отладки
+
+		user = await User.create(newUser)
+
+		return res.status(201).json({
+			message: 'User created successfully',
+			user: {
+				googleId: user.googleId,
+				username: user.username,
+				email: user.email,
+				achievements: user.achievements,
+			},
+		})
 	} catch (error) {
 		console.error('Auth error:', error)
 		return res.status(500).json({
 			message: 'Internal Server Error',
 			error: error.message,
+			details: error.errors, // Добавляем детали ошибки валидации
 		})
 	}
 })
