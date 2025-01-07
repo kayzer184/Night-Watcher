@@ -54,17 +54,15 @@ function Game() {
 	const resetGame = () => {
 		console.log('Starting reset...')
 
-		// Базовый сброс состояний
-		setNpcMood(LEVELS_CONFIG[level].initialNpcMood || 0)
+		setNpcMood(0)
 		setMaxNpcMood(0)
-		setEnergy(LEVELS_CONFIG[level].initialEnergy || 100)
-		setTimeLeft(LEVELS_CONFIG[level].timeLimit || 90)
+		setEnergy(100)
+		setTimeLeft(LEVELS_CONFIG[level].timeLimit)
 		setIsWin(null)
 		setIsPaused(false)
-		setIsSystemPaused(false)
+		setIsSystemPaused(null)
 		isPausedRef.current = false
 
-		// Выключаем фонари
 		lightObjects.current.forEach(light => {
 			if (light.light) light.light.visible = false
 		})
