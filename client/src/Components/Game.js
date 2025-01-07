@@ -34,8 +34,12 @@ function Game() {
 	const [npcMood, setNpcMood] = useState(0)
 	const [energy, setEnergy] = useState(100)
 	const [timeLeft, setTimeLeft] = useState(LEVELS_CONFIG[level].timeLimit)
-	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(LEVELS_CONFIG[level].moodDecayRate)
-	const [energyDecayRate, setEnergyDecayRate] = useState(LEVELS_CONFIG[level].energyDecayRate)
+	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(
+		LEVELS_CONFIG[level].moodDecayRate
+	)
+	const [energyDecayRate, setEnergyDecayRate] = useState(
+		LEVELS_CONFIG[level].energyDecayRate
+	)
 	const [isWin, setIsWin] = useState(null)
 	const isPausedRef = useRef(false)
 	const [isPaused, setIsPaused] = useState(false)
@@ -194,15 +198,26 @@ function Game() {
 		window.addEventListener('resize', onWindowResize)
 		const moveNpc = () => {
 			NPCObjects.current.forEach(npcData => {
+				if (!npcData.path || !npcData.model) return
+
 				const { model, path, speed } = npcData
 				const normalizedSpeed = speed * (1 / UPDATES_PER_SECOND) * 60
+
+				if (npcData.currentTarget >= path.length) {
+					npcData.currentTarget = 0
+				}
+
 				const target = path[npcData.currentTarget]
+				if (!target) return
+
 				const direction = new THREE.Vector3(
 					target.x - model.position.x,
 					0,
 					target.z - model.position.z
 				)
-				if (direction.length() < normalizedSpeed) {
+
+				const distance = direction.length()
+				if (distance < normalizedSpeed) {
 					npcData.currentTarget = (npcData.currentTarget + 1) % path.length
 				} else {
 					direction.normalize()
