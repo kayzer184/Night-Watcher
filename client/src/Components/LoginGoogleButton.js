@@ -31,8 +31,10 @@ const LoginGoogleButton = () => {
 					'https://api-night-watcher.vercel.app/userExist',
 					{
 						method: 'POST',
+						credentials: 'include',
 						headers: {
 							'Content-Type': 'application/json',
+							Accept: 'application/json',
 						},
 						body: JSON.stringify({
 							access_token: response.access_token,
@@ -65,8 +67,10 @@ const LoginGoogleButton = () => {
 				'https://api-night-watcher.vercel.app/auth/google',
 				{
 					method: 'POST',
+					credentials: 'include',
 					headers: {
 						'Content-Type': 'application/json',
+						Accept: 'application/json',
 					},
 					body: JSON.stringify({
 						access_token: token,
@@ -97,8 +101,10 @@ const LoginGoogleButton = () => {
 
 		fetch('https://api-night-watcher.vercel.app/auth/google', {
 			method: 'POST',
+			credentials: 'include',
 			headers: {
 				'Content-Type': 'application/json',
+				Accept: 'application/json',
 			},
 			body: JSON.stringify({
 				access_token: accessToken,
