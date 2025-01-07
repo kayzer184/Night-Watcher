@@ -73,27 +73,40 @@ router.post('/google', async (req, res) => {
 			createdAt: new Date(),
 		}
 
-		console.log('Attempting to create user:', newUser)
+		// Выводим точные данные для отладки
+		console.log('Debug - New user data:', JSON.stringify(newUser, null, 2))
 
-		// Создаем и сохраняем пользователя с подробным логированием
+		// Проверяем каждое поле отдельно
+		if (!newUser.googleId) console.log('Missing googleId')
+		if (!newUser.username) console.log('Missing username')
+		if (!newUser.email) console.log('Missing email')
+
 		try {
+			// Создаем модель и проверяем её напрямую
 			const userModel = new User(newUser)
 
-			// Проверяем валидацию
-			const validationError = userModel.validateSync()
-			if (validationError) {
-				console.error('Validation error:', validationError)
+			// Явная валидация с выводом ошибок
+			const validationErrors = userModel.validateSync()
+			if (validationErrors) {
+				console.error(
+					'Validation errors:',
+					JSON.stringify(validationErrors.errors, null, 2)
+				)
 				return res.status(400).json({
 					message: 'Validation failed',
-					errors: validationError.errors,
+					errors: Object.keys(validationErrors.errors).reduce((acc, key) => {
+						acc[key] = validationErrors.errors[key].message
+						return acc
+					}, {}),
 				})
 			}
 
-			// Сохраняем пользователя
+			// Пробуем сохранить
 			const savedUser = await userModel.save()
 			console.log('User saved successfully:', {
 				id: savedUser._id,
 				googleId: savedUser.googleId,
+				email: savedUser.email,
 			})
 
 			return res.json({
@@ -105,15 +118,27 @@ router.post('/google', async (req, res) => {
 				},
 			})
 		} catch (dbError) {
-			console.error('Database error:', {
+			// Подробный вывод ошибки базы данных
+			console.error('Database error details:', {
 				name: dbError.name,
 				message: dbError.message,
 				code: dbError.code,
+				errors: dbError.errors
+					? JSON.stringify(dbError.errors, null, 2)
+					: 'No validation errors',
 			})
+
+			if (dbError.code === 11000) {
+				return res.status(409).json({
+					message: 'User already exists',
+					error: 'Duplicate key error',
+				})
+			}
 
 			return res.status(500).json({
 				message: 'Failed to create user',
 				error: dbError.message,
+				details: dbError.errors,
 			})
 		}
 	} catch (error) {
