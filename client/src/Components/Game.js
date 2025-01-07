@@ -12,6 +12,16 @@ import Interface from './Interface'
 import { LEVELS_CONFIG } from '../Config/LevelsConfig'
 import { EVENTS_CONFIG } from '../Config/EventsConfig'
 
+function shuffle(array) {
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1))
+		const temp = array[i]
+		array[i] = array[j]
+		array[j] = temp
+	}
+	return array
+}
+
 function Game() {
 	const [searchParams] = useSearchParams()
 	const level = parseInt(searchParams.get('level')) || 1
@@ -23,7 +33,7 @@ function Game() {
 	const NPCObjects = useRef([])
 	const [npcMood, setNpcMood] = useState(0)
 	const [energy, setEnergy] = useState(100)
-	const [timeLeft, setTimeLeft] = useState(90)
+	const [timeLeft, setTimeLeft] = useState(LEVELS_CONFIG[level].timeLimit)
 	const [NPCMoodDecayRate, setNPCMoodDecayRate] = useState(0.003)
 	const [energyDecayRate, setEnergyDecayRate] = useState(1)
 	const [isWin, setIsWin] = useState(null)
@@ -41,28 +51,55 @@ function Game() {
 	const [maxNpcMood, setMaxNpcMood] = useState(0)
 	const [isSystemPaused, setIsSystemPaused] = useState(null)
 
-	const updateNPCAnimations = paused => {
-		NPCObjects.current.forEach(npcData => {
-			if (npcData.mixer) {
-				npcData.mixer.timeScale = paused ? 0 : 1
-			}
-		})
-	}
-
 	const resetGame = () => {
-		setIsWin(null)
-		setNpcMood(0)
+		console.log('Starting reset...')
+
+		// Базовый сброс состояний
+		setNpcMood(LEVELS_CONFIG[level].initialNpcMood || 0)
 		setMaxNpcMood(0)
-		setEnergy(100)
-		setTimeLeft(60)
-		isPausedRef.current = false
+		setEnergy(LEVELS_CONFIG[level].initialEnergy || 100)
+		setTimeLeft(LEVELS_CONFIG[level].timeLimit || 90)
+		setIsWin(null)
 		setIsPaused(false)
 		setIsSystemPaused(false)
-		updateNPCAnimations(false)
-		lastUpdateRef.current = performance.now()
-		NPCObjects.current.forEach(npc => {
-			if (npc.mixer) npc.mixer.timeScale = 1
+		isPausedRef.current = false
+
+		// Выключаем фонари
+		lightObjects.current.forEach(light => {
+			if (light.light) light.light.visible = false
 		})
+
+		const spawnIndices = Array.from(
+			{ length: LEVELS_CONFIG[level].npcSpawns.length },
+			(_, i) => i
+		)
+		shuffle(spawnIndices)
+
+		setActiveEvents(new Map())
+
+		NPCObjects.current.forEach((npc, index) => {
+			const spawnIndex = spawnIndices[index % spawnIndices.length]
+			const spawn = LEVELS_CONFIG[level].npcSpawns[spawnIndex]
+			const pathPoints = LEVELS_CONFIG[level].npcPaths[spawnIndex]
+
+			if (npc.model && spawn && pathPoints) {
+				npc.isInEvent = false
+				npc.currentTarget = 0
+				npc.speed = LEVELS_CONFIG[level].npcSpeed
+
+				npc.model.position.set(spawn[0], spawn[1], spawn[2])
+
+				npc.path = pathPoints
+
+				if (npc.mixer && npc.action) {
+					npc.action.reset()
+					npc.action.play()
+					npc.mixer.timeScale = LEVELS_CONFIG[level].npcSpeed
+				}
+			}
+		})
+
+		lastUpdateRef.current = performance.now()
 	}
 
 	useEffect(() => {

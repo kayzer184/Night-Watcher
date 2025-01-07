@@ -168,7 +168,7 @@ function Interface({
 						bgColor='#FFD700'
 						height='20px'
 						borderRadius='5px'
-						baseBgColor='#333333'
+						baseBgColor='#e0e0e0'
 						labelAlignment='center'
 						customLabel=' '
 					/>
