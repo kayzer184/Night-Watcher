@@ -59,16 +59,17 @@ router.post('/google', async (req, res) => {
 
 		// Создаем нового пользователя с проверкой всех обязательных полей
 		const newUser = {
-			googleId: googleData.sub,
-			username: username,
-			email: googleData.email,
-			achievements: {},
+			googleId: String(googleData.sub),
+			username: String(username),
+			email: String(googleData.email),
+			achievements: new Map(),
 			createdAt: new Date(),
 		}
 
-		console.log('Creating new user:', newUser) // Для отладки
+		console.log('Creating new user:', JSON.stringify(newUser, null, 2))
 
-		user = await User.create(newUser)
+		user = new User(newUser)
+		await user.save()
 
 		return res.status(201).json({
 			message: 'User created successfully',
