@@ -23,6 +23,7 @@ const LoginGoogleButton = () => {
 
 	const handleGoogleLogin = useGoogleLogin({
 		onSuccess: async response => {
+			console.log('Google login success')
 			setAccessToken(response.access_token)
 
 			try {
@@ -40,6 +41,7 @@ const LoginGoogleButton = () => {
 				)
 
 				const data = await checkResponse.json()
+				console.log('User exist check:', data)
 
 				if (!data.exists) {
 					setShowModal(true)
