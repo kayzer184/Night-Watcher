@@ -1,56 +1,52 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
+const User = require('../models/user')
 
 router.post('/google', async (req, res) => {
-  const { access_token, username } = req.body;
+	const { access_token, username } = req.body
 
-  if (!access_token) {
-    return res.status(400).json({ message: 'Access token is required' });
-  }
-  if (!username) {
-    return res.status(400).json({ message: 'Username is required' });
-  }
+	try {
+		// Запрос к Google API
+		const googleResponse = await fetch(
+			`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`
+		)
+		const googleData = await googleResponse.json()
 
-  try {
-    // Запрос к Google API
-    const googleResponse = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`);
+		// Ищем пользователя
+		let user = await User.findOne({ googleId: googleData.sub })
 
-    if (!googleResponse.ok) {
-      const errorMessage = `Error from Google API: ${googleResponse.statusText}`;
-      return res.status(googleResponse.status).json({ message: errorMessage });
-    }
+		if (user) {
+			// Если пользователь существует - просто логиним его
+			return res.json({
+				message: 'Login successful',
+				user: {
+					googleId: user.googleId,
+					username: user.username,
+					email: user.email,
+				},
+			})
+		}
 
-    const googleData = await googleResponse.json();
+		// Если пользователя нет - создаем нового
+		user = new User({
+			googleId: googleData.sub,
+			username: username,
+			email: googleData.email,
+		})
+		await user.save()
 
-    // Регистрация пользователя в вашем сервисе
-    const registerResponse = await fetch('https://api-night-watcher.vercel.app/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        googleId: googleData.sub,
-        username: username,
-        email: googleData.email,
-        createdAt: Date.now(),
-      }),
-    });
+		res.json({
+			message: 'Registration successful',
+			user: {
+				googleId: user.googleId,
+				username: user.username,
+				email: user.email,
+			},
+		})
+	} catch (error) {
+		console.error('Auth error:', error)
+		res.status(500).json({ message: 'Authentication failed' })
+	}
+})
 
-    if (!registerResponse.ok) {
-      const errorMessage = `Error from Registration API: ${registerResponse.statusText}`;
-      return res.status(registerResponse.status).json({ message: registerResponse.message });
-    }
-
-    return res.status(200).json({ message: 'User authenticated and registered successfully' });
-  } catch (error) {
-    const isFetchError = error.message.includes('Failed to fetch');
-    const errorMessage = isFetchError
-      ? 'Service Unavailable: Could not connect to external services'
-      : 'Internal Server Error: Unexpected failure';
-
-    console.error('Unexpected Error:', error);
-    return res.status(isFetchError ? 503 : 500).json({ message: errorMessage, error: error.message });
-  }
-});
-
-module.exports = router;
+module.exports = router
