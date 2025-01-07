@@ -7,7 +7,7 @@ import '../Sass/Interface.scss'
 import reset from '../Assets/Icons/ResetButton.svg'
 import LoginGoogleButton from './LoginGoogleButton'
 import { ReactComponent as StarIcon } from '../Assets/Icons/Star.svg'
-import { useAuth } from '../Context/AuthContext'
+import { useAuth } from '../context/AuthContext'
 
 // Helper function to determine mood color
 function getMoodColor(mood) {

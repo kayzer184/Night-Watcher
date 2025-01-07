@@ -13,7 +13,7 @@ import LeadersPage from '../Pages/LeadersPage'
 import SettingsPage from '../Pages/SettingsPage'
 import GamePage from '../Pages/GamePage'
 import NotFoundPage from '../Pages/NotFoundPage'
-import { AuthProvider, useAuth } from '../Context/AuthContext'
+import { AuthProvider, useAuth } from '../context/AuthContext'
 
 function AppRoutes() {
 	const { user, setUser } = useAuth()

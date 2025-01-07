@@ -11,7 +11,7 @@ import NPCLoader from './NPCLoader'
 import Interface from './Interface'
 import { LEVELS_CONFIG } from '../Config/LevelsConfig'
 import { EVENTS_CONFIG } from '../Config/EventsConfig'
-import { useAuth } from '../Context/AuthContext'
+import { useAuth } from '../context/AuthContext'
 
 function shuffle(array) {
 	for (let i = array.length - 1; i > 0; i--) {
