@@ -4,106 +4,125 @@ const User = require('../models/User')
 
 router.post('/google', async (req, res) => {
 	try {
-		const { access_token, username } = req.body;
-		console.log('Received request data:', { access_token: !!access_token, username });
+		const { access_token, username } = req.body
+
+		// Подробное логирование входных данных
+		console.log('Request body:', {
+			hasAccessToken: !!access_token,
+			username: username,
+			bodyLength: JSON.stringify(req.body).length,
+		})
 
 		if (!access_token || !username) {
-			return res.status(400).json({ 
+			console.log('Validation failed - missing fields')
+			return res.status(400).json({
 				message: 'Missing required fields',
-				received: { hasToken: !!access_token, username }
-			});
+			})
 		}
 
-		// Запрос к Google API
-		const googleResponse = await fetch(
-			`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`
-		);
-
-		if (!googleResponse.ok) {
-			return res.status(401).json({ 
-				message: 'Google API error',
-				status: googleResponse.status
-			});
+		// Запрос к Google API с обработкой ошибок
+		let googleData
+		try {
+			const googleResponse = await fetch(
+				`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`
+			)
+			googleData = await googleResponse.json()
+			console.log('Google API response:', {
+				hasGoogleId: !!googleData.sub,
+				hasEmail: !!googleData.email,
+			})
+		} catch (googleError) {
+			console.error('Google API error:', googleError)
+			return res.status(401).json({
+				message: 'Failed to verify Google token',
+			})
 		}
 
-		const googleData = await googleResponse.json();
-		console.log('Google data:', {
-			sub: googleData.sub,
-			email: googleData.email,
-			verified_email: googleData.email_verified
-		});
+		// Проверяем данные от Google
+		if (!googleData.sub || !googleData.email) {
+			console.log('Invalid Google data')
+			return res.status(400).json({
+				message: 'Invalid Google account data',
+			})
+		}
 
 		// Проверяем существующего пользователя
-		const existingUser = await User.findOne({ 
-			$or: [
-				{ googleId: googleData.sub },
-				{ email: googleData.email }
-			]
-		});
+		const existingUser = await User.findOne({ googleId: googleData.sub })
 
 		if (existingUser) {
-			console.log('Found existing user:', {
+			console.log('User exists:', {
 				googleId: existingUser.googleId,
-				username: existingUser.username
-			});
+				username: existingUser.username,
+			})
 			return res.json({
 				message: 'Login successful',
 				user: {
 					googleId: existingUser.googleId,
 					username: existingUser.username,
-					email: existingUser.email
-				}
-			});
+					email: existingUser.email,
+				},
+			})
 		}
 
-		// Создаем нового пользователя
-		const userData = {
+		// Создаем объект пользователя
+		const newUser = {
 			googleId: googleData.sub,
 			username: username,
 			email: googleData.email,
 			achievements: {},
-			createdAt: new Date()
-		};
-
-		console.log('Creating new user with data:', userData);
-
-		const user = new User(userData);
-
-		try {
-			await user.validate(); // Проверяем валидацию перед сохранением
-			await user.save();
-			console.log('User saved successfully');
-			
-			res.json({
-				message: 'Registration successful',
-				user: {
-					googleId: user.googleId,
-					username: user.username,
-					email: user.email
-				}
-			});
-		} catch (validationError) {
-			console.error('Validation error:', {
-				message: validationError.message,
-				errors: validationError.errors
-			});
-			return res.status(400).json({
-				message: 'Validation failed',
-				errors: validationError.errors
-			});
+			createdAt: new Date(),
 		}
 
+		console.log('Attempting to create user:', newUser)
+
+		// Создаем и сохраняем пользователя с подробным логированием
+		try {
+			const userModel = new User(newUser)
+
+			// Проверяем валидацию
+			const validationError = userModel.validateSync()
+			if (validationError) {
+				console.error('Validation error:', validationError)
+				return res.status(400).json({
+					message: 'Validation failed',
+					errors: validationError.errors,
+				})
+			}
+
+			// Сохраняем пользователя
+			const savedUser = await userModel.save()
+			console.log('User saved successfully:', {
+				id: savedUser._id,
+				googleId: savedUser.googleId,
+			})
+
+			return res.json({
+				message: 'Registration successful',
+				user: {
+					googleId: savedUser.googleId,
+					username: savedUser.username,
+					email: savedUser.email,
+				},
+			})
+		} catch (dbError) {
+			console.error('Database error:', {
+				name: dbError.name,
+				message: dbError.message,
+				code: dbError.code,
+			})
+
+			return res.status(500).json({
+				message: 'Failed to create user',
+				error: dbError.message,
+			})
+		}
 	} catch (error) {
-		console.error('Server error:', {
-			name: error.name,
-			message: error.message,
-			stack: error.stack
-		});
-		res.status(500).json({
+		console.error('Unexpected error:', error)
+		return res.status(500).json({
 			message: 'Server error',
-			error: error.message
-		});
+			error: error.message,
+		})
 	}
-});
+})
 
 module.exports = router
