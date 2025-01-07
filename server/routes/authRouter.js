@@ -3,105 +3,107 @@ const router = express.Router()
 const User = require('../models/User')
 
 router.post('/google', async (req, res) => {
-	const { access_token, username } = req.body
-
-	// Проверяем входные данные
-	if (!access_token || !username) {
-		console.log('Missing required fields:', {
-			access_token: !!access_token,
-			username: !!username,
-		})
-		return res
-			.status(400)
-			.json({ message: 'Access token and username are required' })
-	}
-
 	try {
-		console.log('Fetching user info from Google...')
+		const { access_token, username } = req.body;
+		console.log('Received request data:', { access_token: !!access_token, username });
+
+		if (!access_token || !username) {
+			return res.status(400).json({ 
+				message: 'Missing required fields',
+				received: { hasToken: !!access_token, username }
+			});
+		}
+
 		// Запрос к Google API
 		const googleResponse = await fetch(
 			`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`
-		)
+		);
 
 		if (!googleResponse.ok) {
-			console.error('Google API error:', {
-				status: googleResponse.status,
-				statusText: googleResponse.statusText,
-			})
-			return res.status(401).json({ message: 'Failed to verify Google token' })
+			return res.status(401).json({ 
+				message: 'Google API error',
+				status: googleResponse.status
+			});
 		}
 
-		const googleData = await googleResponse.json()
-		console.log('Google data received:', {
+		const googleData = await googleResponse.json();
+		console.log('Google data:', {
 			sub: googleData.sub,
 			email: googleData.email,
-		})
+			verified_email: googleData.email_verified
+		});
 
-		// Ищем пользователя
-		let user = await User.findOne({ googleId: googleData.sub })
-		console.log('Existing user found:', !!user)
+		// Проверяем существующего пользователя
+		const existingUser = await User.findOne({ 
+			$or: [
+				{ googleId: googleData.sub },
+				{ email: googleData.email }
+			]
+		});
 
-		if (user) {
-			// Если пользователь существует - просто логиним его
-			console.log('User exists, sending response')
+		if (existingUser) {
+			console.log('Found existing user:', {
+				googleId: existingUser.googleId,
+				username: existingUser.username
+			});
 			return res.json({
 				message: 'Login successful',
 				user: {
-					googleId: user.googleId,
-					username: user.username,
-					email: user.email,
-				},
-			})
+					googleId: existingUser.googleId,
+					username: existingUser.username,
+					email: existingUser.email
+				}
+			});
 		}
 
-		// Если пользователя нет - создаем нового
-		console.log('Creating new user with data:', {
-			googleId: googleData.sub,
-			username,
-			email: googleData.email,
-		})
-
-		user = new User({
+		// Создаем нового пользователя
+		const userData = {
 			googleId: googleData.sub,
 			username: username,
 			email: googleData.email,
 			achievements: {},
-			createdAt: new Date(),
-		})
+			createdAt: new Date()
+		};
+
+		console.log('Creating new user with data:', userData);
+
+		const user = new User(userData);
 
 		try {
-			await user.save()
-			console.log('New user created successfully')
-		} catch (saveError) {
-			console.error('User save error:', {
-				message: saveError.message,
-				errors: saveError.errors,
-			})
-			throw saveError
+			await user.validate(); // Проверяем валидацию перед сохранением
+			await user.save();
+			console.log('User saved successfully');
+			
+			res.json({
+				message: 'Registration successful',
+				user: {
+					googleId: user.googleId,
+					username: user.username,
+					email: user.email
+				}
+			});
+		} catch (validationError) {
+			console.error('Validation error:', {
+				message: validationError.message,
+				errors: validationError.errors
+			});
+			return res.status(400).json({
+				message: 'Validation failed',
+				errors: validationError.errors
+			});
 		}
 
-		res.json({
-			message: 'Registration successful',
-			user: {
-				googleId: user.googleId,
-				username: user.username,
-				email: user.email,
-			},
-		})
 	} catch (error) {
-		console.error('Detailed error:', {
-			message: error.message,
-			stack: error.stack,
+		console.error('Server error:', {
 			name: error.name,
-		})
-
-		// Отправляем более информативную ошибку
+			message: error.message,
+			stack: error.stack
+		});
 		res.status(500).json({
-			message: 'Authentication failed',
-			error: error.message,
-			type: error.name,
-		})
+			message: 'Server error',
+			error: error.message
+		});
 	}
-})
+});
 
 module.exports = router
