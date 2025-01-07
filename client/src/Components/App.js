@@ -1,6 +1,11 @@
 import React, { useEffect } from 'react'
 import '../Sass/App.scss'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import {
+	BrowserRouter as Router,
+	Routes,
+	Route,
+	useLocation,
+} from 'react-router-dom'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import MenuPage from '../Pages/MenuPage'
 import LevelsPage from '../Pages/LevelsPage'
@@ -11,7 +16,15 @@ import NotFoundPage from '../Pages/NotFoundPage'
 import { AuthProvider, useAuth } from '../context/AuthContext'
 
 function AppRoutes() {
-	const { setUser } = useAuth()
+	const { user, setUser } = useAuth()
+	const location = useLocation()
+
+	useEffect(() => {
+		const savedUser = localStorage.getItem('user')
+		if (!savedUser && user) {
+			setUser(null)
+		}
+	}, [location, user, setUser])
 
 	useEffect(() => {
 		const handleStorageChange = () => {
