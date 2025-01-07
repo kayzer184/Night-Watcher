@@ -83,4 +83,42 @@ router.post('/google', async (req, res) => {
 	}
 })
 
+router.post('/validate', async (req, res) => {
+	try {
+		const { userId, username } = req.body
+
+		if (!userId || !username) {
+			return res.status(400).json({
+				success: false,
+				message: 'Missing required fields',
+			})
+		}
+
+		// Проверяем существование пользователя
+		const user = await User.findOne({
+			_id: userId,
+			username: username,
+		})
+
+		if (!user) {
+			return res.status(401).json({
+				success: false,
+				message: 'Invalid session',
+			})
+		}
+
+		return res.status(200).json({
+			success: true,
+			message: 'Session valid',
+		})
+	} catch (error) {
+		console.error('Validation error:', error)
+		return res.status(500).json({
+			success: false,
+			message: 'Internal Server Error',
+			error: error.message,
+		})
+	}
+})
+
 module.exports = router
