@@ -1,6 +1,14 @@
 const express = require('express')
 const router = express.Router()
+const mongoose = require('mongoose')
 const User = require('../models/User')
+
+// Проверяем, что модель доступна
+console.log('User model:', {
+	modelName: User.modelName,
+	collection: User.collection.name,
+	schema: Object.keys(User.schema.paths),
+})
 
 router.post('/google', async (req, res) => {
 	const { access_token, username } = req.body
@@ -25,51 +33,54 @@ router.post('/google', async (req, res) => {
 
 		const googleData = await googleResponse.json()
 
-		// Проверяем, существует ли пользователь
-		let user = await User.findOne({ googleId: googleData.sub })
+		try {
+			// Проверяем, существует ли пользователь
+			const existingUser = await User.findOne({
+				googleId: googleData.sub,
+			}).exec()
 
-		if (user) {
-			// Если пользователь существует, возвращаем его данные
+			if (existingUser) {
+				console.log('Found existing user:', existingUser._id)
+				return res.status(200).json({
+					message: 'User already exists',
+					user: {
+						googleId: existingUser.googleId,
+						username: existingUser.username,
+						email: existingUser.email,
+						achievements: existingUser.achievements,
+					},
+				})
+			}
+
+			// Создаем нового пользователя
+			const newUser = new User({
+				googleId: googleData.sub,
+				username: username,
+				email: googleData.email,
+				achievements: {},
+				createdAt: new Date(),
+			})
+
+			const savedUser = await newUser.save()
+			console.log('Created new user:', savedUser._id)
+
 			return res.status(200).json({
-				message: 'User already exists',
+				message: 'User created successfully',
 				user: {
-					googleId: user.googleId,
-					username: user.username,
-					email: user.email,
-					achievements: user.achievements,
+					googleId: savedUser.googleId,
+					username: savedUser.username,
+					email: savedUser.email,
+					achievements: savedUser.achievements,
 				},
 			})
+		} catch (dbError) {
+			console.error('Database error:', dbError)
+			throw dbError
 		}
-
-		// Создаем нового пользователя
-		user = new User({
-			googleId: googleData.sub,
-			username: username,
-			email: googleData.email,
-			achievements: {}, // Инициализируем пустой объект достижений
-			createdAt: new Date(),
-		})
-
-		await user.save()
-
-		return res.status(200).json({
-			message: 'User created successfully',
-			user: {
-				googleId: user.googleId,
-				username: user.username,
-				email: user.email,
-				achievements: user.achievements,
-			},
-		})
 	} catch (error) {
 		console.error('Auth error:', error)
-		const isFetchError = error.message.includes('Failed to fetch')
-		const errorMessage = isFetchError
-			? 'Service Unavailable: Could not connect to external services'
-			: 'Internal Server Error: Unexpected failure'
-
-		return res.status(isFetchError ? 503 : 500).json({
-			message: errorMessage,
+		return res.status(500).json({
+			message: 'Internal Server Error',
 			error: error.message,
 		})
 	}

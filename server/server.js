@@ -30,21 +30,19 @@ mongoose
 	})
 	.then(() => {
 		console.log('MongoDB connected')
+		app.use('/auth', authRouter)
+    app.use('/getLeaderBoard', leaderboardRoutes)
+    app.use('/register', registerRouter)
 	})
 	.catch(err => {
-		console.error('Failed to connect to MongoDB:', err)
+		console.error('MongoDB connection error:', err)
 		process.exit(1)
 	})
 
-// Добавляем preflight для OPTIONS
-app.options('*', cors()) // Включаем preflight для всех маршрутов
+app.options('*', cors())
 
-// Подключение маршрутов
-app.use('/getLeaderBoard', leaderboardRoutes)
-app.use('/register', registerRouter)
-app.use('/auth', authRouter)
 
-// Обработчик корневого маршрута
+
 app.get('/', (req, res) => {
 	res.send('Welcome to the Night-Watcher API')
 })
@@ -54,5 +52,4 @@ app.listen(PORT, () => {
 	console.log(`Server is running on port ${PORT}`)
 })
 
-// Экспорт обработчика
 module.exports = app

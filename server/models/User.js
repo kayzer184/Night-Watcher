@@ -1,93 +1,39 @@
 const mongoose = require('mongoose')
 
-// Создаем простую схему без лишних валидаций
+// Схема пользователя
 const userSchema = new mongoose.Schema({
-	googleId: String,
-	username: String,
-	email: String,
+	googleId: {
+		type: String,
+		required: true,
+		unique: true,
+	},
+	username: {
+		type: String,
+		required: true,
+	},
+	email: {
+		type: String,
+		required: true,
+		unique: true,
+		validate: {
+			validator: function (v) {
+				return /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v);
+			},
+			message: props => `${props.value} is not a valid email address!`,
+		},
+	},
 	achievements: {
 		type: Object,
 		default: {},
+		required: true
 	},
 	createdAt: {
 		type: Date,
 		default: Date.now,
 	},
-})
+});
 
-// Добавляем логирование всех операций
-userSchema.pre('save', function (next) {
-	console.log('Before save:', {
-		_id: this._id,
-		googleId: this.googleId,
-		username: this.username,
-		email: this.email,
-	})
-	next()
-})
+// Убедимся, что модель не была определена ранее
+const User = mongoose.models.User || mongoose.model('Users', userSchema, 'Users');
 
-userSchema.post('save', function (doc) {
-	console.log('After save:', {
-		_id: doc._id,
-		googleId: doc.googleId,
-		username: doc.username,
-		email: doc.email,
-	})
-})
-
-// Обработка ошибок
-userSchema.post('save', function (error, doc, next) {
-	if (error.name === 'MongoServerError') {
-		console.log('MongoDB Error:', {
-			code: error.code,
-			message: error.message,
-			keyPattern: error.keyPattern,
-		})
-	}
-	next(error)
-})
-
-// Создаем модель
-const User = mongoose.model('User', userSchema, 'Users')
-
-// Экспортируем модель и функцию создания пользователя
-module.exports = {
-	User,
-	// Вспомогательная функция для создания пользователя
-	async createUser(userData) {
-		try {
-			console.log('Creating user with:', userData)
-
-			// Проверяем существующего пользователя
-			const existingUser = await User.findOne({
-				$or: [{ googleId: userData.googleId }, { email: userData.email }],
-			})
-
-			if (existingUser) {
-				console.log('User exists:', existingUser)
-				return {
-					success: true,
-					user: existingUser,
-					isNew: false,
-				}
-			}
-
-			// Создаем нового пользователя
-			const user = new User(userData)
-			await user.save()
-
-			console.log('User created:', user)
-			return {
-				success: true,
-				user,
-				isNew: true,
-			}
-		} catch (error) {
-			console.error('Create user error:', error)
-			return {
-				success: false,
-				error,
-			}
-		}
-	},
-}
+module.exports = User;
