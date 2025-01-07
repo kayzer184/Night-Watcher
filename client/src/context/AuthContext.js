@@ -27,21 +27,46 @@ export const AuthProvider = ({ children }) => {
 						}
 					)
 
+					const data = await response.json()
+
 					if (!response.ok) {
 						console.log('Сессия недействительна')
 						setUser(null)
 						localStorage.removeItem('user')
+
+						// Добавляем уведомление через window.dispatchEvent
+						const event = new CustomEvent('showNotification', {
+							detail: {
+								type: 'error',
+								message: 'Сессия недействительна. Пожалуйста, войдите снова.',
+							},
+						})
+						window.dispatchEvent(event)
 					}
 				} catch (error) {
 					console.error('Ошибка валидации:', error)
 					setUser(null)
 					localStorage.removeItem('user')
+
+					// Добавляем уведомление об ошибке
+					const event = new CustomEvent('showNotification', {
+						detail: {
+							type: 'error',
+							message: 'Ошибка проверки сессии. Пожалуйста, войдите снова.',
+						},
+					})
+					window.dispatchEvent(event)
 				}
 			}
 		}
 
-		validateUser()
-	}, [user?.id]) // Зависимость от user.id, чтобы не создавать бесконечный цикл
+		// Добавляем задержку при первой валидации
+		const timer = setTimeout(() => {
+			validateUser()
+		}, 1000) // Задержка в 1 секунду
+
+		return () => clearTimeout(timer)
+	}, [user?.id]) // Зависимость от user.id
 
 	// Сохранение пользователя в localStorage
 	useEffect(() => {
