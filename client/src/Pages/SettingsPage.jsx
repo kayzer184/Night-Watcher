@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGoogleLogin } from '@react-oauth/google'
 import LoginGoogleButton from '../Components/LoginGoogleButton'
@@ -55,12 +55,27 @@ function SettingsPage() {
 			.then(response => response.json())
 			.then(data => {
 				console.log('Server response:', data)
-				setShowModal(false)
-				addNotification('success', 'Registration successful!')
+				if (data.user) {
+					// Сохраняем данные пользователя в контекст
+					setUser({
+						googleId: data.user.googleId,
+						username: data.user.username,
+						email: data.user.email,
+						achievements: data.user.achievements,
+					})
+
+					// Сохраняем в localStorage для сохранения сессии
+					localStorage.setItem('user', JSON.stringify(data.user))
+
+					setShowModal(false)
+					addNotification('success', data.message || 'Успешная авторизация!')
+				} else {
+					addNotification('error', data.message || 'Ошибка при авторизации')
+				}
 			})
 			.catch(error => {
 				console.error('Error sending request:', error)
-				addNotification('error', 'Failed to register. Please try again.')
+				addNotification('error', 'Ошибка при регистрации. Попробуйте снова.')
 			})
 	}
 
@@ -78,7 +93,17 @@ function SettingsPage() {
 
 	function handleLogout() {
 		setUser(null)
+		localStorage.removeItem('user') // Удаляем данные пользователя из localStorage
+		addNotification('success', 'Вы успешно вышли из системы')
 	}
+
+	// Добавьте эффект для проверки сохраненной сессии при загрузке
+	useEffect(() => {
+		const savedUser = localStorage.getItem('user')
+		if (savedUser && !user) {
+			setUser(JSON.parse(savedUser))
+		}
+	}, [])
 
 	return (
 		<div className={`SettingsPage ${startAnimation ? 'animate' : ''}`}>
@@ -86,9 +111,12 @@ function SettingsPage() {
 			{!user ? (
 				<LoginGoogleButton onClick={handleGoogleLogin} />
 			) : (
-				<div>
+				<div className='user-info'>
 					<p>Вы вошли как {user.username}</p>
-					<button onClick={handleLogout}>Выйти</button>
+					<p>Email: {user.email}</p>
+					<button onClick={handleLogout} className='logout-button'>
+						Выйти
+					</button>
 				</div>
 			)}
 			<button onClick={handleBack} className='back-button'>
