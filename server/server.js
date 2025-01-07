@@ -2,8 +2,8 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const leaderboardRoutes = require('./routes/leaderboard')
-const registerRouter = require('./routes/register')
 const authRouter = require('./routes/authRouter')
+const userExistRouter = require('./routes/userExist')
 
 const app = express()
 
@@ -24,8 +24,8 @@ const mongoURI =
 
 // Подключаем роуты до подключения к MongoDB
 app.use('/auth', authRouter)
+app.use('/userExist', userExistRouter)
 app.use('/getLeaderBoard', leaderboardRoutes)
-app.use('/register', registerRouter)
 
 // Подключение к MongoDB
 mongoose

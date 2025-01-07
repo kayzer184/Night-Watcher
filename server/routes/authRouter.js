@@ -14,12 +14,7 @@ router.post('/google', async (req, res) => {
 	try {
 		const { access_token, username } = req.body
 
-		if (!access_token || !username) {
-			return res
-				.status(400)
-				.json({ message: 'Access token and username are required' })
-		}
-
+		// Получаем данные от Google
 		const googleResponse = await fetch(
 			`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`,
 			{
@@ -30,62 +25,60 @@ router.post('/google', async (req, res) => {
 		)
 
 		if (!googleResponse.ok) {
-			console.error('Google API error:', await googleResponse.text())
 			return res.status(400).json({ message: 'Invalid access token' })
 		}
 
 		const googleData = await googleResponse.json()
 
-		// Проверяем наличие необходимых данных от Google
 		if (!googleData.sub || !googleData.email) {
-			console.error('Missing Google data:', googleData)
 			return res.status(400).json({ message: 'Invalid Google response' })
 		}
 
 		// Ищем существующего пользователя
 		let user = await User.findOne({ googleId: googleData.sub })
 
-		if (user) {
+		// Если пользователь существует и username не передан - это вход
+		if (user && !username) {
 			return res.status(200).json({
-				message: 'User authenticated successfully',
+				message: `Добро пожаловать, ${user.username}!`,
 				user: {
-					googleId: user.googleId,
+					id: user.id,
 					username: user.username,
-					email: user.email,
-					achievements: user.achievements,
 				},
 			})
 		}
 
-		// Создаем нового пользователя с проверкой всех обязательных полей
-		const newUser = {
-			googleId: String(googleData.sub),
-			username: String(username),
-			email: String(googleData.email),
-			achievements: new Map(),
-			createdAt: new Date(),
+		// Если username передан - это регистрация
+		if (username) {
+			if (user) {
+				return res.status(400).json({ message: 'Пользователь уже существует' })
+			}
+
+			user = new User({
+				googleId: String(googleData.sub),
+				username: String(username),
+				email: String(googleData.email),
+				achievements: new Map(),
+				createdAt: new Date(),
+			})
+			await user.save()
+
+			return res.status(201).json({
+				message: `Регистрация успешна, ${username}!`,
+				user: {
+					id: user.id,
+					username: user.username,
+				},
+			})
 		}
 
-		console.log('Creating new user:', JSON.stringify(newUser, null, 2))
-
-		user = new User(newUser)
-		await user.save()
-
-		return res.status(201).json({
-			message: 'User created successfully',
-			user: {
-				googleId: user.googleId,
-				username: user.username,
-				email: user.email,
-				achievements: user.achievements,
-			},
-		})
+		return res.status(400).json({ message: 'Invalid request' })
 	} catch (error) {
 		console.error('Auth error:', error)
 		return res.status(500).json({
 			message: 'Internal Server Error',
 			error: error.message,
-			details: error.errors, // Добавляем детали ошибки валидации
+			details: error.errors,
 		})
 	}
 })

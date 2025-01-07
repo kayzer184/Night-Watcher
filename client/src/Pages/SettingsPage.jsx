@@ -18,27 +18,79 @@ function SettingsPage() {
 	const navigate = useNavigate()
 
 	const handleGoogleLogin = useGoogleLogin({
-		onSuccess: response => {
-			console.log('Google login successful:', response)
+		onSuccess: async response => {
 			setAccessToken(response.access_token)
-			setShowModal(true)
-			addNotification('success', 'Google login successful!')
+
+			try {
+				// Сначала проверяем существование пользователя
+				const checkResponse = await fetch(
+					'https://api-night-watcher.vercel.app/userExist',
+					{
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							access_token: response.access_token,
+						}),
+					}
+				)
+
+				const data = await checkResponse.json()
+
+				if (!data.exists) {
+					// Если пользователь не существует, показываем модальное окно регистрации
+					setShowModal(true)
+				} else {
+					// Если пользователь существует, выполняем вход
+					handleAuthRequest(response.access_token)
+				}
+			} catch (error) {
+				console.error('Error checking user:', error)
+				addNotification('error', 'Ошибка при проверке пользователя')
+			}
 		},
 		onError: error => {
-			console.log(error)
-			addNotification('error', 'Google login failed.')
+			console.error('Login Failed:', error)
+			addNotification('error', 'Ошибка при входе через Google')
 		},
 	})
 
-	function handleBack() {
-		setStartAnimation(true)
-		setTimeout(() => navigate('/'), 1000)
+	// Функция для авторизации существующего пользователя
+	const handleAuthRequest = async token => {
+		try {
+			const response = await fetch(
+				'https://api-night-watcher.vercel.app/auth/google',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						access_token: token,
+					}),
+				}
+			)
+
+			const data = await response.json()
+
+			if (data.user) {
+				setUser(data.user)
+				localStorage.setItem('user', JSON.stringify(data.user))
+				addNotification('success', data.message || 'Успешный вход!')
+			} else {
+				addNotification('error', data.message || 'Ошибка при входе')
+			}
+		} catch (error) {
+			console.error('Auth error:', error)
+			addNotification('error', 'Ошибка при авторизации')
+		}
 	}
 
+	// Функция для регистрации нового пользователя
 	function handleSendRequest() {
-		if (!accessToken) {
-			console.error('Access token is missing!')
-			addNotification('error', 'Access token is missing!')
+		if (!accessToken || !inputValue) {
+			addNotification('error', 'Необходимо ввести имя пользователя')
 			return
 		}
 
@@ -54,50 +106,42 @@ function SettingsPage() {
 		})
 			.then(response => response.json())
 			.then(data => {
-				console.log('Server response:', data)
 				if (data.user) {
-					// Сохраняем данные пользователя в контекст
-					setUser({
-						googleId: data.user.googleId,
-						username: data.user.username,
-						email: data.user.email,
-						achievements: data.user.achievements,
-					})
-
-					// Сохраняем в localStorage для сохранения сессии
+					setUser(data.user)
 					localStorage.setItem('user', JSON.stringify(data.user))
-
 					setShowModal(false)
-					addNotification('success', data.message || 'Успешная авторизация!')
+					addNotification('success', 'Регистрация успешно завершена!')
 				} else {
-					addNotification('error', data.message || 'Ошибка при авторизации')
+					addNotification('error', data.message || 'Ошибка при регистрации')
 				}
 			})
 			.catch(error => {
-				console.error('Error sending request:', error)
-				addNotification('error', 'Ошибка при регистрации. Попробуйте снова.')
+				console.error('Error:', error)
+				addNotification('error', 'Ошибка при регистрации')
 			})
 	}
 
-	// Функция для добавления уведомления
-	function addNotification(type, message) {
-		const id = Date.now() // Уникальный идентификатор
-		setNotifications(prev => [...prev, { id, type, message }])
-		setTimeout(() => removeNotification(id), 5000) // Автоматическое удаление через 5 секунд
+	function handleBack() {
+		setStartAnimation(true)
+		setTimeout(() => navigate('/'), 1000)
 	}
 
-	// Функция для удаления уведомления
+	function addNotification(type, message) {
+		const id = Date.now()
+		setNotifications(prev => [...prev, { id, type, message }])
+		setTimeout(() => removeNotification(id), 5000)
+	}
+
 	function removeNotification(id) {
 		setNotifications(prev => prev.filter(notif => notif.id !== id))
 	}
 
 	function handleLogout() {
 		setUser(null)
-		localStorage.removeItem('user') // Удаляем данные пользователя из localStorage
+		localStorage.removeItem('user')
 		addNotification('success', 'Вы успешно вышли из системы')
 	}
 
-	// Добавьте эффект для проверки сохраненной сессии при загрузке
 	useEffect(() => {
 		const savedUser = localStorage.getItem('user')
 		if (savedUser && !user) {
@@ -113,7 +157,6 @@ function SettingsPage() {
 			) : (
 				<div className='user-info'>
 					<p>Вы вошли как {user.username}</p>
-					<p>Email: {user.email}</p>
 					<button onClick={handleLogout} className='logout-button'>
 						Выйти
 					</button>
@@ -123,8 +166,6 @@ function SettingsPage() {
 				Назад
 			</button>
 			<Background />
-
-			{/* Модальное окно */}
 			{showModal && (
 				<div className='modal__backdrop'>
 					<div className='modal'>
@@ -139,7 +180,7 @@ function SettingsPage() {
 								className='modal-input'
 								value={inputValue}
 								onChange={e => setInputValue(e.target.value)}
-								placeholder='Введите ваш никнейм'
+								placeholder='Введите имя'
 							/>
 							<button className='modal__sign-up' onClick={handleSendRequest}>
 								Зарегистрироваться
