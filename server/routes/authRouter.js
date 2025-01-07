@@ -6,66 +6,45 @@ router.post('/google', async (req, res) => {
 	try {
 		const { access_token, username } = req.body
 
-		// Подробное логирование входных данных
-		console.log('Request body:', {
-			hasAccessToken: !!access_token,
-			username: username,
-			bodyLength: JSON.stringify(req.body).length,
+		console.log('1. Received request with:', {
+			hasToken: !!access_token,
+			username,
 		})
 
-		if (!access_token || !username) {
-			console.log('Validation failed - missing fields')
-			return res.status(400).json({
-				message: 'Missing required fields',
-			})
-		}
-
-		// Запрос к Google API с обработкой ошибок
+		// Проверяем Google токен
 		let googleData
 		try {
 			const googleResponse = await fetch(
 				`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`
 			)
+
+			if (!googleResponse.ok) {
+				console.log('2. Google API error:', {
+					status: googleResponse.status,
+					statusText: googleResponse.statusText,
+				})
+				return res.status(401).json({ message: 'Invalid Google token' })
+			}
+
 			googleData = await googleResponse.json()
-			console.log('Google API response:', {
-				hasGoogleId: !!googleData.sub,
-				hasEmail: !!googleData.email,
+			console.log('3. Google API data:', {
+				sub: googleData.sub,
+				email: googleData.email,
+				name: googleData.name,
 			})
 		} catch (googleError) {
-			console.error('Google API error:', googleError)
-			return res.status(401).json({
-				message: 'Failed to verify Google token',
-			})
+			console.error('4. Google API fetch error:', googleError)
+			return res.status(500).json({ message: 'Failed to fetch Google data' })
 		}
 
-		// Проверяем данные от Google
+		// Проверяем обязательные поля
 		if (!googleData.sub || !googleData.email) {
-			console.log('Invalid Google data')
-			return res.status(400).json({
-				message: 'Invalid Google account data',
-			})
+			console.log('5. Missing required Google data')
+			return res.status(400).json({ message: 'Incomplete Google profile data' })
 		}
 
-		// Проверяем существующего пользователя
-		const existingUser = await User.findOne({ googleId: googleData.sub })
-
-		if (existingUser) {
-			console.log('User exists:', {
-				googleId: existingUser.googleId,
-				username: existingUser.username,
-			})
-			return res.json({
-				message: 'Login successful',
-				user: {
-					googleId: existingUser.googleId,
-					username: existingUser.username,
-					email: existingUser.email,
-				},
-			})
-		}
-
-		// Создаем объект пользователя
-		const newUser = {
+		// Создаем пользователя
+		const userData = {
 			googleId: googleData.sub,
 			username: username,
 			email: googleData.email,
@@ -73,80 +52,50 @@ router.post('/google', async (req, res) => {
 			createdAt: new Date(),
 		}
 
-		// Выводим точные данные для отладки
-		console.log('Debug - New user data:', JSON.stringify(newUser, null, 2))
-
-		// Проверяем каждое поле отдельно
-		if (!newUser.googleId) console.log('Missing googleId')
-		if (!newUser.username) console.log('Missing username')
-		if (!newUser.email) console.log('Missing email')
+		console.log('6. Creating user with data:', userData)
 
 		try {
-			// Создаем модель и проверяем её напрямую
-			const userModel = new User(newUser)
+			const user = new User(userData)
 
-			// Явная валидация с выводом ошибок
-			const validationErrors = userModel.validateSync()
-			if (validationErrors) {
-				console.error(
-					'Validation errors:',
-					JSON.stringify(validationErrors.errors, null, 2)
-				)
+			// Явная валидация
+			const validationError = user.validateSync()
+			if (validationError) {
+				console.log('7. Validation failed:', validationError.errors)
 				return res.status(400).json({
 					message: 'Validation failed',
-					errors: Object.keys(validationErrors.errors).reduce((acc, key) => {
-						acc[key] = validationErrors.errors[key].message
-						return acc
-					}, {}),
+					errors: validationError.errors,
 				})
 			}
 
-			// Пробуем сохранить
-			const savedUser = await userModel.save()
-			console.log('User saved successfully:', {
-				id: savedUser._id,
-				googleId: savedUser.googleId,
-				email: savedUser.email,
-			})
+			// Сохранение
+			const savedUser = await user.save()
+			console.log('8. User saved:', savedUser.toObject())
 
 			return res.json({
-				message: 'Registration successful',
+				message: 'Success',
 				user: {
 					googleId: savedUser.googleId,
 					username: savedUser.username,
 					email: savedUser.email,
 				},
 			})
-		} catch (dbError) {
-			// Подробный вывод ошибки базы данных
-			console.error('Database error details:', {
-				name: dbError.name,
-				message: dbError.message,
-				code: dbError.code,
-				errors: dbError.errors
-					? JSON.stringify(dbError.errors, null, 2)
-					: 'No validation errors',
+		} catch (error) {
+			console.log('9. Save error:', {
+				name: error.name,
+				message: error.message,
+				code: error.code,
+				errors: error.errors,
 			})
-
-			if (dbError.code === 11000) {
-				return res.status(409).json({
-					message: 'User already exists',
-					error: 'Duplicate key error',
-				})
-			}
 
 			return res.status(500).json({
 				message: 'Failed to create user',
-				error: dbError.message,
-				details: dbError.errors,
+				error: error.message,
+				details: error.errors,
 			})
 		}
 	} catch (error) {
-		console.error('Unexpected error:', error)
-		return res.status(500).json({
-			message: 'Server error',
-			error: error.message,
-		})
+		console.error('10. Unexpected error:', error)
+		return res.status(500).json({ message: 'Server error' })
 	}
 })
 
