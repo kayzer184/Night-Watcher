@@ -7,7 +7,7 @@ export const LEVELS_CONFIG = {
 		npcSpeed: 0.33,
 		timeLimit: 90,
 		moodDecayRate: 0.003,
-		energyDecayRate: 0.5,
+		energyDecayRate: 1,
 		starConditions: {
 			MISSION_COMPLETED: {
 				id: 'MISSION_COMPLETED',
