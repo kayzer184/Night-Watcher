@@ -11,12 +11,15 @@ router.post('/', async (req, res) => {
         if (!user) {
             return res.status(404).json({ 
                 success: false, 
-                message: 'Пользователь не найден' 
+                message: 'Пользователь не найден',
+                userId: userId,
+                levelId: levelId,
+                achievements: achievements
             })
         }
 
         if (!user.achievements[levelId]) {
-          user.achievements[levelId] = {}
+          user.achievements[levelId] = {} 
         }
 
         // Обновляем достижения только если новый результат лучше
