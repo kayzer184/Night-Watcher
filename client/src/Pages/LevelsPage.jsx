@@ -49,12 +49,11 @@ function LevelsPage() {
 
 		if (user) {
 			console.log('Fetching progress for user:', user.id)
-			fetch(`https://api-night-watcher.vercel.app/progress/${user.id}`, {
+			fetch(`https://api-night-watcher.vercel.app/getUser/${user.id}`, {
 				credentials: 'include',
 			})
 				.then(response => response.json())
 				.then(data => {
-					console.log('Progress data received:', data)
 					if (data.success) {
 						const progress = { ...initialProgress }
 						data.progress.forEach(level => {
@@ -63,14 +62,12 @@ function LevelsPage() {
 								score: level.score,
 							}
 						})
-						console.log('Processed progress:', progress)
 						setLevelsProgress(progress)
 					} else {
 						setLevelsProgress(initialProgress)
 					}
 				})
 				.catch(error => {
-					console.error('Error fetching progress:', error)
 					setLevelsProgress(initialProgress)
 				})
 		} else {
@@ -84,11 +81,11 @@ function LevelsPage() {
 	}
 
 	function handleLevelSelect(level) {
-		setSelectedLevel(level) // Устанавливаем выбранный уровень
+		setSelectedLevel(level)
 	}
 
 	function closeModal() {
-		setSelectedLevel(null) // Закрываем модальное окно
+		setSelectedLevel(null)
 	}
 
 	return (
