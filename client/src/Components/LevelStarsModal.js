@@ -7,34 +7,34 @@ const LevelStarsModal = ({
 	level,
 	isPreview = false,
 	gameStats = null,
-	achievements = [],
+	achievements = {},
 }) => {
+	const levelAchievements = achievements[level.toString()] || {}
+
 	return (
 		<div className='modal-stars-container'>
 			<div className='achievements-section'>
 				<h3>Достижения уровня</h3>
 				<div className='achievements-list'>
-					{Object.values(LEVELS_CONFIG[level].starConditions).map(condition => (
-						<div
-							key={condition.id}
-							className={`achievement-item ${
-								(!isPreview && gameStats && condition.check(gameStats)) ||
-								achievements.includes(condition.id)
-									? 'completed'
-									: ''
-							}`}
-						>
-							<StarIcon
-								className={`achievement-star ${
-									(!isPreview && gameStats && condition.check(gameStats)) ||
-									achievements.includes(condition.id)
-										? 'filled'
-										: ''
+					{Object.values(LEVELS_CONFIG[level].starConditions).map(
+						(condition, index) => (
+							<div
+								key={condition.id}
+								className={`achievement-item ${
+									levelAchievements[(index + 1).toString()] ? 'completed' : ''
 								}`}
-							/>
-							<span className='achievement-text'>{condition.description}</span>
-						</div>
-					))}
+							>
+								<StarIcon
+									className={`achievement-star ${
+										levelAchievements[(index + 1).toString()] ? 'filled' : ''
+									}`}
+								/>
+								<span className='achievement-text'>
+									{condition.description}
+								</span>
+							</div>
+						)
+					)}
 				</div>
 			</div>
 		</div>
