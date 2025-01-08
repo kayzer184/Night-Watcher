@@ -133,9 +133,6 @@ function LevelsPage() {
 						/>
 						<p>{selectedLevel.description}</p>
 						<LevelStarsModal level={selectedLevel.id} isPreview={true} />
-						<p className='best-score'>
-							Лучший результат: {levelsProgress[selectedLevel.id]?.score || 0}
-						</p>
 						<div className='buttons-container'>
 							<button
 								className='play-button'

@@ -3,7 +3,12 @@ import { LEVELS_CONFIG } from '../Config/LevelsConfig'
 import { ReactComponent as StarIcon } from '../Assets/Icons/Star.svg'
 import '../Sass/LevelStarsModal.scss'
 
-const LevelStarsModal = ({ level, isPreview = false, gameStats = null }) => {
+const LevelStarsModal = ({
+	level,
+	isPreview = false,
+	gameStats = null,
+	achievements = [],
+}) => {
 	return (
 		<div className='modal-stars-container'>
 			<div className='achievements-list'>
@@ -11,14 +16,16 @@ const LevelStarsModal = ({ level, isPreview = false, gameStats = null }) => {
 					<div
 						key={condition.id}
 						className={`achievement-item ${
-							!isPreview && gameStats && condition.check(gameStats)
+							(!isPreview && gameStats && condition.check(gameStats)) ||
+							achievements.includes(condition.id)
 								? 'completed'
 								: ''
 						}`}
 					>
 						<StarIcon
 							className={`achievement-star ${
-								!isPreview && gameStats && condition.check(gameStats)
+								(!isPreview && gameStats && condition.check(gameStats)) ||
+								achievements.includes(condition.id)
 									? 'filled'
 									: ''
 							}`}
