@@ -9,23 +9,12 @@ const userUpdateRouter = require('./routes/userUpdateRouter')
 
 const app = express()
 
-app.use(
-	cors({
-		origin: ['https://night-watcher.vercel.app'],
-		methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-		allowedHeaders: [
-			'Content-Type',
-			'Authorization',
-			'X-Requested-With',
-			'Accept',
-			'Origin',
-			'Access-Control-Allow-Headers',
-		],
-		credentials: true,
-		preflightContinue: true,
-		optionsSuccessStatus: 204,
-	})
-)
+app.use((req, res, next) => {
+	res.header('Access-Control-Allow-Origin', '*')
+	res.header('Access-Control-Allow-Methods', '*')
+	res.header('Access-Control-Allow-Headers', '*')
+	next()
+})
 
 app.use(express.json())
 
