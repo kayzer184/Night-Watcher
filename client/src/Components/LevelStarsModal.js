@@ -7,8 +7,9 @@ const LevelStarsModal = ({
 	level,
 	isPreview = false,
 	gameStats = null,
-	achievements = {},
+	user = {},
 }) => {
+	const achievements = user?.achievements || {}
 	const levelAchievements = achievements[level.toString()] || {}
 
 	return (
