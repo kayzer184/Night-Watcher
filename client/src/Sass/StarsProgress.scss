@@ -1,0 +1,31 @@
+.stars-container {
+	display: flex;
+	gap: 5px;
+	justify-content: center;
+	margin-top: 5px;
+	// background: red; // временно для отладки
+	z-index: 1000; // увеличим z-index
+
+	&.large {
+		gap: 10px;
+		margin: 15px 0;
+
+		.star {
+			font-size: 32px;
+		}
+	}
+
+	.star {
+		font-size: 20px;
+		z-index: 1001; // увеличим z-index
+
+		&.filled {
+			color: #f9b700;
+			text-shadow: 0 0 5px #f9b700;
+		}
+
+		&.empty {
+			color: #666;
+		}
+	}
+}

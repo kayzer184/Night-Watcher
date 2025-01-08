@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import '../Sass/LevelsPage.scss'
 import Background from '../Components/Background'
+import StarsProgress from '../Components/StarsProgress'
 
 import level1Screenshot from '../Assets/ScreenShots/level1.jpg'
 import level2Screenshot from '../Assets/ScreenShots/level2.jpg'
@@ -32,9 +33,34 @@ const levelData = [
 function LevelsPage() {
 	const { user } = useAuth()
 	const [startAnimation, setStartAnimation] = useState(false)
-	const [selectedLevel, setSelectedLevel] = useState(null) // Для выбранного уровня
+	const [selectedLevel, setSelectedLevel] = useState(null)
+	const [levelsProgress, setLevelsProgress] = useState({})
 	const navigate = useNavigate()
-	console.log(user)
+
+	useEffect(() => {
+		if (user) {
+			console.log('Fetching progress for user:', user.id)
+			fetch(`https://api-night-watcher.vercel.app/progress/${user.id}`, {
+				credentials: 'include',
+			})
+				.then(response => response.json())
+				.then(data => {
+					console.log('Progress data received:', data)
+					if (data.success) {
+						const progress = {}
+						data.progress.forEach(level => {
+							progress[level.levelId] = {
+								stars: level.stars,
+								score: level.score,
+							}
+						})
+						console.log('Processed progress:', progress)
+						setLevelsProgress(progress)
+					}
+				})
+				.catch(error => console.error('Error fetching progress:', error))
+		}
+	}, [user])
 
 	function handleBack() {
 		setStartAnimation(true)
@@ -60,6 +86,11 @@ function LevelsPage() {
 						onClick={() => handleLevelSelect(level)}
 					>
 						{level.name}
+						{levelsProgress[level.id] && (
+							<div className='level-progress'>
+								<StarsProgress stars={levelsProgress[level.id].stars} />
+							</div>
+						)}
 					</button>
 				))}
 			</div>
@@ -78,6 +109,17 @@ function LevelsPage() {
 							className='level-screenshot'
 						/>
 						<p>{selectedLevel.description}</p>
+						{levelsProgress[selectedLevel.id] && (
+							<div className='level-details'>
+								<StarsProgress
+									stars={levelsProgress[selectedLevel.id].stars}
+									large
+								/>
+								<p className='best-score'>
+									Лучший результат: {levelsProgress[selectedLevel.id].score}
+								</p>
+							</div>
+						)}
 						<button
 							className='play-button'
 							onClick={() => navigate(`/game?level=${selectedLevel.id}`)}

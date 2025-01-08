@@ -1,133 +1,150 @@
 .LevelsPage {
-  background-color: #0d0d0d; /* Темный фон */
-  color: #f1f1f1; /* Белый текст */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  overflow: hidden;
+	background-color: #0d0d0d; /* Темный фон */
+	color: #f1f1f1; /* Белый текст */
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	overflow: hidden;
 
-  .title {
-    font-family: 'Roboto', sans-serif;
-    font-size: 3rem;
-    text-align: center;
-    margin-bottom: 40px;
-    color: #f9b700; /* Желтый неоновый цвет */
-    text-shadow: 0 0 10px #f9b700, 0 0 20px #f9b700;
-    transition: transform 1s, opacity 1s;
-  }
+	.title {
+		font-family: 'Roboto', sans-serif;
+		font-size: 3rem;
+		text-align: center;
+		margin-bottom: 40px;
+		color: #f9b700; /* Желтый неоновый цвет */
+		text-shadow: 0 0 10px #f9b700, 0 0 20px #f9b700;
+		transition: transform 1s, opacity 1s;
+	}
 
-  .levels-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 40px;
-  }
+	.levels-container {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 20px;
+		margin-bottom: 40px;
+	}
 
-  .level-button {
-    z-index: 10;
-    background-color: #262626; /* Темно-серый */
-    border: 2px solid #f9b700; /* Желтая рамка */
-    color: #f9b700;
-    font-size: 1.2rem;
-    padding: 15px 30px;
-    border-radius: 10px;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: transform 0.3s, box-shadow 0.3s;
-  }
+	.level-button {
+		z-index: 10;
+		background-color: #262626; /* Темно-серый */
+		border: 2px solid #f9b700; /* Желтая рамка */
+		color: #f9b700;
+		font-size: 1.2rem;
+		padding: 15px 30px;
+		border-radius: 10px;
+		cursor: pointer;
+		text-transform: uppercase;
+		transition: transform 0.3s, box-shadow 0.3s;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		min-width: 200px;
+	}
 
-  .level-button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 15px #f9b700;
-  }
+	.level-button:hover {
+		transform: scale(1.1);
+		box-shadow: 0 0 15px #f9b700;
+	}
 
-  .level-button:active {
-    transform: scale(0.95);
-  }
+	.level-button:active {
+		transform: scale(0.95);
+	}
 
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
+	.modal {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.8);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 1000;
+	}
 
-  .modal-content {
-    background: #1c1c1c;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    color: #f1f1f1;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-    max-width: 500px;
-    width: 90%;
-  }
+	.modal-content {
+		background: #1c1c1c;
+		padding: 20px;
+		border-radius: 10px;
+		text-align: center;
+		color: #f1f1f1;
+		box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+		max-width: 500px;
+		width: 90%;
+	}
 
-  .level-screenshot {
-    width: 100%;
-    border-radius: 10px;
-    margin: 20px 0;
-  }
+	.level-screenshot {
+		width: 100%;
+		border-radius: 10px;
+		margin: 20px 0;
+	}
 
-  .play-button,
-  .close-button {
-    background: #f9b700;
-    color: #0d0d0d;
-    padding: 10px 20px;
-    margin: 10px;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: transform 0.3s;
-  }
+	.play-button,
+	.close-button {
+		background: #f9b700;
+		color: #0d0d0d;
+		padding: 10px 20px;
+		margin: 10px;
+		border: none;
+		border-radius: 5px;
+		font-size: 1rem;
+		cursor: pointer;
+		transition: transform 0.3s;
+	}
 
-  .play-button:hover,
-  .close-button:hover {
-    transform: scale(1.1);
-  }
+	.play-button:hover,
+	.close-button:hover {
+		transform: scale(1.1);
+	}
 
-  .play-button:active,
-  .close-button:active {
-    transform: scale(0.95);
-  }
+	.play-button:active,
+	.close-button:active {
+		transform: scale(0.95);
+	}
 
-  .back-button {
-    z-index: 10;
-    background-color: #f9b700;
-    border: none;
-    padding: 15px 30px;
-    font-size: 1.2rem;
-    cursor: pointer;
-    border-radius: 5px;
-    color: #0d0d0d;
-    transition: transform 0.3s, box-shadow 0.3s;
-  }
+	.back-button {
+		z-index: 10;
+		background-color: #f9b700;
+		border: none;
+		padding: 15px 30px;
+		font-size: 1.2rem;
+		cursor: pointer;
+		border-radius: 5px;
+		color: #0d0d0d;
+		transition: transform 0.3s, box-shadow 0.3s;
+	}
 
-  .back-button:hover {
-    box-shadow: 0 0 15px #f9b700;
-    transform: scale(1.05);
-  }
+	.back-button:hover {
+		box-shadow: 0 0 15px #f9b700;
+		transform: scale(1.05);
+	}
 
-  .back-button:active {
-    transform: scale(0.95);
-  }
+	.back-button:active {
+		transform: scale(0.95);
+	}
 
-  &.animate {
-    .title,
-    .levels-container,
-    .back-button {
-      transform: translateY(-100%);
-      opacity: 0;
-    }
-  }
+	.level-details {
+		background: rgba(0, 0, 0, 0.2);
+		padding: 15px;
+		border-radius: 8px;
+		margin: 15px 0;
+
+		.best-score {
+			color: #f9b700;
+			font-size: 1.2em;
+			margin: 10px 0 0;
+		}
+	}
+
+	&.animate {
+		.title,
+		.levels-container,
+		.back-button {
+			transform: translateY(-100%);
+			opacity: 0;
+		}
+	}
 }
