@@ -132,22 +132,21 @@ function LevelsPage() {
 							className='level-screenshot'
 						/>
 						<p>{selectedLevel.description}</p>
-
 						<LevelStarsModal level={selectedLevel.id} isPreview={true} />
-
 						<p className='best-score'>
 							Лучший результат: {levelsProgress[selectedLevel.id]?.score || 0}
 						</p>
-
-						<button
-							className='play-button'
-							onClick={() => navigate(`/game?level=${selectedLevel.id}`)}
-						>
-							Играть
-						</button>
-						<button className='close-button' onClick={closeModal}>
-							Закрыть
-						</button>
+						<div className='buttons-container'>
+							<button
+								className='play-button'
+								onClick={() => navigate(`/game?level=${selectedLevel.id}`)}
+							>
+								Играть
+							</button>
+							<button className='close-button' onClick={closeModal}>
+								Закрыть
+							</button>
+						</div>
 					</div>
 				</div>
 			)}
