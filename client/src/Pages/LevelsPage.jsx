@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import '../Sass/LevelsPage.scss'
 import Background from '../Components/Background'
+import { ReactComponent as StarIcon } from '../Assets/Icons/Star.svg'
 import LevelStarsModal from '../Components/LevelStarsModal'
 
 import level1Screenshot from '../Assets/ScreenShots/level1.jpg'
@@ -100,9 +101,18 @@ function LevelsPage() {
 						className='level-button'
 						onClick={() => handleLevelSelect(level)}
 					>
-						{level.name}
-						<div className='level-progress'>
-							<LevelStarsModal level={level.id} isPreview={true} />
+						<span className='level-name'>{level.name}</span>
+						<div className='level-stars'>
+							{[1, 2, 3].map(star => (
+								<StarIcon
+									key={star}
+									className={`star-icon ${
+										(levelsProgress[level.id]?.stars || 0) >= star
+											? 'filled'
+											: ''
+									}`}
+								/>
+							))}
 						</div>
 					</button>
 				))}

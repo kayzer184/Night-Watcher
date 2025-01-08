@@ -28,10 +28,9 @@
 
 	.level-button {
 		z-index: 10;
-		background-color: #262626; /* Темно-серый */
-		border: 2px solid #f9b700; /* Желтая рамка */
+		background-color: #262626;
+		border: 2px solid #f9b700;
 		color: #f9b700;
-		font-size: 1.2rem;
 		padding: 15px 30px;
 		border-radius: 10px;
 		cursor: pointer;
@@ -41,15 +40,36 @@
 		flex-direction: column;
 		align-items: center;
 		min-width: 200px;
-	}
+		gap: 10px;
 
-	.level-button:hover {
-		transform: scale(1.1);
-		box-shadow: 0 0 15px #f9b700;
-	}
+		.level-name {
+			font-size: 1.2rem;
+		}
 
-	.level-button:active {
-		transform: scale(0.95);
+		.level-stars {
+			display: flex;
+			gap: 5px;
+
+			.star-icon {
+				width: 20px;
+				height: 20px;
+				fill: #666;
+				transition: fill 0.3s;
+
+				&.filled {
+					fill: #f9b700;
+				}
+			}
+		}
+
+		&:hover {
+			transform: scale(1.1);
+			box-shadow: 0 0 15px #f9b700;
+		}
+
+		&:active {
+			transform: scale(0.95);
+		}
 	}
 
 	.modal {
@@ -72,7 +92,7 @@
 		text-align: center;
 		color: #f1f1f1;
 		box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-		max-width: 600px;
+		max-width: 400px;
 		width: 90%;
 		max-height: 90vh;
 		overflow-y: auto;
@@ -99,6 +119,29 @@
 			margin: 10px;
 			padding: 12px 25px;
 			font-size: 1.1em;
+		}
+
+		.stars-container {
+			padding: 15px;
+
+			h3 {
+				font-size: 1.1em;
+				margin-bottom: 10px;
+			}
+
+			.star-condition {
+				margin: 8px 0;
+				padding: 6px;
+
+				.star-icon {
+					width: 20px;
+					height: 20px;
+				}
+
+				.condition-description {
+					font-size: 13px;
+				}
+			}
 		}
 	}
 
