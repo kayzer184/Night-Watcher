@@ -4,7 +4,7 @@
 	padding: 20px 25px;
 	width: 100%;
 	border: 1px solid #f9b700;
-	margin: 25px 0;
+	margin: 35px 0;
 
 	.achievements-list {
 		display: flex;
@@ -61,20 +61,18 @@
 @media (max-width: 480px) {
 	.modal-stars-container {
 		padding: 15px 20px;
-		margin: 20px 0;
+		margin: 35px 0;
+	}
 
-		.achievement-item {
-			padding: 8px;
-		}
+	.modal-content {
+		.buttons-container {
+			flex-direction: row !important;
+			gap: 10px;
 
-		.achievement-star {
-			width: 20px;
-			height: 20px;
-			margin-right: 12px;
-		}
-
-		.achievement-text {
-			font-size: 14px;
+			button {
+				flex: 1;
+				min-width: 120px;
+			}
 		}
 	}
 }
