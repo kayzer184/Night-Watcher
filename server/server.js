@@ -12,9 +12,18 @@ const app = express()
 app.use(
 	cors({
 		origin: ['https://night-watcher.vercel.app'],
-		methods: ['GET', 'POST', 'OPTIONS'],
-		allowedHeaders: ['Content-Type', 'Authorization'],
+		methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+		allowedHeaders: [
+			'Content-Type',
+			'Authorization',
+			'X-Requested-With',
+			'Accept',
+			'Origin',
+			'Access-Control-Allow-Headers',
+		],
 		credentials: true,
+		preflightContinue: true,
+		optionsSuccessStatus: 204,
 	})
 )
 
