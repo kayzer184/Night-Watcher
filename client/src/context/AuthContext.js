@@ -73,7 +73,6 @@ export const AuthProvider = ({ children }) => {
 					setUser(null)
 					localStorage.removeItem('user')
 
-					// Добавляем уведомление об ошибке
 					const event = new CustomEvent('showNotification', {
 						detail: {
 							type: 'error',
