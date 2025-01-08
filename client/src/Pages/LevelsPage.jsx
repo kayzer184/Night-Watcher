@@ -129,7 +129,11 @@ function LevelsPage() {
 							className='level-screenshot'
 						/>
 						<p>{selectedLevel.description}</p>
-						<LevelStarsModal level={selectedLevel.id} isPreview={true} />
+						<LevelStarsModal
+							level={selectedLevel.id}
+							user={user}
+							isPreview={true}
+						/>
 						<div className='buttons-container'>
 							<button
 								className='play-button'
