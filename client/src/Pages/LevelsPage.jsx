@@ -38,16 +38,24 @@ function LevelsPage() {
 	const navigate = useNavigate()
 
 	useEffect(() => {
+		const initialProgress = {}
+		levelData.forEach(level => {
+			initialProgress[level.id] = {
+				stars: 0,
+				score: 0,
+			}
+		})
+
 		if (user) {
 			console.log('Fetching progress for user:', user.id)
-			fetch(`https://api-night-watcher.vercel.app/getUser/${user.id}`, {
+			fetch(`https://api-night-watcher.vercel.app/progress/${user.id}`, {
 				credentials: 'include',
 			})
 				.then(response => response.json())
 				.then(data => {
 					console.log('Progress data received:', data)
 					if (data.success) {
-						const progress = {}
+						const progress = { ...initialProgress }
 						data.progress.forEach(level => {
 							progress[level.levelId] = {
 								stars: level.stars,
@@ -56,9 +64,16 @@ function LevelsPage() {
 						})
 						console.log('Processed progress:', progress)
 						setLevelsProgress(progress)
+					} else {
+						setLevelsProgress(initialProgress)
 					}
 				})
-				.catch(error => console.error('Error fetching progress:', error))
+				.catch(error => {
+					console.error('Error fetching progress:', error)
+					setLevelsProgress(initialProgress)
+				})
+		} else {
+			setLevelsProgress(initialProgress)
 		}
 	}, [user])
 
@@ -86,11 +101,9 @@ function LevelsPage() {
 						onClick={() => handleLevelSelect(level)}
 					>
 						{level.name}
-						{levelsProgress[level.id] && (
-							<div className='level-progress'>
-								<StarsProgress stars={levelsProgress[level.id].stars} />
-							</div>
-						)}
+						<div className='level-progress'>
+							<StarsProgress stars={levelsProgress[level.id]?.stars || 0} />
+						</div>
 					</button>
 				))}
 			</div>
@@ -109,17 +122,15 @@ function LevelsPage() {
 							className='level-screenshot'
 						/>
 						<p>{selectedLevel.description}</p>
-						{levelsProgress[selectedLevel.id] && (
-							<div className='level-details'>
-								<StarsProgress
-									stars={levelsProgress[selectedLevel.id].stars}
-									large
-								/>
-								<p className='best-score'>
-									Лучший результат: {levelsProgress[selectedLevel.id].score}
-								</p>
-							</div>
-						)}
+						<div className='level-details'>
+							<StarsProgress
+								stars={levelsProgress[selectedLevel.id]?.stars || 0}
+								large
+							/>
+							<p className='best-score'>
+								Лучший результат: {levelsProgress[selectedLevel.id]?.score || 0}
+							</p>
+						</div>
 						<button
 							className='play-button'
 							onClick={() => navigate(`/game?level=${selectedLevel.id}`)}
