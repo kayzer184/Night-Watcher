@@ -1,0 +1,41 @@
+.stars-container {
+	padding: 20px;
+	border-radius: 10px;
+	background: rgba(0, 0, 0, 0.2);
+
+	h3 {
+		color: #f9b700;
+		margin-bottom: 15px;
+		text-align: center;
+	}
+
+	.star-condition {
+		display: flex;
+		align-items: center;
+		margin: 10px 0;
+		padding: 8px;
+		border-radius: 5px;
+		transition: background-color 0.3s;
+
+		&.completed {
+			background: rgba(249, 183, 0, 0.1);
+		}
+
+		.star-icon {
+			width: 24px;
+			height: 24px;
+			margin-right: 10px;
+			fill: #666;
+			transition: fill 0.3s;
+
+			&.filled {
+				fill: #f9b700;
+			}
+		}
+
+		.condition-description {
+			color: #fff;
+			font-size: 14px;
+		}
+	}
+}

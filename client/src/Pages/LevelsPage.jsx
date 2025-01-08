@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import '../Sass/LevelsPage.scss'
 import Background from '../Components/Background'
-import StarsProgress from '../Components/StarsProgress'
+import LevelStarsModal from '../Components/LevelStarsModal'
 
 import level1Screenshot from '../Assets/ScreenShots/level1.jpg'
 import level2Screenshot from '../Assets/ScreenShots/level2.jpg'
@@ -102,7 +102,7 @@ function LevelsPage() {
 					>
 						{level.name}
 						<div className='level-progress'>
-							<StarsProgress stars={levelsProgress[level.id]?.stars || 0} />
+							<LevelStarsModal level={level.id} isPreview={true} />
 						</div>
 					</button>
 				))}
@@ -122,15 +122,13 @@ function LevelsPage() {
 							className='level-screenshot'
 						/>
 						<p>{selectedLevel.description}</p>
-						<div className='level-details'>
-							<StarsProgress
-								stars={levelsProgress[selectedLevel.id]?.stars || 0}
-								large
-							/>
-							<p className='best-score'>
-								Лучший результат: {levelsProgress[selectedLevel.id]?.score || 0}
-							</p>
-						</div>
+
+						<LevelStarsModal level={selectedLevel.id} isPreview={true} />
+
+						<p className='best-score'>
+							Лучший результат: {levelsProgress[selectedLevel.id]?.score || 0}
+						</p>
+
 						<button
 							className='play-button'
 							onClick={() => navigate(`/game?level=${selectedLevel.id}`)}

@@ -67,13 +67,39 @@
 
 	.modal-content {
 		background: #1c1c1c;
-		padding: 20px;
-		border-radius: 10px;
+		padding: 30px;
+		border-radius: 15px;
 		text-align: center;
 		color: #f1f1f1;
 		box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-		max-width: 500px;
+		max-width: 600px;
 		width: 90%;
+		max-height: 90vh;
+		overflow-y: auto;
+
+		h2 {
+			color: #f9b700;
+			margin-bottom: 20px;
+		}
+
+		.level-screenshot {
+			width: 100%;
+			border-radius: 10px;
+			margin: 20px 0;
+		}
+
+		.best-score {
+			color: #f9b700;
+			font-size: 1.2em;
+			margin: 20px 0;
+		}
+
+		.play-button,
+		.close-button {
+			margin: 10px;
+			padding: 12px 25px;
+			font-size: 1.1em;
+		}
 	}
 
 	.level-screenshot {
