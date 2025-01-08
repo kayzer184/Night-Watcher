@@ -48,7 +48,6 @@ function LevelsPage() {
 		})
 
 		if (user) {
-			console.log('Fetching progress for user:', user.id)
 			fetch(`https://api-night-watcher.vercel.app/getUser/${user.id}`, {
 				credentials: 'include',
 			})
