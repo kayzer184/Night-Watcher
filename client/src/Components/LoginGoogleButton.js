@@ -1,11 +1,24 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { GoogleLogin } from '@react-oauth/google'
+import '../Sass/LoginGoogleButton.scss'
 
 const LoginGoogleButton = () => {
 	const navigate = useNavigate()
 	const { login } = useAuth()
+	const [notifications, setNotifications] = useState([])
+
+	useEffect(() => {
+		console.log('Current notifications:', notifications)
+	}, [notifications])
+
+	const addNotification = notification => {
+		setNotifications(prev => [...prev, notification])
+		setTimeout(() => {
+			setNotifications(prev => prev.filter(n => n.id !== notification.id))
+		}, 3000)
+	}
 
 	const onSuccess = async response => {
 		try {
@@ -23,13 +36,23 @@ const LoginGoogleButton = () => {
 			const data = await result.json()
 
 			if (data.success) {
-				// Используем функцию login из контекста
+				console.log('Google login success')
 				login(data.user)
 			} else {
 				console.error('Auth error:', data.message)
+				addNotification({
+					id: Date.now(),
+					type: 'error',
+					message: data.message || 'Ошибка авторизации',
+				})
 			}
 		} catch (error) {
 			console.error('Auth error:', error)
+			addNotification({
+				id: Date.now(),
+				type: 'error',
+				message: 'Ошибка при авторизации',
+			})
 		}
 	}
 
@@ -39,8 +62,23 @@ const LoginGoogleButton = () => {
 				onSuccess={onSuccess}
 				onError={() => {
 					console.log('Login Failed')
+					addNotification({
+						id: Date.now(),
+						type: 'error',
+						message: 'Ошибка входа через Google',
+					})
 				}}
 			/>
+			<div className='notifications'>
+				{notifications.map(notification => (
+					<div
+						key={notification.id}
+						className={`notification ${notification.type}`}
+					>
+						{notification.message}
+					</div>
+				))}
+			</div>
 		</div>
 	)
 }
