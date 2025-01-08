@@ -6,7 +6,7 @@ import '../Sass/LoginGoogleButton.scss'
 
 const LoginGoogleButton = () => {
 	const navigate = useNavigate()
-	const { login } = useAuth()
+	const { setUser } = useAuth()
 	const [notifications, setNotifications] = useState([])
 
 	useEffect(() => {
@@ -16,7 +16,9 @@ const LoginGoogleButton = () => {
 	const addNotification = notification => {
 		setNotifications(prev => [...prev, notification])
 		setTimeout(() => {
-			setNotifications(prev => prev.filter(n => n.id !== notification.id))
+			setNotifications(prev =>
+				prev.filter(n => n.id !== notification.id)
+			)
 		}, 3000)
 	}
 
@@ -37,8 +39,7 @@ const LoginGoogleButton = () => {
 
 			if (data.success) {
 				console.log('Google login success')
-				login(data.user)
-				navigate('/levels')
+				setUser(data.user)
 			} else {
 				console.error('Auth error:', data.message)
 				addNotification({
