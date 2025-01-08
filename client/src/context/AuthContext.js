@@ -3,35 +3,10 @@ import React, { createContext, useState, useContext, useEffect } from 'react'
 const AuthContext = createContext(null)
 
 export const AuthProvider = ({ children }) => {
-	const [user, setUser] = useState(null)
-	const [loading, setLoading] = useState(true)
-
-	useEffect(() => {
-		const fetchUserData = async userId => {
-			try {
-				const response = await fetch(
-					`https://api-night-watcher.vercel.app/getUser/${userId}`
-				)
-				const data = await response.json()
-				if (data.success) {
-					setUser(data.user)
-				}
-			} catch (error) {
-				console.error('Error fetching user data:', error)
-			} finally {
-				setLoading(false)
-			}
-		}
-
-		// Проверяем localStorage при загрузке
+	const [user, setUser] = useState(() => {
 		const savedUser = localStorage.getItem('user')
-		if (savedUser) {
-			const userData = JSON.parse(savedUser)
-			fetchUserData(userData.id)
-		} else {
-			setLoading(false)
-		}
-	}, [])
+		return savedUser ? JSON.parse(savedUser) : null
+	})
 
 	// Проверка валидности пользователя при загрузке и после изменения user
 	useEffect(() => {
@@ -73,6 +48,7 @@ export const AuthProvider = ({ children }) => {
 					setUser(null)
 					localStorage.removeItem('user')
 
+					// Добавляем уведомление об ошибке
 					const event = new CustomEvent('showNotification', {
 						detail: {
 							type: 'error',
@@ -84,6 +60,8 @@ export const AuthProvider = ({ children }) => {
 			}
 		}
 
+		validateUser()
+	}, [user?.id]) // Зависимость от user.id, чтобы не создавать бесконечный цикл
 		// Добавляем задержку при первой валидации
 		const timer = setTimeout(() => {
 			validateUser()
