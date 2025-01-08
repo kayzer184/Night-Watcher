@@ -15,15 +15,17 @@ router.post('/', async (req, res) => {
 			})
 		}
 
-		// Инициализируем достижения уровня, если их нет
+		// Инициализируем achievements если его нет
 		if (!user.achievements) {
 			user.achievements = {}
 		}
+
+		// Инициализируем уровень если его нет
 		if (!user.achievements[levelId]) {
 			user.achievements[levelId] = {}
 		}
 
-		// Подсчитываем количество true в текущих и новых достижениях
+		// Подсчитываем количество true
 		const currentTrueCount = Object.values(user.achievements[levelId]).filter(
 			v => v === true
 		).length
@@ -31,11 +33,15 @@ router.post('/', async (req, res) => {
 			v => v === true
 		).length
 
-		// Обновляем только если новых true больше
+		console.log('Current true:', currentTrueCount, 'New true:', newTrueCount)
+
 		if (newTrueCount > currentTrueCount) {
+			// Используем markModified чтобы сообщить Mongoose об изменении вложенного объекта
 			user.achievements[levelId] = achievements
+			user.markModified('achievements')
 			await user.save()
-			console.log('Saved new achievements:', user.achievements)
+
+			console.log('Saved achievements:', user.achievements)
 
 			res.json({
 				success: true,
