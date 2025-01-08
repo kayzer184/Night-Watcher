@@ -100,6 +100,7 @@
 		h2 {
 			color: #f9b700;
 			margin-bottom: 20px;
+			font-size: 24px;
 		}
 
 		.level-screenshot {
@@ -108,39 +109,25 @@
 			margin: 20px 0;
 		}
 
-		.best-score {
-			color: #f9b700;
-			font-size: 1.2em;
-			margin: 20px 0;
+		p {
+			color: #fff;
+			margin: 15px 0;
 		}
 
 		.play-button,
 		.close-button {
+			background: #f9b700;
+			color: #1c1c1c;
+			border: none;
+			padding: 10px 20px;
+			border-radius: 5px;
 			margin: 10px;
-			padding: 12px 25px;
-			font-size: 1.1em;
-		}
+			cursor: pointer;
+			font-size: 16px;
+			transition: transform 0.3s;
 
-		.stars-container {
-			padding: 15px;
-
-			h3 {
-				font-size: 1.1em;
-				margin-bottom: 10px;
-			}
-
-			.star-condition {
-				margin: 8px 0;
-				padding: 6px;
-
-				.star-icon {
-					width: 20px;
-					height: 20px;
-				}
-
-				.condition-description {
-					font-size: 13px;
-				}
+			&:hover {
+				transform: scale(1.05);
 			}
 		}
 	}

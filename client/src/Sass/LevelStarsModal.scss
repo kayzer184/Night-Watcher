@@ -1,41 +1,58 @@
-.stars-container {
-	padding: 20px;
-	border-radius: 10px;
-	background: rgba(0, 0, 0, 0.2);
+.modal-stars-container {
+	background: #1a1a1a;
+	border-radius: 8px;
+	padding: 15px;
+	width: 100%;
+	border: 1px solid #f9b700;
 
-	h3 {
-		color: #f9b700;
-		margin-bottom: 15px;
-		text-align: center;
+	.achievements-list {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
 	}
 
-	.star-condition {
+	.achievement-item {
 		display: flex;
 		align-items: center;
-		margin: 10px 0;
 		padding: 8px;
-		border-radius: 5px;
+		border-radius: 4px;
+		background: transparent;
 		transition: background-color 0.3s;
 
 		&.completed {
 			background: rgba(249, 183, 0, 0.1);
 		}
+	}
 
-		.star-icon {
-			width: 24px;
-			height: 24px;
-			margin-right: 10px;
-			fill: #666;
-			transition: fill 0.3s;
+	.achievement-star {
+		width: 20px;
+		height: 20px;
+		margin-right: 10px;
+		fill: #666;
 
-			&.filled {
-				fill: #f9b700;
-			}
+		&.filled {
+			fill: #f9b700;
 		}
+	}
 
-		.condition-description {
-			color: #fff;
-			font-size: 14px;
+	.achievement-text {
+		color: #fff;
+		font-size: 14px;
+	}
+}
+
+// Стили для превью звезд на кнопках уровней
+.level-stars {
+	display: flex;
+	gap: 5px;
+
+	.star-icon {
+		width: 20px;
+		height: 20px;
+		fill: #666;
+
+		&.filled {
+			fill: #f9b700;
 		}
 	}
 }
