@@ -11,28 +11,31 @@ const LevelStarsModal = ({
 }) => {
 	return (
 		<div className='modal-stars-container'>
-			<div className='achievements-list'>
-				{Object.values(LEVELS_CONFIG[level].starConditions).map(condition => (
-					<div
-						key={condition.id}
-						className={`achievement-item ${
-							(!isPreview && gameStats && condition.check(gameStats)) ||
-							achievements.includes(condition.id)
-								? 'completed'
-								: ''
-						}`}
-					>
-						<StarIcon
-							className={`achievement-star ${
+			<div className='achievements-section'>
+				<h3>Достижения уровня</h3>
+				<div className='achievements-list'>
+					{Object.values(LEVELS_CONFIG[level].starConditions).map(condition => (
+						<div
+							key={condition.id}
+							className={`achievement-item ${
 								(!isPreview && gameStats && condition.check(gameStats)) ||
 								achievements.includes(condition.id)
-									? 'filled'
+									? 'completed'
 									: ''
 							}`}
-						/>
-						<span className='achievement-text'>{condition.description}</span>
-					</div>
-				))}
+						>
+							<StarIcon
+								className={`achievement-star ${
+									(!isPreview && gameStats && condition.check(gameStats)) ||
+									achievements.includes(condition.id)
+										? 'filled'
+										: ''
+								}`}
+							/>
+							<span className='achievement-text'>{condition.description}</span>
+						</div>
+					))}
+				</div>
 			</div>
 		</div>
 	)
