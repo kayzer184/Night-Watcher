@@ -9,7 +9,7 @@ const LoginGoogleButton = () => {
 	const [inputValue, setInputValue] = useState('')
 	const [accessToken, setAccessToken] = useState('')
 	const [notifications, setNotifications] = useState([])
-	const { setUser } = useAuth()
+	const { login } = useAuth()
 
 	const addNotification = (type, message) => {
 		const id = Date.now()
@@ -76,8 +76,7 @@ const LoginGoogleButton = () => {
 
 			const data = await response.json()
 			if (data.user) {
-				setUser(data.user)
-				localStorage.setItem('user', JSON.stringify(data.user))
+				login(data.user)
 				addNotification('success', 'Успешный вход!')
 			} else {
 				addNotification('error', 'Ошибка при входе')
@@ -110,7 +109,7 @@ const LoginGoogleButton = () => {
 			.then(data => {
 				console.log('Registration response:', data)
 				if (data.user) {
-					setUser(data.user)
+					login(data.user)
 					localStorage.setItem('user', JSON.stringify(data.user))
 					setShowModal(false)
 					addNotification('success', 'Регистрация успешно завершена!')
