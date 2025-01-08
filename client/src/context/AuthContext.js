@@ -3,12 +3,52 @@ import React, { createContext, useState, useContext, useEffect } from 'react'
 const AuthContext = createContext(null)
 
 export const AuthProvider = ({ children }) => {
-	const [user, setUser] = useState(() => {
-		const savedUser = localStorage.getItem('user')
-		return savedUser ? JSON.parse(savedUser) : null
-	})
+	const [user, setUser] = useState(null)
+	const [loading, setLoading] = useState(true)
 
-	// Проверка валидности пользователя при загрузке и после изменения user
+	useEffect(() => {
+		// Проверяем localStorage при загрузке
+		const savedUser = localStorage.getItem('user')
+		if (savedUser) {
+			// Сразу устанавливаем сохраненные данные
+			setUser(JSON.parse(savedUser))
+
+			// Затем обновляем их с сервера
+			const userData = JSON.parse(savedUser)
+			fetchUserData(userData.id)
+		} else {
+			setLoading(false)
+		}
+	}, [])
+
+	const fetchUserData = async userId => {
+		try {
+			const response = await fetch(
+				`https://api-night-watcher.vercel.app/getUser/${userId}`
+			)
+			const data = await response.json()
+			if (data.success) {
+				setUser(data.user)
+				localStorage.setItem('user', JSON.stringify(data.user))
+			}
+		} catch (error) {
+			console.error('Error fetching user data:', error)
+		} finally {
+			setLoading(false)
+		}
+	}
+
+	const login = userData => {
+		setUser(userData)
+		localStorage.setItem('user', JSON.stringify(userData))
+	}
+
+	const logout = () => {
+		setUser(null)
+		localStorage.removeItem('user')
+	}
+
+	// Валидация пользователя
 	useEffect(() => {
 		const validateUser = async () => {
 			if (user) {
@@ -27,14 +67,8 @@ export const AuthProvider = ({ children }) => {
 						}
 					)
 
-					const data = await response.json()
-
 					if (!response.ok) {
-						console.log('Сессия недействительна')
-						setUser(null)
-						localStorage.removeItem('user')
-
-						// Добавляем уведомление через window.dispatchEvent
+						logout()
 						const event = new CustomEvent('showNotification', {
 							detail: {
 								type: 'error',
@@ -45,10 +79,7 @@ export const AuthProvider = ({ children }) => {
 					}
 				} catch (error) {
 					console.error('Ошибка валидации:', error)
-					setUser(null)
-					localStorage.removeItem('user')
-
-					// Добавляем уведомление об ошибке
+					logout()
 					const event = new CustomEvent('showNotification', {
 						detail: {
 							type: 'error',
@@ -60,27 +91,15 @@ export const AuthProvider = ({ children }) => {
 			}
 		}
 
-		validateUser()
-	}, [user?.id]) // Зависимость от user.id, чтобы не создавать бесконечный цикл
-		// Добавляем задержку при первой валидации
 		const timer = setTimeout(() => {
 			validateUser()
-		}, 1000) // Задержка в 1 секунду
+		}, 1000)
 
 		return () => clearTimeout(timer)
-	}, [user?.id]) // Зависимость от user.id
-
-	// Сохранение пользователя в localStorage
-	useEffect(() => {
-		if (user) {
-			localStorage.setItem('user', JSON.stringify(user))
-		} else {
-			localStorage.removeItem('user')
-		}
-	}, [user])
+	}, [user?.id])
 
 	return (
-		<AuthContext.Provider value={{ user, setUser }}>
+		<AuthContext.Provider value={{ user, login, logout, loading }}>
 			{children}
 		</AuthContext.Provider>
 	)
