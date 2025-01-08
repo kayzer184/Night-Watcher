@@ -93,10 +93,8 @@ function LevelsPage() {
 			}
 		}
 
-		if (selectedLevel) {
-			fetchUserData()
-		}
-	}, [selectedLevel, user?.id])
+		fetchUserData()
+	}, [user?.id])
 
 	function handleBack() {
 		setStartAnimation(true)
@@ -127,9 +125,7 @@ function LevelsPage() {
 								<StarIcon
 									key={star}
 									className={`star-icon ${
-										(levelsProgress[level.id]?.stars || 0) >= star
-											? 'filled'
-											: ''
+										userData?.achievements?.[level.id]?.[star] ? 'filled' : ''
 									}`}
 								/>
 							))}

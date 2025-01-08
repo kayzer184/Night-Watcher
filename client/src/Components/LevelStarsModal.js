@@ -9,12 +9,8 @@ const LevelStarsModal = ({
 	gameStats = null,
 	user = {},
 }) => {
-	console.log('LevelStarsModal props:', { level, user })
-
 	const achievements = user?.achievements || {}
 	const levelAchievements = achievements[level.toString()] || {}
-
-	console.log('Achievements for level:', levelAchievements)
 
 	return (
 		<div className='modal-stars-container'>
@@ -24,7 +20,6 @@ const LevelStarsModal = ({
 					{Object.values(LEVELS_CONFIG[level].starConditions).map(
 						(condition, index) => {
 							const isCompleted = levelAchievements[(index + 1).toString()]
-							console.log(`Achievement ${index + 1}:`, isCompleted)
 
 							return (
 								<div
