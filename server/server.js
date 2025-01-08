@@ -5,6 +5,7 @@ const leaderboardRoutes = require('./routes/leaderboard')
 const authRouter = require('./routes/authRouter')
 const userExistRouter = require('./routes/userExist')
 const getUserRouter = require('./routes/getUser')
+const userUpdateRouter = require('./routes/userUpdateRouter')
 
 const app = express()
 
@@ -28,6 +29,7 @@ app.use('/auth', authRouter)
 app.use('/userExist', userExistRouter)
 app.use('/getLeaderBoard', leaderboardRoutes)
 app.use('/getUser', getUserRouter)
+app.use('/update', userUpdateRouter)
 
 // Подключение к MongoDB
 mongoose

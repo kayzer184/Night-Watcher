@@ -154,6 +154,54 @@ function Interface({
 		}, 300)
 	}
 
+	useEffect(() => {
+		// Когда isWin меняется и это победа
+		if (isWin === true) {
+			const sendAchievements = async () => {
+				if (!user?.id) return // Если пользователь не авторизован
+
+				// Собираем достижения уровня
+				const levelAchievements = {}
+				Object.values(LEVELS_CONFIG[level].starConditions).forEach(
+					condition => {
+						levelAchievements[condition.id] = condition.check({
+							isWin: isWin,
+							npcMood: NPCMood,
+							maxNpcMood: maxNpcMood,
+							energy: Energy,
+						})
+					}
+				)
+
+				try {
+					const response = await fetch(
+						'https://api-night-watcher.vercel.app/update',
+						{
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify({
+								userId: user.id,
+								levelId: level,
+								achievements: levelAchievements,
+							}),
+						}
+					)
+
+					const data = await response.json()
+					if (!data.success) {
+						console.error('Ошибка сохранения прогресса:', data.message)
+					}
+				} catch (error) {
+					console.error('Ошибка отправки данных:', error)
+				}
+			}
+
+			sendAchievements()
+		}
+	}, [isWin, level, user?.id, NPCMood, maxNpcMood, Energy])
+
 	return (
 		<div className='Interface'>
 			{/* Mood Progress Bar */}
