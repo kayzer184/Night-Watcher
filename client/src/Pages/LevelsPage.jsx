@@ -36,7 +36,6 @@ function LevelsPage() {
 	const [startAnimation, setStartAnimation] = useState(false)
 	const [selectedLevel, setSelectedLevel] = useState(null)
 	const [levelsProgress, setLevelsProgress] = useState({})
-	const [userData, setUserData] = useState(null)
 	const navigate = useNavigate()
 
 	useEffect(() => {
@@ -76,26 +75,6 @@ function LevelsPage() {
 		}
 	}, [user])
 
-	useEffect(() => {
-		const fetchUserData = async () => {
-			if (user?.id) {
-				try {
-					const response = await fetch(
-						`https://api-night-watcher.vercel.app/getUser/${user.id}`
-					)
-					const data = await response.json()
-					if (data.success) {
-						setUserData(data.user)
-					}
-				} catch (error) {
-					console.error('Error fetching user data:', error)
-				}
-			}
-		}
-
-		fetchUserData()
-	}, [user?.id])
-
 	function handleBack() {
 		setStartAnimation(true)
 		setTimeout(() => navigate('/'), 1000)
@@ -125,7 +104,7 @@ function LevelsPage() {
 								<StarIcon
 									key={star}
 									className={`star-icon ${
-										userData?.achievements?.[level.id]?.[star] ? 'filled' : ''
+										user?.achievements?.[level.id]?.[star] ? 'filled' : ''
 									}`}
 								/>
 							))}
@@ -150,7 +129,7 @@ function LevelsPage() {
 						<p>{selectedLevel.description}</p>
 						<LevelStarsModal
 							level={selectedLevel.id}
-							user={userData}
+							user={user}
 							isPreview={true}
 						/>
 						<div className='buttons-container'>

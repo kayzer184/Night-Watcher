@@ -3,10 +3,35 @@ import React, { createContext, useState, useContext, useEffect } from 'react'
 const AuthContext = createContext(null)
 
 export const AuthProvider = ({ children }) => {
-	const [user, setUser] = useState(() => {
+	const [user, setUser] = useState(null)
+	const [loading, setLoading] = useState(true)
+
+	useEffect(() => {
+		const fetchUserData = async userId => {
+			try {
+				const response = await fetch(
+					`https://api-night-watcher.vercel.app/getUser/${userId}`
+				)
+				const data = await response.json()
+				if (data.success) {
+					setUser(data.user)
+				}
+			} catch (error) {
+				console.error('Error fetching user data:', error)
+			} finally {
+				setLoading(false)
+			}
+		}
+
+		// Проверяем localStorage при загрузке
 		const savedUser = localStorage.getItem('user')
-		return savedUser ? JSON.parse(savedUser) : null
-	})
+		if (savedUser) {
+			const userData = JSON.parse(savedUser)
+			fetchUserData(userData.id)
+		} else {
+			setLoading(false)
+		}
+	}, [])
 
 	// Проверка валидности пользователя при загрузке и после изменения user
 	useEffect(() => {
