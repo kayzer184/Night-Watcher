@@ -4,6 +4,18 @@ import { ReactComponent as StarIcon } from '../Assets/Icons/Star.svg'
 import '../Sass/LevelStarsModal.scss'
 
 const LevelStarsModal = ({ level, isPreview = false, gameStats = null }) => {
+	if (isPreview) {
+		// Упрощенное отображение для превью
+		return (
+			<div className='stars-preview'>
+				{[1, 2, 3].map(star => (
+					<StarIcon key={star} className='star-icon' />
+				))}
+			</div>
+		)
+	}
+
+	// Полное отображение для игрового интерфейса
 	return (
 		<div className='stars-container'>
 			<h3>Достижения уровня</h3>
@@ -11,16 +23,12 @@ const LevelStarsModal = ({ level, isPreview = false, gameStats = null }) => {
 				<div
 					key={condition.id}
 					className={`star-condition ${
-						!isPreview && gameStats && condition.check(gameStats)
-							? 'completed'
-							: ''
+						gameStats && condition.check(gameStats) ? 'completed' : ''
 					}`}
 				>
 					<StarIcon
 						className={`star-icon ${
-							!isPreview && gameStats && condition.check(gameStats)
-								? 'filled'
-								: ''
+							gameStats && condition.check(gameStats) ? 'filled' : ''
 						}`}
 					/>
 					<span className='condition-description'>{condition.description}</span>
