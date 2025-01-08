@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const User = require('../models/User')
-const LeaderboardRouter = require('./leaderboardRouter')
 
 router.post('/update', async (req, res) => {
     try {
