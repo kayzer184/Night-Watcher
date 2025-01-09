@@ -8,11 +8,13 @@ function MapLoader(
 	hitboxes,
 	collidableObjects,
 	scene,
-	level = 1
+	level = 1,
+	ambientLightIntensity,
+	onLoad
 ) {
 	const levelConfig = LEVELS_CONFIG[level]
 
-	const ambientLight = new THREE.AmbientLight(0xffffff, 0.05)
+	const ambientLight = new THREE.AmbientLight(0xffffff, ambientLightIntensity)
 	scene.add(ambientLight)
 
 	const MapModelLoader = new FBXLoader()
@@ -44,6 +46,14 @@ function MapLoader(
 		const [xR, yR, zR] = light.rotation
 		addStreetLight(lightObjects, hitboxes, scene, x, y, z, xR, yR, zR, level)
 	})
+
+	if (onLoad) {
+		onLoad({ ambientLight })
+	}
+
+	return {
+		ambientLight,
+	}
 }
 
 export default MapLoader

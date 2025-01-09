@@ -5,8 +5,7 @@ const User = require('../models/User')
 router.post('/', async (req, res) => {
 	try {
 		const { userId, levelId, achievements } = req.body
-		console.log('Received:', { userId, levelId, achievements })
-
+		
 		const user = await User.findById(userId)
 		if (!user) {
 			return res.status(404).json({
@@ -15,12 +14,10 @@ router.post('/', async (req, res) => {
 			})
 		}
 
-		// Инициализируем achievements если его нет
 		if (!user.achievements) {
 			user.achievements = {}
 		}
 
-		// Инициализируем уровень если его нет
 		if (!user.achievements[levelId]) {
 			user.achievements[levelId] = {}
 		}

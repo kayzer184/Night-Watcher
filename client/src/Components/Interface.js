@@ -34,6 +34,8 @@ function Interface({
 	isWin,
 	level,
 	maxNpcMood,
+	ambientLightIntensity,
+	setAmbientLightIntensity,
 }) {
 	const { user, setUser } = useAuth()
 	const [isModalVisible, setModalVisible] = useState(false)
@@ -238,6 +240,21 @@ function Interface({
 					/>
 					<div className='centered-label'>{`${Energy}%`}</div>
 				</div>
+			</div>
+
+			<div className='PB-range-slider-div'>
+				<input
+					type='range'
+					min='0'
+					max='1'
+					step='0.1'
+					value={ambientLightIntensity}
+					onChange={e => setAmbientLightIntensity(parseFloat(e.target.value))}
+					className='PB-range-slider'
+				/>
+				<span className='PB-range-slidervalue'>
+					{Math.round(ambientLightIntensity * 100)}%
+				</span>
 			</div>
 
 			{/* Timer */}

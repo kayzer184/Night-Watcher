@@ -114,7 +114,7 @@ export const LEVELS_CONFIG = {
 		npcSpeed: 0.4,
 		timeLimit: 75,
 		moodDecayRate: 0.003,
-		energyDecayRate: 1.2,
+		energyDecayRate: 1,
 		starConditions: {
 			PERFECT_MOOD: {
 				id: 'PERFECT_MOOD',

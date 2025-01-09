@@ -45,6 +45,7 @@ function Game() {
 	const isPausedRef = useRef(false)
 	const [isPaused, setIsPaused] = useState(false)
 	const lightObjects = useRef([])
+	const [abmientLightIntensity, setAbmientLightIntensity] = useState(0.05)
 	const lastEnergyUpdateRef = useRef(Date.now())
 	const lastUpdateRef = useRef(performance.now())
 	const UPDATES_PER_SECOND = 144
@@ -56,6 +57,7 @@ function Game() {
 	const [maxNpcMood, setMaxNpcMood] = useState(0)
 	const [isSystemPaused, setIsSystemPaused] = useState(null)
 	const { user } = useAuth()
+	const [ambientLight, setAmbientLight] = useState(null)
 
 	const sendGameResults = async (stars, score) => {
 		if (!user) return
@@ -181,7 +183,15 @@ function Game() {
 		controls.enableDamping = true
 		controls.dampingFactor = 0.25
 		controls.maxPolarAngle = Math.PI / 2
-		MapLoader(lightObjects.current, hitboxes, collidableObjects, scene, level)
+		MapLoader(
+			lightObjects.current,
+			hitboxes,
+			collidableObjects,
+			scene,
+			level,
+			abmientLightIntensity,
+			handleMapLoad
+		)
 		NPCLoader(
 			NPCObjects.current,
 			LEVELS_CONFIG[level].npcCount,
@@ -437,13 +447,24 @@ function Game() {
 		})
 		setIsWin(timeLeft === 0 && npcMood <= 100 && energy !== 0)
 	}
+	useEffect(() => {
+		console.log('Light intensity changed:', abmientLightIntensity)
+		if (ambientLight) {
+			console.log('Updating light intensity to:', abmientLightIntensity)
+			ambientLight.intensity = abmientLightIntensity
+		}
+	}, [abmientLightIntensity, ambientLight])
+	const handleMapLoad = mapLoader => {
+		console.log('Map loaded, ambient light:', mapLoader.ambientLight)
+		setAmbientLight(mapLoader.ambientLight)
+	}
 	return (
 		<div ref={mountRef}>
 			<div className='Interface-Box'>
 				<Interface
 					NPCObjects={NPCObjects}
 					NPCMood={Math.round(npcMood)}
-					setNPCMood={setNpcMood}
+					setNpcMood={setNpcMood}
 					Energy={energy}
 					setEnergy={setEnergy}
 					timeLeft={timeLeft}
@@ -458,6 +479,8 @@ function Game() {
 					isWin={isWin}
 					level={level}
 					maxNpcMood={maxNpcMood}
+					ambientLightIntensity={abmientLightIntensity}
+					setAmbientLightIntensity={setAbmientLightIntensity}
 				/>
 			</div>
 		</div>
