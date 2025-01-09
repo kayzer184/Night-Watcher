@@ -23,7 +23,7 @@ export const LEVELS_CONFIG = {
 				id: 'ENERGY_SAVE',
 				description: 'Сохраните более 25% энергии',
 				check: gameState => gameState.energy >= 25,
-			}
+			},
 		},
 		streetLights: [
 			{ position: [-223, 108, 55], rotation: [0, 0, 0] },
@@ -105,6 +105,8 @@ export const LEVELS_CONFIG = {
 				{ x: -680, z: 1280 },
 			],
 		],
+		music: '/audio/Music_1.mp3',
+		musicVolume: 0.5,
 	},
 	2: {
 		mapModel: '/Models/Map_2.fbx',
@@ -179,6 +181,8 @@ export const LEVELS_CONFIG = {
 				{ x: -64, z: -964 },
 			],
 		],
+		music: '/audio/level2-music.mp3',
+		musicVolume: 0.4,
 	},
 	3: {
 		mapModel: '/Models/Map_3.fbx',

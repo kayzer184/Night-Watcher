@@ -18,6 +18,8 @@ import Interface from './Interface'
 import { LEVELS_CONFIG } from '../Config/LevelsConfig'
 import { EVENTS_CONFIG } from '../Config/EventsConfig'
 import { useAuth } from '../context/AuthContext'
+import AudioManager from '../Utils/AudioManager'
+import { useSettings } from '../context/SettingsContext'
 
 function shuffle(array) {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -51,7 +53,6 @@ function Game() {
 	const isPausedRef = useRef(false)
 	const [isPaused, setIsPaused] = useState(false)
 	const lightObjects = useRef([])
-	const [abmientLightIntensity, setAbmientLightIntensity] = useState(0.05)
 	const lastEnergyUpdateRef = useRef(Date.now())
 	const lastUpdateRef = useRef(performance.now())
 	const UPDATES_PER_SECOND = 144
@@ -67,6 +68,9 @@ function Game() {
 	const selectedObjects = useRef([])
 	const composerRef = useRef(null)
 	const outlinePassRef = useRef(null)
+	const audioManager = useRef(null)
+	const audioInitialized = useRef(false)
+	const { volume, setVolume, brightness, setBrightness } = useSettings()
 
 	const sendGameResults = async (stars, score) => {
 		if (!user) return
@@ -225,7 +229,7 @@ function Game() {
 			collidableObjects,
 			scene,
 			level,
-			abmientLightIntensity,
+			brightness,
 			handleMapLoad
 		)
 		NPCLoader(
@@ -507,6 +511,12 @@ function Game() {
 			isPausedRef.current = !isPausedRef.current
 			setIsPaused(prevPause => !prevPause)
 
+			if (isPausedRef.current) {
+				audioManager.current.fadeOut()
+			} else {
+				audioManager.current.fadeIn()
+			}
+
 			if (!isPausedRef.current) {
 				lastUpdateRef.current = performance.now()
 			}
@@ -527,16 +537,59 @@ function Game() {
 	}
 
 	useEffect(() => {
-		console.log('Light intensity changed:', abmientLightIntensity)
+		console.log('Light intensity changed:', brightness)
 		if (ambientLight) {
-			console.log('Updating light intensity to:', abmientLightIntensity)
-			ambientLight.intensity = abmientLightIntensity
+			console.log('Updating light intensity to:', brightness)
+			ambientLight.intensity = brightness
 		}
-	}, [abmientLightIntensity, ambientLight])
+	}, [brightness, ambientLight])
 
 	const handleMapLoad = mapLoader => {
 		console.log('Map loaded, ambient light:', mapLoader.ambientLight)
 		setAmbientLight(mapLoader.ambientLight)
+	}
+
+	useEffect(() => {
+		if (!audioInitialized.current) {
+			audioManager.current = new AudioManager()
+
+			const initAudio = async () => {
+				try {
+					const musicPath = LEVELS_CONFIG[level].music
+					await audioManager.current.loadMusic(musicPath)
+					audioManager.current.play()
+					audioManager.current.setVolume(volume)
+					audioInitialized.current = true
+				} catch (error) {
+					console.error('Failed to initialize audio:', error)
+				}
+			}
+
+			initAudio()
+		}
+
+		return () => {
+			// Не останавливаем музыку при размонтировании
+			// audioManager.current?.stop();
+		}
+	}, [level]) // Убираем volume из зависимостей
+
+	useEffect(() => {
+		if (audioManager.current) {
+			audioManager.current.setVolume(volume)
+		}
+	}, [volume])
+
+	const handleVolumeChange = value => {
+		setVolume(value)
+		if (audioManager.current) {
+			audioManager.current.setVolume(value)
+		}
+	}
+
+	const handleBrightnessChange = value => {
+		setBrightness(value)
+		// ... логика изменения яркости ...
 	}
 
 	return (
@@ -560,8 +613,10 @@ function Game() {
 					isWin={isWin}
 					level={level}
 					maxNpcMood={maxNpcMood}
-					ambientLightIntensity={abmientLightIntensity}
-					setAmbientLightIntensity={setAbmientLightIntensity}
+					ambientLightIntensity={brightness}
+					onBrightnessChange={handleBrightnessChange}
+					onVolumeChange={handleVolumeChange}
+					currentVolume={volume}
 				/>
 			</div>
 		</div>

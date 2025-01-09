@@ -14,6 +14,7 @@ import SettingsPage from '../Pages/SettingsPage'
 import GamePage from '../Pages/GamePage'
 import NotFoundPage from '../Pages/NotFoundPage'
 import { AuthProvider, useAuth } from '../context/AuthContext'
+import { SettingsProvider } from '../context/SettingsContext'
 
 function AppRoutes() {
 	const { user, setUser } = useAuth()
@@ -54,9 +55,11 @@ function App() {
 	return (
 		<GoogleOAuthProvider clientId='208385145027-2rrf39t2f0f9fb0d03mrm2epjnlf1bgf.apps.googleusercontent.com'>
 			<AuthProvider>
-				<Router>
-					<AppRoutes />
-				</Router>
+				<SettingsProvider>
+					<Router>
+						<AppRoutes />
+					</Router>
+				</SettingsProvider>
 			</AuthProvider>
 		</GoogleOAuthProvider>
 	)
