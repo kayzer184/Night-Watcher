@@ -1,6 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js'
+import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js'
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
+import { FXAAShader } from 'three/addons/shaders/FXAAShader.js'
 import { useSearchParams } from 'react-router-dom'
 
 import ifvisible from 'ifvisible.js'
@@ -58,6 +64,9 @@ function Game() {
 	const [isSystemPaused, setIsSystemPaused] = useState(null)
 	const { user } = useAuth()
 	const [ambientLight, setAmbientLight] = useState(null)
+	const selectedObjects = useRef([])
+	const composerRef = useRef(null)
+	const outlinePassRef = useRef(null)
 
 	const sendGameResults = async (stars, score) => {
 		if (!user) return
@@ -183,6 +192,33 @@ function Game() {
 		controls.enableDamping = true
 		controls.dampingFactor = 0.25
 		controls.maxPolarAngle = Math.PI / 2
+
+		const composer = new EffectComposer(renderer)
+		const renderPass = new RenderPass(scene, camera)
+		composer.addPass(renderPass)
+
+		const outlinePass = new OutlinePass(
+			new THREE.Vector2(window.innerWidth, window.innerHeight),
+			scene,
+			camera
+		)
+		outlinePass.edgeStrength = 3.0
+		outlinePass.edgeGlow = 0.0
+		outlinePass.edgeThickness = 1.0
+		outlinePass.visibleEdgeColor.set('#ffffff')
+		outlinePass.hiddenEdgeColor.set('#190a05')
+		composer.addPass(outlinePass)
+
+		const outputPass = new OutputPass()
+		composer.addPass(outputPass)
+
+		const effectFXAA = new ShaderPass(FXAAShader)
+		effectFXAA.uniforms['resolution'].value.set(
+			1 / window.innerWidth,
+			1 / window.innerHeight
+		)
+		composer.addPass(effectFXAA)
+
 		MapLoader(
 			lightObjects.current,
 			hitboxes,
@@ -199,36 +235,69 @@ function Game() {
 			scene,
 			level
 		)
-		const onWindowResize = () => {
-			camera.aspect = window.innerWidth / window.innerHeight
-			camera.updateProjectionMatrix()
-			renderer.setSize(window.innerWidth, window.innerHeight)
-		}
+
 		const toggleLight = (light, index) => {
-			light.visible = !light.visible
+			if (energy > 0) {
+				light.visible = !light.visible
+			}
 		}
-		const onMouseClick = event => {
+
+		const onMouseMove = event => {
 			if (!isPausedRef.current) {
 				mouse.x = (event.clientX / window.innerWidth) * 2 - 1
 				mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
 				raycaster.setFromCamera(mouse, camera)
 				const intersects = raycaster.intersectObjects(scene.children, true)
+
 				if (intersects.length > 0) {
 					const intersection = intersects[0]
-					console.log(
-						`x: ${intersection.point.x}, y: ${intersection.point.y}, z: ${intersection.point.z}`
-					)
+					let foundHitbox = false
 					hitboxes.forEach(({ box }, index) => {
 						if (box.containsPoint(intersection.point)) {
-							const light = lightObjects.current[index].light
-							toggleLight(light, index)
+							outlinePass.selectedObjects = [lightObjects.current[index].model]
+							foundHitbox = true
 						}
 					})
+					if (!foundHitbox) {
+						outlinePass.selectedObjects = []
+					}
+				} else {
+					outlinePass.selectedObjects = []
 				}
 			}
 		}
-		window.addEventListener('click', onMouseClick, false)
+
+		const onWindowResize = () => {
+			camera.aspect = window.innerWidth / window.innerHeight
+			camera.updateProjectionMatrix()
+			renderer.setSize(window.innerWidth, window.innerHeight)
+		}
+
+		window.addEventListener('mousemove', onMouseMove, false)
+		window.addEventListener(
+			'click',
+			event => {
+				if (!isPausedRef.current) {
+					mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+					mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+					raycaster.setFromCamera(mouse, camera)
+					const intersects = raycaster.intersectObjects(scene.children, true)
+
+					if (intersects.length > 0) {
+						const intersection = intersects[0]
+						hitboxes.forEach(({ box }, index) => {
+							if (box.containsPoint(intersection.point)) {
+								const light = lightObjects.current[index].light
+								toggleLight(light, index)
+							}
+						})
+					}
+				}
+			},
+			false
+		)
 		window.addEventListener('resize', onWindowResize)
+
 		const moveNpc = () => {
 			NPCObjects.current.forEach(npcData => {
 				if (!npcData.path || !npcData.model) return
@@ -279,6 +348,7 @@ function Game() {
 				})
 			})
 		}
+
 		const updateEnergy = () => {
 			const currentTime = Date.now()
 			if (currentTime - lastEnergyUpdateRef.current >= 1000) {
@@ -294,6 +364,7 @@ function Game() {
 				)
 			}
 		}
+
 		const handleRandomEvents = () => {
 			const currentTime = Date.now()
 
@@ -363,6 +434,7 @@ function Game() {
 				}
 			})
 		}
+
 		const animate = () => {
 			const currentTime = performance.now()
 			const frameTime = currentTime - lastUpdateRef.current
@@ -390,14 +462,15 @@ function Game() {
 			}
 
 			controls.update()
-			renderer.render(scene, camera)
+			composer.render()
 			requestAnimationFrame(animate)
 		}
+
 		animate()
 
 		return () => {
 			window.removeEventListener('resize', onWindowResize)
-			window.removeEventListener('click', onMouseClick)
+			window.removeEventListener('mousemove', onMouseMove)
 
 			if (mountRef.current && mountRef.current.contains(renderer.domElement)) {
 				mountRef.current.removeChild(renderer.domElement)
@@ -407,6 +480,7 @@ function Game() {
 			scene.clear()
 		}
 	}, [level])
+
 	useEffect(() => {
 		if (!isPaused && timeLeft > 0) {
 			const timer = setInterval(() => {
@@ -415,6 +489,7 @@ function Game() {
 			return () => clearInterval(timer)
 		}
 	}, [isPaused, timeLeft])
+
 	useEffect(() => {
 		if (timeLeft === 0 || npcMood >= 100 || energy === 0) {
 			isPausedRef.current = true
@@ -422,9 +497,11 @@ function Game() {
 			endGame()
 		}
 	}, [timeLeft, npcMood, energy])
+
 	useEffect(() => {
 		setEnergy(prevEnergy => Math.min(100, Math.max(0, prevEnergy)))
 	}, [energy])
+
 	const handlePause = () => {
 		if (isWin === null) {
 			isPausedRef.current = !isPausedRef.current
@@ -441,12 +518,14 @@ function Game() {
 			})
 		}
 	}
+
 	const endGame = () => {
 		NPCObjects.current.forEach(npcData => {
 			if (npcData.mixer) npcData.mixer.timeScale = isPausedRef.current ? 0 : 1
 		})
 		setIsWin(timeLeft === 0 && npcMood <= 100 && energy !== 0)
 	}
+
 	useEffect(() => {
 		console.log('Light intensity changed:', abmientLightIntensity)
 		if (ambientLight) {
@@ -454,10 +533,12 @@ function Game() {
 			ambientLight.intensity = abmientLightIntensity
 		}
 	}, [abmientLightIntensity, ambientLight])
+
 	const handleMapLoad = mapLoader => {
 		console.log('Map loaded, ambient light:', mapLoader.ambientLight)
 		setAmbientLight(mapLoader.ambientLight)
 	}
+
 	return (
 		<div ref={mountRef}>
 			<div className='Interface-Box'>
