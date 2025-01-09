@@ -550,29 +550,47 @@ function Game() {
 	}
 
 	useEffect(() => {
-		if (!audioInitialized.current) {
-			audioManager.current = new AudioManager()
-
-			const initAudio = async () => {
-				try {
+		const initAudio = async () => {
+			try {
+				if (!audioManager.current) {
+					audioManager.current = new AudioManager()
 					const musicPath = LEVELS_CONFIG[level].music
 					await audioManager.current.loadMusic(musicPath)
+
+					const savedTime = sessionStorage.getItem('musicCurrentTime')
+					if (savedTime) {
+						audioManager.current.setCurrentTime(parseFloat(savedTime))
+					}
+
 					audioManager.current.play()
 					audioManager.current.setVolume(volume)
 					audioInitialized.current = true
-				} catch (error) {
-					console.error('Failed to initialize audio:', error)
-				}
-			}
 
-			initAudio()
+					setInterval(() => {
+						if (audioManager.current?.getCurrentTime()) {
+							sessionStorage.setItem(
+								'musicCurrentTime',
+								audioManager.current.getCurrentTime()
+							)
+						}
+					}, 1000)
+				}
+			} catch (error) {
+				console.error('Failed to initialize audio:', error)
+			}
 		}
+
+		initAudio()
 
 		return () => {
-			// Не останавливаем музыку при размонтировании
-			// audioManager.current?.stop();
+			if (audioManager.current) {
+				sessionStorage.setItem(
+					'musicCurrentTime',
+					audioManager.current.getCurrentTime()
+				)
+			}
 		}
-	}, [level]) // Убираем volume из зависимостей
+	}, [level])
 
 	useEffect(() => {
 		if (audioManager.current) {
