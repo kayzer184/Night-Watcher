@@ -247,7 +247,7 @@ function Interface({
 					type='range'
 					min='0'
 					max='1'
-					step='0.1'
+					step='0.05'
 					value={ambientLightIntensity}
 					onChange={e => setAmbientLightIntensity(parseFloat(e.target.value))}
 					className='PB-range-slider'
