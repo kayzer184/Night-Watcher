@@ -20,11 +20,6 @@ router.post('/', async (req, res) => {
 			})
 		}
 
-		console.log(
-			'[Debug] Current achievements:',
-			JSON.stringify(user.achievements)
-		)
-
 		const formattedAchievements = {}
 		Object.entries(achievements).forEach(([key, value]) => {
 			formattedAchievements[parseInt(key)] = value === true
@@ -36,8 +31,6 @@ router.post('/', async (req, res) => {
 			},
 		}
 
-		console.log('[Debug] Update query:', JSON.stringify(updateQuery))
-
 		const updatedUser = await User.findByIdAndUpdate(userId, updateQuery, {
 			new: true,
 		})
@@ -46,32 +39,23 @@ router.post('/', async (req, res) => {
 			throw new Error('Failed to update user achievements')
 		}
 
-		console.log(
-			'[Debug] Updated user achievements:',
-			JSON.stringify(updatedUser.achievements)
-		)
-
 		let totalStars = 0
-		const achievementsObj = updatedUser.achievements.toObject()
+		const rawAchievements = JSON.parse(JSON.stringify(updatedUser.achievements))
 
-		Object.keys(achievementsObj)
-			.filter(key => !isNaN(key))
-			.forEach(level => {
-				const levelAchievements = achievementsObj[level]
+		console.log('[Debug] Raw achievements:', rawAchievements)
+
+		for (const level in rawAchievements) {
+			if (rawAchievements.hasOwnProperty(level) && !isNaN(level)) {
+				const levelAchievements = rawAchievements[level]
 				const starsInLevel = Object.values(levelAchievements).filter(
 					v => v === true
 				).length
-				console.log(`[Debug] Stars in level ${level}:`, starsInLevel)
+				console.log(`[Debug] Level ${level} stars:`, starsInLevel)
 				totalStars += starsInLevel
-			})
+			}
+		}
 
 		console.log('[Debug] Total stars calculated:', totalStars)
-
-		console.log('[Debug] Achievement structure:', {
-			hasAchievements: !!updatedUser.achievements,
-			levels: Object.keys(updatedUser.achievements),
-			currentLevel: updatedUser.achievements[levelId],
-		})
 
 		const leaderboardUpdate = await Leaderboard.findOneAndUpdate(
 			{ username: updatedUser.username },
@@ -96,7 +80,7 @@ router.post('/', async (req, res) => {
 		return res.json({
 			success: true,
 			message: 'Прогресс успешно обновлен',
-			updatedUser: updatedUser.toObject(),
+			updatedUser: JSON.parse(JSON.stringify(updatedUser)),
 			totalStars,
 		})
 	} catch (error) {

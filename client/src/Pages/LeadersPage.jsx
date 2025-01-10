@@ -69,7 +69,7 @@ function LeadersPage() {
 								<tr key={index}>
 									<td>{index + 1}</td>
 									<td>{leader.username}</td>
-									<td>⭐ {leader.stars}</td>
+									<td>{leader.stars}</td>
 								</tr>
 							))
 						) : (
