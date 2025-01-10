@@ -35,13 +35,33 @@ router.post('/', async (req, res) => {
 			`[Progress] Level: ${levelId}, Current true: ${currentTrueCount}, New true: ${newTrueCount}`
 		)
 
-		// Обновляем только если новый результат лучше
+		// Обновляем только если новый результат ЛУЧШЕ или РАВЕН текущему
 		if (newTrueCount < currentTrueCount) {
+			console.log('[Skip] Current result is better:', {
+				currentStars: currentTrueCount,
+				newStars: newTrueCount,
+			})
+
+			// Подсчитываем общее количество звезд для текущего состояния
+			let totalStars = 0
+			const rawAchievements = JSON.parse(JSON.stringify(user.achievements))
+
+			for (const level in rawAchievements) {
+				if (rawAchievements.hasOwnProperty(level) && !isNaN(level)) {
+					const levelAchievements = rawAchievements[level]
+					const starsInLevel = Object.values(levelAchievements).filter(
+						v => v === true
+					).length
+					console.log(`[Debug] Level ${level} current stars:`, starsInLevel)
+					totalStars += starsInLevel
+				}
+			}
+
 			return res.json({
 				success: true,
 				message: 'Текущий результат лучше нового',
 				updatedUser: JSON.parse(JSON.stringify(user)),
-				totalStars: currentTrueCount,
+				totalStars,
 			})
 		}
 
