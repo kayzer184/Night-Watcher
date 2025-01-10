@@ -20,6 +20,11 @@ router.post('/', async (req, res) => {
 			})
 		}
 
+		console.log(
+			'[Debug] Current achievements:',
+			JSON.stringify(user.achievements)
+		)
+
 		const formattedAchievements = {}
 		Object.entries(achievements).forEach(([key, value]) => {
 			formattedAchievements[parseInt(key)] = value === true
@@ -41,14 +46,29 @@ router.post('/', async (req, res) => {
 			throw new Error('Failed to update user achievements')
 		}
 
+		console.log(
+			'[Debug] Updated user achievements:',
+			JSON.stringify(updatedUser.achievements)
+		)
+
 		let totalStars = 0
-		Object.values(updatedUser.achievements).forEach(levelAchievements => {
-			totalStars += Object.values(levelAchievements).filter(
-				v => v === true
-			).length
-		})
+		Object.entries(updatedUser.achievements).forEach(
+			([level, achievements]) => {
+				const starsInLevel = Object.values(achievements).filter(
+					v => v === true
+				).length
+				console.log(`[Debug] Stars in level ${level}:`, starsInLevel)
+				totalStars += starsInLevel
+			}
+		)
 
 		console.log('[Debug] Total stars calculated:', totalStars)
+
+		console.log('[Debug] Achievement structure:', {
+			hasAchievements: !!updatedUser.achievements,
+			levels: Object.keys(updatedUser.achievements),
+			currentLevel: updatedUser.achievements[levelId],
+		})
 
 		const leaderboardUpdate = await Leaderboard.findOneAndUpdate(
 			{ username: updatedUser.username },
