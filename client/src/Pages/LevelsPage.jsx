@@ -39,39 +39,33 @@ function LevelsPage() {
 	const navigate = useNavigate()
 
 	useEffect(() => {
-		const initialProgress = {}
-		levelData.forEach(level => {
-			initialProgress[level.id] = {
-				stars: 0,
-				score: 0,
-			}
-		})
+		const fetchUserProgress = async () => {
+			if (user) {
+				try {
+					console.log('[Debug] Fetching user progress for:', user.id)
+					const response = await fetch(
+						`https://api-night-watcher.vercel.app/getUser/${user.id}`,
+						{
+							credentials: 'include',
+						}
+					)
+					const data = await response.json()
 
-		if (user) {
-			fetch(`https://api-night-watcher.vercel.app/getUser/${user.id}`, {
-				credentials: 'include',
-			})
-				.then(response => response.json())
-				.then(data => {
 					if (data.success) {
-						const progress = { ...initialProgress }
-						data.progress.forEach(level => {
-							progress[level.levelId] = {
-								stars: level.stars,
-								score: level.score,
-							}
-						})
-						setLevelsProgress(progress)
+						console.log('[Debug] Received user data:', data)
+						setLevelsProgress(data.user.achievements || {})
 					} else {
-						setLevelsProgress(initialProgress)
+						console.error('[Error] Failed to get user data:', data.message)
 					}
-				})
-				.catch(error => {
-					setLevelsProgress(initialProgress)
-				})
-		} else {
-			setLevelsProgress(initialProgress)
+				} catch (error) {
+					console.error('[Error] Failed to fetch user progress:', error)
+				}
+			} else {
+				setLevelsProgress({})
+			}
 		}
+
+		fetchUserProgress()
 	}, [user])
 
 	function handleBack() {
@@ -81,10 +75,6 @@ function LevelsPage() {
 
 	function handleLevelSelect(level) {
 		setSelectedLevel(level)
-	}
-
-	function closeModal() {
-		setSelectedLevel(null)
 	}
 
 	return (
@@ -99,14 +89,20 @@ function LevelsPage() {
 					>
 						<span className='level-name'>{level.name}</span>
 						<div className='level-stars'>
-							{[1, 2, 3].map(star => (
-								<StarIcon
-									key={star}
-									className={`star-icon ${
-										user?.achievements?.[level.id]?.[star] ? 'filled' : ''
-									}`}
-								/>
-							))}
+							{[1, 2, 3].map(starIndex => {
+								const isAchieved =
+									levelsProgress[level.id]?.[starIndex] === true
+								console.log(
+									`[Debug] Level ${level.id}, Star ${starIndex}, Achieved:`,
+									isAchieved
+								)
+								return (
+									<StarIcon
+										key={starIndex}
+										className={`star-icon ${isAchieved ? 'filled' : ''}`}
+									/>
+								)
+							})}
 						</div>
 					</button>
 				))}
@@ -138,7 +134,10 @@ function LevelsPage() {
 							>
 								Играть
 							</button>
-							<button className='close-button' onClick={closeModal}>
+							<button
+								className='close-button'
+								onClick={() => setSelectedLevel(null)}
+							>
 								Закрыть
 							</button>
 						</div>

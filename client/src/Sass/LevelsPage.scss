@@ -51,13 +51,14 @@
 			gap: 5px;
 
 			.star-icon {
-				width: 20px;
-				height: 20px;
-				fill: #666;
-				transition: fill 0.3s;
+				width: 24px;
+				height: 24px;
+				margin: 0 2px;
+				fill: #ccc;
+				transition: fill 0.3s ease;
 
 				&.filled {
-					fill: #f9b700;
+					fill: #ffd700;
 				}
 			}
 		}
