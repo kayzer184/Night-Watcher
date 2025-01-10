@@ -76,6 +76,7 @@ function Game() {
 	const [audioReady, setAudioReady] = useState(false)
 	const [isAudioInitialized, setIsAudioInitialized] = useState(false)
 	const [showModal, setShowModal] = useState(false)
+<<<<<<< Updated upstream
 	const [achievements, setAchievements] = useState(null)
 
 	const sendGameResults = async (stars, score) => {
@@ -99,6 +100,8 @@ function Game() {
 			console.error('Error sending game results:', error)
 		}
 	}
+=======
+>>>>>>> Stashed changes
 
 	const resetGame = () => {
 		setNpcMood(0)
@@ -624,37 +627,52 @@ function Game() {
 		}
 	}, [volume, isAudioInitialized])
 
-	const handleVolumeChange = useCallback(
-		newVolume => {
-			setVolume(newVolume)
-		},
-		[setVolume]
-	)
+	const handleVolumeChange = useCallback(value => {
+		setVolume(value)
+		if (audioManager.current) {
+			audioManager.current.setVolume(value)
+		}
+	}, [])
 
-	const handleBrightnessChange = value => {
-		setBrightness(value)
-		// ... логика изменения яркости ...
-	}
+	const handleBrightnessChange = useCallback(
+		value => {
+			setBrightness(value)
+			if (ambientLight) {
+				ambientLight.intensity = value
+			}
+		},
+		[ambientLight]
+	)
 
 	useEffect(() => {
 		ifvisible.on('blur', () => {
 			if (audioManager.current) {
-				audioManager.current.stop()
+				audioManager.current.fadeOut()
 				sessionStorage.setItem(
 					'musicCurrentTime',
 					audioManager.current.getCurrentTime()
 				)
+				sessionStorage.setItem('lastVolume', volume)
 			}
 		})
 
-		ifvisible.on('focus', () => {
+		ifvisible.on('focus', async () => {
 			if (audioManager.current) {
 				const savedTime = sessionStorage.getItem('musicCurrentTime')
+				const savedVolume = sessionStorage.getItem('lastVolume')
+
 				if (savedTime) {
 					audioManager.current.setCurrentTime(parseFloat(savedTime))
 				}
-				audioManager.current.play()
-				audioManager.current.setVolume(volume)
+
+				await audioManager.current.play()
+				audioManager.current.fadeIn()
+
+				if (volume === 0) {
+					audioManager.current.setVolume(0)
+				} else if (savedVolume !== null) {
+					audioManager.current.setVolume(parseFloat(savedVolume))
+				}
 			}
 		})
 

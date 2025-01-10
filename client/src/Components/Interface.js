@@ -216,29 +216,38 @@ function Interface({
 	}, [isWin, level, user?.id, NPCMood, maxNpcMood, Energy])
 
 	const handleVolumeChange = newVolume => {
-		if (newVolume > 0) {
-			prevVolume.current = newVolume
-			localStorage.setItem('prevGameVolume', newVolume)
+		// Убедимся, что значение является числом
+		const volume = Math.max(0, Math.min(1, parseFloat(newVolume) || 0))
+		onVolumeChange(volume)
+		setIsMuted(volume === 0)
+
+		// Сохраняем предыдущую громкость только если она больше 0
+		if (volume > 0) {
+			prevVolume.current = volume
+			localStorage.setItem('prevGameVolume', volume.toString())
 		}
-		onVolumeChange(newVolume)
-		setIsMuted(newVolume === 0)
 	}
 
 	const handleMuteToggle = () => {
 		if (isMuted) {
-			// Возвращаем предыдущую громкость
-			const volumeToRestore = prevVolume.current > 0 ? prevVolume.current : 0.5
-			onVolumeChange(volumeToRestore)
+			// Восстанавливаем предыдущую громкость
+			const savedVolume = localStorage.getItem('prevGameVolume')
+			const volumeToRestore = savedVolume ? parseFloat(savedVolume) : 0.5
+			handleVolumeChange(volumeToRestore)
 		} else {
 			// Сохраняем текущую громкость перед мутированием
 			if (currentVolume > 0) {
 				prevVolume.current = currentVolume
-				localStorage.setItem('prevGameVolume', currentVolume)
+				localStorage.setItem('prevGameVolume', currentVolume.toString())
 			}
-			onVolumeChange(0)
+			handleVolumeChange(0)
 		}
-		setIsMuted(!isMuted)
 	}
+
+	// Обновляем состояние isMuted при изменении громкости
+	useEffect(() => {
+		setIsMuted(currentVolume === 0)
+	}, [currentVolume])
 
 	return (
 		<div className='Interface'>

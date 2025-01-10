@@ -7,6 +7,7 @@ class AudioManager {
 		this.isPlaying = false
 		this.startTime = 0
 		this.pausedAt = 0
+		this.lastVolume = 1
 	}
 
 	async init() {
@@ -45,7 +46,7 @@ class AudioManager {
 
 		this.musicSource.loop = true
 
-		const offset = this.pausedAt
+		const offset = this.pausedAt || 0
 		this.startTime = this.audioContext.currentTime - offset
 		this.musicSource.start(0, offset)
 		this.isPlaying = true
@@ -77,22 +78,35 @@ class AudioManager {
 
 	setVolume(value) {
 		if (this.gainNode) {
-			this.gainNode.gain.value = value
+			const safeValue = Number.isFinite(value) ? value : 0
+			this.lastVolume = safeValue
+			this.gainNode.gain.setValueAtTime(
+				safeValue,
+				this.audioContext.currentTime
+			)
 		}
 	}
 
-	fadeOut(duration = 1) {
-		if (this.gainNode) {
+	fadeOut(duration = 0.5) {
+		if (this.gainNode && this.isPlaying) {
 			const currentTime = this.audioContext.currentTime
 			this.gainNode.gain.linearRampToValueAtTime(0, currentTime + duration)
+			setTimeout(() => {
+				if (this.isPlaying) {
+					this.stop()
+				}
+			}, duration * 1000)
 		}
 	}
 
-	fadeIn(duration = 1) {
-		if (this.gainNode) {
+	fadeIn(duration = 0.5) {
+		if (this.gainNode && this.isPlaying) {
 			const currentTime = this.audioContext.currentTime
-			this.gainNode.gain.linearRampToValueAtTime(0, currentTime)
-			this.gainNode.gain.linearRampToValueAtTime(1, currentTime + duration)
+			this.gainNode.gain.setValueAtTime(0, currentTime)
+			this.gainNode.gain.linearRampToValueAtTime(
+				this.lastVolume || 1,
+				currentTime + duration
+			)
 		}
 	}
 }
