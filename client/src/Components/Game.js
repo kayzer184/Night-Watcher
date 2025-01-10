@@ -20,8 +20,6 @@ import { EVENTS_CONFIG } from '../Config/EventsConfig'
 import { useAuth } from '../context/AuthContext'
 import AudioManager from '../Utils/AudioManager'
 import { useSettings } from '../context/SettingsContext'
-import Modal from './Modal'
-import LevelStarsModal from './LevelStarsModal'
 
 function shuffle(array) {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -75,7 +73,6 @@ function Game() {
 	const { volume, setVolume, brightness, setBrightness } = useSettings()
 	const [audioReady, setAudioReady] = useState(false)
 	const [isAudioInitialized, setIsAudioInitialized] = useState(false)
-	const [showModal, setShowModal] = useState(false)
 
 	const resetGame = () => {
 		setNpcMood(0)
@@ -752,11 +749,6 @@ function Game() {
 					onVolumeControlClick={handleVolumeControlClick}
 				/>
 			</div>
-			{showModal && (
-				<Modal onClose={() => setShowModal(false)}>
-					<LevelStarsModal achievements={achievements} level={level} />
-				</Modal>
-			)}
 		</div>
 	)
 }
