@@ -726,6 +726,45 @@ function Game() {
 		autoStartAudio()
 	}, [])
 
+	const handleGameComplete = async achievements => {
+		// Преобразуем достижения в формат с числовыми ключами
+		const formattedAchievements = {}
+		Object.keys(achievements).forEach((key, index) => {
+			formattedAchievements[String(index + 1)] = achievements[key]
+		})
+
+		console.log('[Debug] Formatted achievements:', formattedAchievements)
+
+		try {
+			const response = await fetch(
+				'https://api-night-watcher.vercel.app/updateProgress',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						userId: user.id,
+						levelId: level,
+						achievements: formattedAchievements, // Отправляем преобразованные достижения
+					}),
+					credentials: 'include',
+				}
+			)
+
+			const data = await response.json()
+			console.log('[Debug] Update response:', data)
+
+			if (data.success) {
+				setShowModal(true)
+			} else {
+				console.error('[Error] Failed to update progress:', data.message)
+			}
+		} catch (error) {
+			console.error('[Error] Failed to send progress:', error)
+		}
+	}
+
 	return (
 		<div
 			ref={mountRef}

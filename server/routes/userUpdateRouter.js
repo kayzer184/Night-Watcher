@@ -25,10 +25,20 @@ router.post('/', async (req, res) => {
 
 		const currentLevelAchievements = user.achievements[levelId] || {}
 
+		const formattedAchievements = {}
+		Object.entries(achievements).forEach(([key, value]) => {
+			formattedAchievements[parseInt(key)] = value === true
+		})
+
+		console.log(
+			`[Formatted] Achievements to save:`,
+			JSON.stringify(formattedAchievements)
+		)
+
 		const currentTrueCount = Object.values(currentLevelAchievements).filter(
 			v => v === true
 		).length
-		const newTrueCount = Object.values(achievements).filter(
+		const newTrueCount = Object.values(formattedAchievements).filter(
 			v => v === true
 		).length
 
@@ -42,7 +52,7 @@ router.post('/', async (req, res) => {
 					{ _id: userId },
 					{
 						$set: {
-							[`achievements.${levelId}`]: achievements,
+							[`achievements.${levelId}`]: formattedAchievements,
 						},
 					}
 				)
@@ -78,7 +88,9 @@ router.post('/', async (req, res) => {
 					currentLevelAchievements
 				)}`
 			)
-			console.log(`[Details] New achievements: ${JSON.stringify(achievements)}`)
+			console.log(
+				`[Details] New achievements: ${JSON.stringify(formattedAchievements)}`
+			)
 			return res.status(400).json({
 				success: false,
 				message: 'Текущий результат не лучше предыдущего',
