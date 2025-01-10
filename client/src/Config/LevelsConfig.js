@@ -112,7 +112,7 @@ export const LEVELS_CONFIG = {
 		mapModel: '/Models/Map_2.fbx',
 		npcModels: ['/Models/NPC_2_1.fbx', '/Models/NPC_2_2.fbx'],
 		streetLightModels: ['/Models/Street Light_2.fbx'],
-		npcCount: 2,
+		npcCount: 4,
 		npcSpeed: 0.4,
 		timeLimit: 75,
 		moodDecayRate: 0.003,
@@ -152,6 +152,7 @@ export const LEVELS_CONFIG = {
 		npcSpawns: [
 			[-1300, 2, 170],
 			[310, 2, -275],
+			[-815, 2, 400],
 		],
 		npcPaths: [
 			[
@@ -174,9 +175,21 @@ export const LEVELS_CONFIG = {
 				{ x: 310, z: -90 },
 				{ x: 220, z: -90 },
 				{ x: 220, z: 60 },
-				{ x: 310, z: 60 },
 				{ x: 200, z: 80 },
+				{ x: -815, z: 80 },
+				{ x: -815, z: -215 },
+				{ x: -915, z: -215 },
+				{ x: -915, z: -325 },
+				{ x: -900, z: -325 },
+				{ x: -900, z: -745 },
 			],
+			[
+				{ x: -815, z: 400 },
+				{ x: -400, z: 400 },
+				{ x: -400, z: -225 },
+				{ x: -815, z: -225 },
+				{ x: -815, z: 400 },
+			]
 		],
 		music: '/audio/Music_1.mp3',
 		musicVolume: 0.5,

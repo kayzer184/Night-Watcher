@@ -290,65 +290,80 @@ function Game() {
 
 		const moveNpc = () => {
 			NPCObjects.current.forEach(npcData => {
-					if (!npcData.path || !npcData.model) return
-	
-					const { model, path, speed } = npcData
-					const normalizedSpeed = speed * (1 / UPDATES_PER_SECOND) * 60
-	
-					// Проверка валидности текущей цели
-					if (npcData.currentTarget >= path.length) {
-							npcData.currentTarget = 0
-					}
-	
-					const target = path[npcData.currentTarget]
-					if (!target) return
-	
-					// Вычисляем направление к цели
-					const direction = new THREE.Vector3(
-							target.x - model.position.x,
-							0,
-							target.z - model.position.z
-					)
-	
-					const distance = direction.length()
+				if (!npcData.path || !npcData.model) return
+
+				const { model, path, speed } = npcData
+				const normalizedSpeed = speed * (1 / UPDATES_PER_SECOND) * 60
+
+				// Проверка валидности текущей цели
+				if (npcData.currentTarget >= path.length) {
+						npcData.currentTarget = 0
+				}
+
+				const target = path[npcData.currentTarget]
+				if (!target) return
+
+				// Вычисляем направление к цели
+				const direction = new THREE.Vector3(
+						target.x - model.position.x,
+						0,
+						target.z - model.position.z
+				)
+
+				const distance = direction.length()
+				
+				// Увеличиваем порог достижения точки
+				const threshold = normalizedSpeed * 1.5 // Немного больше чем скорость движения
+
+				if (distance < threshold) {
+						// Точно устанавливаем позицию в точку маршрута
+						model.position.set(target.x, model.position.y, target.z)
+						
+						// Проверяем, есть ли следующая точка
+						const nextTarget = (npcData.currentTarget + 1) % path.length
+						if (path[nextTarget]) {
+								npcData.currentTarget = nextTarget
+						}
+				} else {
+					direction.normalize()
+					model.position.addScaledVector(direction, normalizedSpeed)
 					
-					// Увеличиваем порог достижения точки
-					const threshold = normalizedSpeed * 22.5 // Немного больше чем скорость движения
-	
-					if (distance < threshold) {
-							// Точно устанавливаем позицию в точку маршрута
-							model.position.set(target.x, model.position.y, target.z)
-							
-							// Проверяем, есть ли следующая точка
-							const nextTarget = (npcData.currentTarget + 1) % path.length
-							if (path[nextTarget]) {
-									npcData.currentTarget = nextTarget
-							}
-					} else {
-							direction.normalize()
-							model.position.addScaledVector(direction, normalizedSpeed)
-							
-							// Плавный поворот
-							const targetRotation = Math.abs(direction.x) > Math.abs(direction.z)
-									? direction.x > 0
-											? Math.PI / 2
-											: -Math.PI / 2
-									: direction.z > 0
-											? 0
-											: Math.PI
-	
-							// Плавно поворачиваем к целевому углу
-							const rotationSpeed = 0.1
-							const currentRotation = model.rotation.y
-							const rotationDiff = targetRotation - currentRotation
-	
-							// Нормализуем разницу углов
-							let normalizedDiff = rotationDiff
-							while (normalizedDiff > Math.PI) normalizedDiff -= Math.PI * 2
-							while (normalizedDiff < -Math.PI) normalizedDiff += Math.PI * 2
-	
-							model.rotation.y += normalizedDiff * rotationSpeed
-					}
+					// Плавный поворот
+					const targetRotation = Math.abs(direction.x) > Math.abs(direction.z)
+							? direction.x > 0
+									? Math.PI / 2
+									: -Math.PI / 2
+							: direction.z > 0
+									? 0
+									: Math.PI
+
+					// Плавно поворачиваем к целевому углу
+					const rotationSpeed = 0.1
+					const currentRotation = model.rotation.y
+					const rotationDiff = targetRotation - currentRotation
+
+					// Нормализуем разницу углов
+					let normalizedDiff = rotationDiff
+					while (normalizedDiff > Math.PI) normalizedDiff -= Math.PI * 2
+					while (normalizedDiff < -Math.PI) normalizedDiff += Math.PI * 2
+
+					model.rotation.y += normalizedDiff * rotationSpeed
+				}
+				
+				// Проверяем, находится ли NPC в освещенной зоне
+				const isNpcInLight = lightObjects.current.some(({ light }) => {
+					if (!light.visible) return false
+					const distance = model.position.distanceTo(light.position)
+					return distance < 300 // Радиус освещения
+				})
+
+				setNpcMood(prevMood => {
+					const newMood = isNpcInLight
+						? Math.min(100, prevMood - NPCMoodDecayRate)
+						: Math.max(0, prevMood + NPCMoodDecayRate)
+					setMaxNpcMood(prev => Math.max(prev, newMood))
+					return prevMood + (newMood - prevMood)
+				})
 			})
 		}
 
