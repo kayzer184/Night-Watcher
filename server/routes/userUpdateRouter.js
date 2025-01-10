@@ -20,36 +20,15 @@ router.post('/', async (req, res) => {
 		}
 
 		if (!user.achievements) {
-			console.log(`[Init] Creating achievements object for user: ${userId}`)
 			user.achievements = {}
 		}
 
 		const currentLevelAchievements = user.achievements[levelId] || {}
-		console.log(
-			`[Current] Level achievements:`,
-			JSON.stringify(currentLevelAchievements)
-		)
-
-		console.log(
-			`[Received] New achievements data:`,
-			JSON.stringify(achievements)
-		)
-
-		const achievementsToSave = {}
-		for (const [key, value] of Object.entries(achievements)) {
-			achievementsToSave[key] = value === true
-		}
-
-		console.log(
-			`[Formatted] Achievements to save:`,
-			JSON.stringify(achievementsToSave)
-		)
 
 		const currentTrueCount = Object.values(currentLevelAchievements).filter(
 			v => v === true
 		).length
-
-		const newTrueCount = Object.values(achievementsToSave).filter(
+		const newTrueCount = Object.values(achievements).filter(
 			v => v === true
 		).length
 
@@ -58,36 +37,38 @@ router.post('/', async (req, res) => {
 		)
 
 		if (newTrueCount > currentTrueCount) {
-			if (!user.achievements[levelId]) {
-				user.achievements[levelId] = {}
+			try {
+				const result = await User.updateOne(
+					{ _id: userId },
+					{
+						$set: {
+							[`achievements.${levelId}`]: achievements,
+						},
+					}
+				)
+
+				if (result.modifiedCount === 1) {
+					const updatedUser = await User.findById(userId)
+					console.log(
+						`[Success] Updated achievements for user ${userId}. New state:`,
+						JSON.stringify(updatedUser.achievements)
+					)
+
+					return res.json({
+						success: true,
+						message: 'Прогресс успешно обновлен',
+						updatedUser: updatedUser,
+					})
+				} else {
+					throw new Error('Failed to update achievements')
+				}
+			} catch (updateError) {
+				console.error(`[Error] Failed to update achievements:`, updateError)
+				return res.status(500).json({
+					success: false,
+					message: 'Ошибка при обновлении достижений',
+				})
 			}
-
-			user.achievements[levelId] = achievementsToSave
-
-			console.log(
-				`[Pre-save] Achievement structure:`,
-				JSON.stringify(user.achievements)
-			)
-
-			user.markModified(`achievements.${levelId}`)
-			user.markModified('achievements')
-
-			await user.save()
-
-			console.log(
-				`[Success] Updated achievements for user ${userId}. New state:`,
-				JSON.stringify(user.achievements)
-			)
-			console.log(
-				`[Details] Level ${levelId} achievements:`,
-				JSON.stringify(user.achievements[levelId])
-			)
-
-			return res.json({
-				success: true,
-				message: 'Прогресс успешно обновлен',
-				updatedUser: user,
-			})
 		} else {
 			console.log(
 				`[Rejected] No progress improvement. User: ${userId}, Level: ${levelId}`
@@ -97,9 +78,7 @@ router.post('/', async (req, res) => {
 					currentLevelAchievements
 				)}`
 			)
-			console.log(
-				`[Details] New achievements: ${JSON.stringify(achievementsToSave)}`
-			)
+			console.log(`[Details] New achievements: ${JSON.stringify(achievements)}`)
 			return res.status(400).json({
 				success: false,
 				message: 'Текущий результат не лучше предыдущего',
