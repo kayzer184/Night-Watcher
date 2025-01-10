@@ -173,10 +173,14 @@ function Interface({
 			const sendAchievements = async () => {
 				if (!user?.id) return
 
-				const levelAchievements = {}
+				const levelAchievements = {
+					"1": false,
+					"2": false, 
+					"3": false
+				}
 				Object.values(LEVELS_CONFIG[level].starConditions).forEach(
-					condition => {
-						levelAchievements[condition.id] = condition.check({
+					(condition, index) => {
+						levelAchievements[(index + 1).toString()] = condition.check({
 							isWin: isWin,
 							npcMood: NPCMood,
 							maxNpcMood: maxNpcMood,
@@ -186,7 +190,6 @@ function Interface({
 				)
 
 				try {
-					console.log('levelAchievements', levelAchievements)
 					const response = await fetch(
 						'https://api-night-watcher.vercel.app/update',
 						{

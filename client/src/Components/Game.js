@@ -76,32 +76,6 @@ function Game() {
 	const [audioReady, setAudioReady] = useState(false)
 	const [isAudioInitialized, setIsAudioInitialized] = useState(false)
 	const [showModal, setShowModal] = useState(false)
-<<<<<<< Updated upstream
-	const [achievements, setAchievements] = useState(null)
-
-	const sendGameResults = async (stars, score) => {
-		if (!user) return
-
-		try {
-			await fetch('https://api-night-watcher.vercel.app/progress/update', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					userId: user.id,
-					username: user.username,
-					levelId: level,
-					stars,
-					score: Math.round(score),
-				}),
-			})
-		} catch (error) {
-			console.error('Error sending game results:', error)
-		}
-	}
-=======
->>>>>>> Stashed changes
 
 	const resetGame = () => {
 		setNpcMood(0)
