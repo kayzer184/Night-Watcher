@@ -24,9 +24,13 @@ router.post('/', async (req, res) => {
 			user.achievements = {}
 		}
 
-		const currentTrueCount = Object.values(
-			user.achievements[levelId] || {}
-		).filter(v => v === true).length
+		const currentLevelAchievements = user.achievements[levelId] || {}
+		console.log(`[Current] Level achievements:`, currentLevelAchievements)
+
+		const currentTrueCount = Object.values(currentLevelAchievements).filter(
+			v => v === true
+		).length
+
 		const newTrueCount = Object.values(achievements).filter(
 			v => v === true
 		).length
@@ -36,7 +40,7 @@ router.post('/', async (req, res) => {
 		)
 
 		if (newTrueCount > currentTrueCount) {
-			user.achievements[levelId] = achievements
+			user.achievements[levelId] = { ...achievements }
 			user.markModified('achievements')
 			await user.save()
 
@@ -51,7 +55,9 @@ router.post('/', async (req, res) => {
 				updatedUser: user,
 			})
 		} else {
-			console.log(`[Rejected] No progress improvement for user ${userId}`)
+			console.log(
+				`[Rejected] No progress improvement for user ${userId}. Current: ${currentTrueCount}, New: ${newTrueCount}`
+			)
 			res.status(400).json({
 				success: false,
 				message: 'Текущий результат не лучше предыдущего',
