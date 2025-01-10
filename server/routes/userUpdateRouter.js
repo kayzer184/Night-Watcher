@@ -7,7 +7,7 @@ router.post('/', async (req, res) => {
 		const { userId, levelId, achievements } = req.body
 		console.log(
 			`[Update Request] User: ${userId}, Level: ${levelId}, Achievements:`,
-			achievements
+			JSON.stringify(achievements)
 		)
 
 		const user = await User.findById(userId)
@@ -25,13 +25,22 @@ router.post('/', async (req, res) => {
 		}
 
 		const currentLevelAchievements = user.achievements[levelId] || {}
-		console.log(`[Current] Level achievements:`, currentLevelAchievements)
+		console.log(
+			`[Current] Level achievements:`,
+			JSON.stringify(currentLevelAchievements)
+		)
+
+		console.log(
+			`[Received] New achievements data:`,
+			JSON.stringify(achievements)
+		)
 
 		const currentTrueCount = Object.values(currentLevelAchievements).filter(
 			v => v === true
 		).length
 
-		const newTrueCount = Object.values(achievements).filter(
+		const newAchievements = { ...achievements }
+		const newTrueCount = Object.values(newAchievements).filter(
 			v => v === true
 		).length
 
@@ -40,13 +49,17 @@ router.post('/', async (req, res) => {
 		)
 
 		if (newTrueCount > currentTrueCount) {
-			user.achievements[levelId] = { ...achievements }
+			user.achievements[levelId] = newAchievements
 			user.markModified('achievements')
 			await user.save()
 
 			console.log(
-				`[Success] Updated achievements for user ${userId}:`,
+				`[Success] Updated achievements for user ${userId}. New state:`,
 				JSON.stringify(user.achievements)
+			)
+			console.log(
+				`[Details] Level ${levelId} achievements:`,
+				JSON.stringify(user.achievements[levelId])
 			)
 
 			res.json({
@@ -56,7 +69,15 @@ router.post('/', async (req, res) => {
 			})
 		} else {
 			console.log(
-				`[Rejected] No progress improvement for user ${userId}. Current: ${currentTrueCount}, New: ${newTrueCount}`
+				`[Rejected] No progress improvement. User: ${userId}, Level: ${levelId}`
+			)
+			console.log(
+				`[Details] Current achievements: ${JSON.stringify(
+					currentLevelAchievements
+				)}`
+			)
+			console.log(
+				`[Details] New achievements: ${JSON.stringify(newAchievements)}`
 			)
 			res.status(400).json({
 				success: false,
