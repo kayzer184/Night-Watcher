@@ -211,7 +211,7 @@ function Game() {
 		outlinePass.edgeStrength = 3.0
 		outlinePass.edgeGlow = 0.0
 		outlinePass.edgeThickness = 1.0
-		outlinePass.visibleEdgeColor.set('#ffffff')
+		outlinePass.visibleEdgeColor.set('#8FFDFF')
 		outlinePass.hiddenEdgeColor.set('#190a05')
 		composer.addPass(outlinePass)
 

@@ -5,9 +5,14 @@ const User = require('../models/User')
 router.post('/', async (req, res) => {
 	try {
 		const { userId, levelId, achievements } = req.body
-		
+		console.log(
+			`[Update Request] User: ${userId}, Level: ${levelId}, Achievements:`,
+			achievements
+		)
+
 		const user = await User.findById(userId)
 		if (!user) {
+			console.log(`[Error] User not found: ${userId}`)
 			return res.status(404).json({
 				success: false,
 				message: 'Пользователь не найден',
@@ -15,30 +20,30 @@ router.post('/', async (req, res) => {
 		}
 
 		if (!user.achievements) {
+			console.log(`[Init] Creating achievements object for user: ${userId}`)
 			user.achievements = {}
 		}
 
-		if (!user.achievements[levelId]) {
-			user.achievements[levelId] = {}
-		}
-
-		// Подсчитываем количество true
-		const currentTrueCount = Object.values(user.achievements[levelId]).filter(
-			v => v === true
-		).length
+		const currentTrueCount = Object.values(
+			user.achievements[levelId] || {}
+		).filter(v => v === true).length
 		const newTrueCount = Object.values(achievements).filter(
 			v => v === true
 		).length
 
-		console.log('Current true:', currentTrueCount, 'New true:', newTrueCount)
+		console.log(
+			`[Progress] Level: ${levelId}, Current true: ${currentTrueCount}, New true: ${newTrueCount}`
+		)
 
 		if (newTrueCount > currentTrueCount) {
-			// Используем markModified чтобы сообщить Mongoose об изменении вложенного объекта
 			user.achievements[levelId] = achievements
 			user.markModified('achievements')
 			await user.save()
 
-			console.log('Saved achievements:', user.achievements)
+			console.log(
+				`[Success] Updated achievements for user ${userId}:`,
+				JSON.stringify(user.achievements)
+			)
 
 			res.json({
 				success: true,
@@ -46,13 +51,14 @@ router.post('/', async (req, res) => {
 				updatedUser: user,
 			})
 		} else {
+			console.log(`[Rejected] No progress improvement for user ${userId}`)
 			res.status(400).json({
 				success: false,
 				message: 'Текущий результат не лучше предыдущего',
 			})
 		}
 	} catch (error) {
-		console.error('Ошибка при обновлении прогресса:', error)
+		console.error(`[Error] Failed to update progress:`, error)
 		res.status(500).json({
 			success: false,
 			message: 'Внутренняя ошибка сервера',
