@@ -20,8 +20,13 @@ router.post('/', async (req, res) => {
 			})
 		}
 
+		// Преобразуем в обычный объект для правильного доступа к данным
+		const rawAchievements = JSON.parse(JSON.stringify(user.achievements))
+
 		// Подсчитываем количество true в текущих достижениях уровня
-		const currentLevelAchievements = user.achievements[levelId] || {}
+		const currentLevelAchievements = rawAchievements[levelId] || {}
+		console.log('[Debug] Current level achievements:', currentLevelAchievements)
+
 		const currentTrueCount = Object.values(currentLevelAchievements).filter(
 			v => v === true
 		).length
@@ -38,13 +43,14 @@ router.post('/', async (req, res) => {
 		// Обновляем только если новый результат ЛУЧШЕ или РАВЕН текущему
 		if (newTrueCount < currentTrueCount) {
 			console.log('[Skip] Current result is better:', {
+				level: levelId,
 				currentStars: currentTrueCount,
 				newStars: newTrueCount,
+				currentAchievements: currentLevelAchievements,
 			})
 
 			// Подсчитываем общее количество звезд для текущего состояния
 			let totalStars = 0
-			const rawAchievements = JSON.parse(JSON.stringify(user.achievements))
 
 			for (const level in rawAchievements) {
 				if (rawAchievements.hasOwnProperty(level) && !isNaN(level)) {
@@ -86,13 +92,15 @@ router.post('/', async (req, res) => {
 
 		// Подсчет общего количества звезд
 		let totalStars = 0
-		const rawAchievements = JSON.parse(JSON.stringify(updatedUser.achievements))
+		const updatedAchievements = JSON.parse(
+			JSON.stringify(updatedUser.achievements)
+		)
 
-		console.log('[Debug] Raw achievements:', rawAchievements)
+		console.log('[Debug] Raw achievements:', updatedAchievements)
 
-		for (const level in rawAchievements) {
-			if (rawAchievements.hasOwnProperty(level) && !isNaN(level)) {
-				const levelAchievements = rawAchievements[level]
+		for (const level in updatedAchievements) {
+			if (updatedAchievements.hasOwnProperty(level) && !isNaN(level)) {
+				const levelAchievements = updatedAchievements[level]
 				const starsInLevel = Object.values(levelAchievements).filter(
 					v => v === true
 				).length
