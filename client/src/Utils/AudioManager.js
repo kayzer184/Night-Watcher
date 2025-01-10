@@ -13,6 +13,9 @@ class AudioManager {
 		if (!this.audioContext) {
 			this.audioContext = new (window.AudioContext ||
 				window.webkitAudioContext)()
+			if (this.audioContext.state === 'suspended') {
+				await this.audioContext.resume()
+			}
 		}
 	}
 
@@ -28,8 +31,10 @@ class AudioManager {
 		}
 	}
 
-	play() {
+	async play() {
 		if (this.isPlaying) return
+
+		await this.init()
 
 		this.musicSource = this.audioContext.createBufferSource()
 		this.musicSource.buffer = this.buffer

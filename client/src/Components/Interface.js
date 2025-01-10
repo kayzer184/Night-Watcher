@@ -40,6 +40,7 @@ function Interface({
 	onVolumeChange,
 	currentVolume,
 	onBrightnessChange,
+	onVolumeControlClick,
 }) {
 	const { user, setUser } = useAuth()
 	const [isModalVisible, setModalVisible] = useState(false)
@@ -422,7 +423,7 @@ function Interface({
 				</Modal>
 			)}
 
-			<div className='volume-control'>
+			<div className='volume-control' onClick={onVolumeControlClick}>
 				<svg
 					className={`volume-icon ${isMuted ? 'muted' : ''}`}
 					xmlns='http://www.w3.org/2000/svg'
@@ -450,7 +451,8 @@ function Interface({
 					max='1'
 					step='0.05'
 					value={currentVolume || 0}
-					onChange={e => handleVolumeChange(parseFloat(e.target.value))}
+					onChange={e => onVolumeChange(parseFloat(e.target.value))}
+					onClick={e => e.stopPropagation()}
 					className='PB-range-slider'
 				/>
 				<span className='PB-range-slidervalue'>

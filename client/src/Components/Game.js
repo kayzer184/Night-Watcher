@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useCallback } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
@@ -71,6 +71,8 @@ function Game() {
 	const audioManager = useRef(null)
 	const audioInitialized = useRef(false)
 	const { volume, setVolume, brightness, setBrightness } = useSettings()
+	const [audioReady, setAudioReady] = useState(false)
+	const [isAudioInitialized, setIsAudioInitialized] = useState(false)
 
 	const sendGameResults = async (stars, score) => {
 		if (!user) return
@@ -549,40 +551,135 @@ function Game() {
 		setAmbientLight(mapLoader.ambientLight)
 	}
 
-	useEffect(() => {
-		const initAudio = async () => {
+	const initializeAudio = useCallback(async () => {
+		if (!isAudioInitialized && !audioManager.current) {
 			try {
-				if (!audioManager.current) {
-					audioManager.current = new AudioManager()
-					const musicPath = LEVELS_CONFIG[level].music
-					await audioManager.current.loadMusic(musicPath)
+				audioManager.current = new AudioManager()
+				await audioManager.current.init()
+				const musicPath = LEVELS_CONFIG[level].music
+				await audioManager.current.loadMusic(musicPath)
 
-					const savedTime = sessionStorage.getItem('musicCurrentTime')
-					if (savedTime) {
-						audioManager.current.setCurrentTime(parseFloat(savedTime))
-					}
-
-					audioManager.current.play()
-					audioManager.current.setVolume(volume)
-					audioInitialized.current = true
-
-					setInterval(() => {
-						if (audioManager.current?.getCurrentTime()) {
-							sessionStorage.setItem(
-								'musicCurrentTime',
-								audioManager.current.getCurrentTime()
-							)
-						}
-					}, 1000)
+				const savedTime = localStorage.getItem('musicCurrentTime')
+				if (savedTime) {
+					audioManager.current.setCurrentTime(parseFloat(savedTime))
 				}
+
+				await audioManager.current.play()
+				audioManager.current.setVolume(volume)
+				setIsAudioInitialized(true)
 			} catch (error) {
 				console.error('Failed to initialize audio:', error)
 			}
 		}
+	}, [level, volume, isAudioInitialized])
 
-		initAudio()
+	useEffect(() => {
+		const handleUserInteraction = async () => {
+			await initializeAudio()
+		}
+
+		if (!isAudioInitialized) {
+			window.addEventListener('click', handleUserInteraction)
+			window.addEventListener('touchstart', handleUserInteraction)
+			window.addEventListener('keydown', handleUserInteraction)
+		}
 
 		return () => {
+			window.removeEventListener('click', handleUserInteraction)
+			window.removeEventListener('touchstart', handleUserInteraction)
+			window.removeEventListener('keydown', handleUserInteraction)
+		}
+	}, [initializeAudio, isAudioInitialized])
+
+	useEffect(() => {
+		let saveInterval
+
+		if (isAudioInitialized && audioManager.current) {
+			saveInterval = setInterval(() => {
+				localStorage.setItem(
+					'musicCurrentTime',
+					audioManager.current.getCurrentTime()
+				)
+			}, 1000)
+		}
+
+		return () => {
+			if (saveInterval) clearInterval(saveInterval)
+			if (audioManager.current) {
+				localStorage.setItem(
+					'musicCurrentTime',
+					audioManager.current.getCurrentTime()
+				)
+			}
+		}
+	}, [isAudioInitialized])
+
+	useEffect(() => {
+		if (isAudioInitialized && audioManager.current) {
+			audioManager.current.setVolume(volume)
+		}
+	}, [volume, isAudioInitialized])
+
+	const handleVolumeChange = useCallback(
+		newVolume => {
+			setVolume(newVolume)
+		},
+		[setVolume]
+	)
+
+	const handleBrightnessChange = value => {
+		setBrightness(value)
+		// ... логика изменения яркости ...
+	}
+
+	useEffect(() => {
+		ifvisible.on('blur', () => {
+			if (audioManager.current) {
+				audioManager.current.stop()
+				sessionStorage.setItem(
+					'musicCurrentTime',
+					audioManager.current.getCurrentTime()
+				)
+			}
+		})
+
+		ifvisible.on('focus', () => {
+			if (audioManager.current) {
+				const savedTime = sessionStorage.getItem('musicCurrentTime')
+				if (savedTime) {
+					audioManager.current.setCurrentTime(parseFloat(savedTime))
+				}
+				audioManager.current.play()
+				audioManager.current.setVolume(volume)
+			}
+		})
+
+		return () => {
+			ifvisible.off('blur')
+			ifvisible.off('focus')
+		}
+	}, [volume])
+
+	useEffect(() => {
+		return () => {
+			if (audioManager.current) {
+				sessionStorage.setItem(
+					'musicCurrentTime',
+					audioManager.current.getCurrentTime()
+				)
+				audioManager.current.stop()
+				audioManager.current = null
+				audioInitialized.current = false
+			}
+		}
+	}, [])
+
+	const handleVolumeControlClick = useCallback(e => {
+		e.stopPropagation()
+	}, [])
+
+	useEffect(() => {
+		const handleBeforeUnload = () => {
 			if (audioManager.current) {
 				sessionStorage.setItem(
 					'musicCurrentTime',
@@ -590,28 +687,50 @@ function Game() {
 				)
 			}
 		}
-	}, [level])
+
+		window.addEventListener('beforeunload', handleBeforeUnload)
+		return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+	}, [])
 
 	useEffect(() => {
-		if (audioManager.current) {
-			audioManager.current.setVolume(volume)
-		}
-	}, [volume])
+		const autoStartAudio = async () => {
+			try {
+				const silentAudio = new Audio()
+				silentAudio
+					.play()
+					.then(async () => {
+						if (!audioManager.current) {
+							audioManager.current = new AudioManager()
+							await audioManager.current.init()
+							const musicPath = LEVELS_CONFIG[level].music
+							await audioManager.current.loadMusic(musicPath)
 
-	const handleVolumeChange = value => {
-		setVolume(value)
-		if (audioManager.current) {
-			audioManager.current.setVolume(value)
-		}
-	}
+							const savedTime = localStorage.getItem('musicCurrentTime')
+							if (savedTime) {
+								audioManager.current.setCurrentTime(parseFloat(savedTime))
+							}
 
-	const handleBrightnessChange = value => {
-		setBrightness(value)
-		// ... логика изменения яркости ...
-	}
+							await audioManager.current.play()
+							audioManager.current.setVolume(volume)
+							setIsAudioInitialized(true)
+						}
+					})
+					.catch(() => {
+						console.log('Автозапуск аудио не разрешен браузером')
+					})
+			} catch (error) {
+				console.error('Failed to auto-start audio:', error)
+			}
+		}
+
+		autoStartAudio()
+	}, [])
 
 	return (
-		<div ref={mountRef}>
+		<div
+			ref={mountRef}
+			onClick={!isAudioInitialized ? initializeAudio : undefined}
+		>
 			<div className='Interface-Box'>
 				<Interface
 					NPCObjects={NPCObjects}
@@ -635,6 +754,7 @@ function Game() {
 					onBrightnessChange={handleBrightnessChange}
 					onVolumeChange={handleVolumeChange}
 					currentVolume={volume}
+					onVolumeControlClick={handleVolumeControlClick}
 				/>
 			</div>
 		</div>
