@@ -35,11 +35,21 @@ router.post('/', async (req, res) => {
 			JSON.stringify(achievements)
 		)
 
+		const achievementsToSave = {}
+		for (const [key, value] of Object.entries(achievements)) {
+			achievementsToSave[key] = value === true
+		}
+
+		console.log(
+			`[Formatted] Achievements to save:`,
+			JSON.stringify(achievementsToSave)
+		)
+
 		const currentTrueCount = Object.values(currentLevelAchievements).filter(
 			v => v === true
 		).length
 
-		const newTrueCount = Object.values(achievements).filter(
+		const newTrueCount = Object.values(achievementsToSave).filter(
 			v => v === true
 		).length
 
@@ -48,14 +58,20 @@ router.post('/', async (req, res) => {
 		)
 
 		if (newTrueCount > currentTrueCount) {
-			user.achievements[levelId] = achievements
+			if (!user.achievements[levelId]) {
+				user.achievements[levelId] = {}
+			}
+
+			user.achievements[levelId] = achievementsToSave
 
 			console.log(
 				`[Pre-save] Achievement structure:`,
 				JSON.stringify(user.achievements)
 			)
 
+			user.markModified(`achievements.${levelId}`)
 			user.markModified('achievements')
+
 			await user.save()
 
 			console.log(
@@ -81,7 +97,9 @@ router.post('/', async (req, res) => {
 					currentLevelAchievements
 				)}`
 			)
-			console.log(`[Details] New achievements: ${JSON.stringify(achievements)}`)
+			console.log(
+				`[Details] New achievements: ${JSON.stringify(achievementsToSave)}`
+			)
 			return res.status(400).json({
 				success: false,
 				message: 'Текущий результат не лучше предыдущего',
