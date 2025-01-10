@@ -46,6 +46,7 @@ function LevelsPage() {
 				.then(response => response.json())
 				.then(data => {
 					if (data.success) {
+						console.log('Received achievements:', data.user.achievements)
 						setAchievements(data.user.achievements || {})
 					}
 				})
@@ -76,14 +77,17 @@ function LevelsPage() {
 					>
 						<span className='level-name'>{level.name}</span>
 						<div className='level-stars'>
-							{[1, 2, 3].map(starIndex => (
-								<StarIcon
-									key={starIndex}
-									className={`star-icon ${
-										achievements[level.id]?.[starIndex] === true ? 'filled' : ''
-									}`}
-								/>
-							))}
+							{[1, 2, 3].map(starIndex => {
+								const levelAchievements = achievements[String(level.id)] || {}
+								return (
+									<StarIcon
+										key={starIndex}
+										className={`star-icon ${
+											levelAchievements[starIndex] === true ? 'filled' : ''
+										}`}
+									/>
+								)
+							})}
 						</div>
 					</button>
 				))}
