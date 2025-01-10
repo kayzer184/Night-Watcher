@@ -39,8 +39,7 @@ router.post('/', async (req, res) => {
 			v => v === true
 		).length
 
-		const newAchievements = { ...achievements }
-		const newTrueCount = Object.values(newAchievements).filter(
+		const newTrueCount = Object.values(achievements).filter(
 			v => v === true
 		).length
 
@@ -49,7 +48,13 @@ router.post('/', async (req, res) => {
 		)
 
 		if (newTrueCount > currentTrueCount) {
-			user.achievements[levelId] = newAchievements
+			user.achievements[levelId] = achievements
+
+			console.log(
+				`[Pre-save] Achievement structure:`,
+				JSON.stringify(user.achievements)
+			)
+
 			user.markModified('achievements')
 			await user.save()
 
@@ -62,7 +67,7 @@ router.post('/', async (req, res) => {
 				JSON.stringify(user.achievements[levelId])
 			)
 
-			res.json({
+			return res.json({
 				success: true,
 				message: 'Прогресс успешно обновлен',
 				updatedUser: user,
@@ -76,17 +81,15 @@ router.post('/', async (req, res) => {
 					currentLevelAchievements
 				)}`
 			)
-			console.log(
-				`[Details] New achievements: ${JSON.stringify(newAchievements)}`
-			)
-			res.status(400).json({
+			console.log(`[Details] New achievements: ${JSON.stringify(achievements)}`)
+			return res.status(400).json({
 				success: false,
 				message: 'Текущий результат не лучше предыдущего',
 			})
 		}
 	} catch (error) {
 		console.error(`[Error] Failed to update progress:`, error)
-		res.status(500).json({
+		return res.status(500).json({
 			success: false,
 			message: 'Внутренняя ошибка сервера',
 			error: error.message,
