@@ -20,6 +20,8 @@ import { EVENTS_CONFIG } from '../Config/EventsConfig'
 import { useAuth } from '../context/AuthContext'
 import AudioManager from '../Utils/AudioManager'
 import { useSettings } from '../context/SettingsContext'
+import Modal from './Modal'
+import LevelStarsModal from './LevelStarsModal'
 
 function shuffle(array) {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -73,6 +75,8 @@ function Game() {
 	const { volume, setVolume, brightness, setBrightness } = useSettings()
 	const [audioReady, setAudioReady] = useState(false)
 	const [isAudioInitialized, setIsAudioInitialized] = useState(false)
+	const [showModal, setShowModal] = useState(false)
+	const [achievements, setAchievements] = useState(null)
 
 	const sendGameResults = async (stars, score) => {
 		if (!user) return
@@ -725,46 +729,6 @@ function Game() {
 
 		autoStartAudio()
 	}, [])
-
-	const handleGameComplete = async achievements => {
-		// Преобразуем достижения в формат с числовыми ключами
-		const formattedAchievements = {}
-		Object.keys(achievements).forEach((key, index) => {
-			formattedAchievements[String(index + 1)] = achievements[key]
-		})
-
-		console.log('[Debug] Formatted achievements:', formattedAchievements)
-
-		try {
-			const response = await fetch(
-				'https://api-night-watcher.vercel.app/updateProgress',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						userId: user.id,
-						levelId: level,
-						achievements: formattedAchievements, // Отправляем преобразованные достижения
-					}),
-					credentials: 'include',
-				}
-			)
-
-			const data = await response.json()
-			console.log('[Debug] Update response:', data)
-
-			if (data.success) {
-				setShowModal(true)
-			} else {
-				console.error('[Error] Failed to update progress:', data.message)
-			}
-		} catch (error) {
-			console.error('[Error] Failed to send progress:', error)
-		}
-	}
-
 	return (
 		<div
 			ref={mountRef}
@@ -796,6 +760,11 @@ function Game() {
 					onVolumeControlClick={handleVolumeControlClick}
 				/>
 			</div>
+			{showModal && (
+				<Modal onClose={() => setShowModal(false)}>
+					<LevelStarsModal achievements={achievements} level={level} />
+				</Modal>
+			)}
 		</div>
 	)
 }

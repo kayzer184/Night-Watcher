@@ -171,9 +171,8 @@ function Interface({
 		// Когда isWin меняется и это победа
 		if (isWin === true) {
 			const sendAchievements = async () => {
-				if (!user?.id) return // Если пользователь не авторизован
+				if (!user?.id) return
 
-				// Собираем достижения уровня
 				const levelAchievements = {}
 				Object.values(LEVELS_CONFIG[level].starConditions).forEach(
 					condition => {
@@ -187,6 +186,7 @@ function Interface({
 				)
 
 				try {
+					console.log('levelAchievements', levelAchievements)
 					const response = await fetch(
 						'https://api-night-watcher.vercel.app/update',
 						{
