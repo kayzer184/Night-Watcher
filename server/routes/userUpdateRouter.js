@@ -20,6 +20,31 @@ router.post('/', async (req, res) => {
 			})
 		}
 
+		// Подсчитываем количество true в текущих достижениях уровня
+		const currentLevelAchievements = user.achievements[levelId] || {}
+		const currentTrueCount = Object.values(currentLevelAchievements).filter(
+			v => v === true
+		).length
+
+		// Подсчитываем количество true в новых достижениях
+		const newTrueCount = Object.values(achievements).filter(
+			v => v === true
+		).length
+
+		console.log(
+			`[Progress] Level: ${levelId}, Current true: ${currentTrueCount}, New true: ${newTrueCount}`
+		)
+
+		// Обновляем только если новый результат лучше
+		if (newTrueCount < currentTrueCount) {
+			return res.json({
+				success: true,
+				message: 'Текущий результат лучше нового',
+				updatedUser: JSON.parse(JSON.stringify(user)),
+				totalStars: currentTrueCount,
+			})
+		}
+
 		const formattedAchievements = {}
 		Object.entries(achievements).forEach(([key, value]) => {
 			formattedAchievements[parseInt(key)] = value === true
@@ -39,6 +64,7 @@ router.post('/', async (req, res) => {
 			throw new Error('Failed to update user achievements')
 		}
 
+		// Подсчет общего количества звезд
 		let totalStars = 0
 		const rawAchievements = JSON.parse(JSON.stringify(updatedUser.achievements))
 
