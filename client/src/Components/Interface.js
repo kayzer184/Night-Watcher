@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ProgressBar from '@ramonak/react-progress-bar'
 import createDevTools from './DevTools'
 import Modal from './Modal'
 import { LEVELS_CONFIG } from '../Config/LevelsConfig'
 import '../Sass/Interface.scss'
 import reset from '../Assets/Icons/ResetButton.svg'
+import menu from '../Assets/Icons/MenuButton.svg'
 import LoginGoogleButton from './LoginGoogleButton'
 import { ReactComponent as StarIcon } from '../Assets/Icons/Star.svg'
 import { useAuth } from '../context/AuthContext'
@@ -42,6 +44,7 @@ function Interface({
 	onBrightnessChange,
 	onVolumeControlClick,
 }) {
+	const navigate = useNavigate()
 	const { user, setUser } = useAuth()
 	const [isModalVisible, setModalVisible] = useState(false)
 	const audioManager = new AudioManager()
@@ -174,9 +177,9 @@ function Interface({
 				if (!user?.id) return
 
 				const levelAchievements = {
-					"1": false,
-					"2": false, 
-					"3": false
+					1: false,
+					2: false,
+					3: false,
 				}
 				Object.values(LEVELS_CONFIG[level].starConditions).forEach(
 					(condition, index) => {
@@ -403,12 +406,20 @@ function Interface({
 							</div>
 						)}
 					</div>
-					<button
-						className='reset-modal-button interface-button'
-						onClick={handleRestart}
-					>
-						<img src={reset} alt='reset' />
-					</button>
+					<div className='modal-buttons'>
+						<button
+							className='menu-button interface-button'
+							onClick={() => navigate('/levels')}
+						>
+							<img src={menu} alt='menu' />
+						</button>
+												<button
+							className='reset-modal-button interface-button'
+							onClick={handleRestart}
+						>
+							<img src={reset} alt='reset' />
+						</button>
+					</div>
 				</Modal>
 			) : (
 				<Modal isVisible={isModalVisible}>
@@ -426,12 +437,20 @@ function Interface({
 							)
 						)}
 					</div>
-					<button
-						className='reset-modal-button interface-button'
-						onClick={handleRestart}
-					>
-						<img src={reset} alt='reset' />
-					</button>
+					<div className='modal-buttons'>
+						<button
+							className='reset-modal-button interface-button'
+							onClick={handleRestart}
+						>
+							<img src={reset} alt='reset' />
+						</button>
+						<button
+							className='menu-button interface-button'
+							onClick={() => navigate('/levels')}
+						>
+							<img src={menu} alt='menu' />
+						</button>
+					</div>
 				</Modal>
 			)}
 

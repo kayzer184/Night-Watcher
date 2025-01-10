@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const User = require('../models/User')
+const Leaderboard = require('../models/leaderboard')
 
 router.post('/', async (req, res) => {
 	try {
@@ -64,10 +65,35 @@ router.post('/', async (req, res) => {
 						JSON.stringify(updatedUser.achievements)
 					)
 
+					// Подсчитываем общее количество звезд
+					let totalStars = 0
+					Object.values(updatedUser.achievements).forEach(levelAchievements => {
+						totalStars += Object.values(levelAchievements).filter(
+							v => v === true
+						).length
+					})
+
+					// Обновляем или создаем запись в таблице лидеров
+					await Leaderboard.findOneAndUpdate(
+						{ username: updatedUser.username },
+						{
+							username: updatedUser.username,
+							score: totalStars,
+							stars: totalStars,
+							lastUpdated: new Date(),
+						},
+						{ upsert: true, new: true }
+					)
+
+					console.log(
+						`[Success] Updated achievements and leaderboard for user ${userId}. Stars: ${totalStars}`
+					)
+
 					return res.json({
 						success: true,
 						message: 'Прогресс успешно обновлен',
 						updatedUser: updatedUser,
+						totalStars: totalStars,
 					})
 				} else {
 					throw new Error('Failed to update achievements')

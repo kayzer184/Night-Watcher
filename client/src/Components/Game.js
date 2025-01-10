@@ -73,6 +73,7 @@ function Game() {
 	const { volume, setVolume, brightness, setBrightness } = useSettings()
 	const [audioReady, setAudioReady] = useState(false)
 	const [isAudioInitialized, setIsAudioInitialized] = useState(false)
+	const [waitingForInteraction, setWaitingForInteraction] = useState(true)
 
 	const resetGame = () => {
 		setNpcMood(0)
@@ -268,6 +269,11 @@ function Game() {
 					const intersects = raycaster.intersectObjects(scene.children, true)
 
 					if (intersects.length > 0) {
+						const point = intersects[0].point
+						console.log(`${point.x.toFixed(2)} ${point.z.toFixed(2)}`)
+					}
+
+					if (intersects.length > 0) {
 						const intersection = intersects[0]
 						hitboxes.forEach(({ box }, index) => {
 							if (box.containsPoint(intersection.point)) {
@@ -289,10 +295,6 @@ function Game() {
 				const { model, path, speed } = npcData
 				const normalizedSpeed = speed * (1 / UPDATES_PER_SECOND) * 60
 
-				if (npcData.currentTarget >= path.length) {
-					npcData.currentTarget = 0
-				}
-
 				const target = path[npcData.currentTarget]
 				if (!target) return
 
@@ -303,33 +305,38 @@ function Game() {
 				)
 
 				const distance = direction.length()
+
+				// Если достигли точки
 				if (distance < normalizedSpeed) {
-					npcData.currentTarget = (npcData.currentTarget + 1) % path.length
+					// Важно! Проверяем, не последняя ли это точка
+					const nextTarget = npcData.currentTarget + 1
+					
+					// Если дошли до конца пути, начинаем сначала
+					if (nextTarget >= path.length) {
+						npcData.currentTarget = 0
+						console.log('Reset path to beginning:', {
+							npcId: npcData.id,
+							newTarget: path[0]
+						})
+					} else {
+						npcData.currentTarget = nextTarget
+						console.log('Moving to next point:', {
+							npcId: npcData.id,
+							oldTarget: target,
+							newTarget: path[nextTarget]
+						})
+					}
 				} else {
 					direction.normalize()
 					model.position.addScaledVector(direction, normalizedSpeed)
-					model.rotation.y =
-						Math.abs(direction.x) > Math.abs(direction.z)
-							? direction.x > 0
-								? Math.PI / 2
-								: -Math.PI / 2
-							: direction.z > 0
+					model.rotation.y = Math.abs(direction.x) > Math.abs(direction.z)
+						? direction.x > 0
+							? Math.PI / 2
+							: -Math.PI / 2
+						: direction.z > 0
 							? 0
 							: Math.PI
 				}
-				let isInLight = lightObjects.current.some(lightObject => {
-					return (
-						lightObject.light.visible &&
-						model.position.distanceTo(lightObject.model.position) < 300
-					)
-				})
-				setNpcMood(prevMood => {
-					const newMood = isInLight
-						? Math.min(100, prevMood - NPCMoodDecayRate)
-						: Math.max(0, prevMood + NPCMoodDecayRate)
-					setMaxNpcMood(prev => Math.max(prev, newMood))
-					return prevMood + (newMood - prevMood)
-				})
 			})
 		}
 
@@ -529,45 +536,54 @@ function Game() {
 		setAmbientLight(mapLoader.ambientLight)
 	}
 
-	const initializeAudio = useCallback(async () => {
-		if (!isAudioInitialized && !audioManager.current) {
-			try {
+	const initializeAudio = async () => {
+		try {
+			if (!audioManager.current) {
 				audioManager.current = new AudioManager()
 				await audioManager.current.init()
 				const musicPath = LEVELS_CONFIG[level].music
 				await audioManager.current.loadMusic(musicPath)
 
-				const savedTime = localStorage.getItem('musicCurrentTime')
-				if (savedTime) {
-					audioManager.current.setCurrentTime(parseFloat(savedTime))
+				const savedVolume = localStorage.getItem('gameVolume')
+				if (savedVolume !== null) {
+					audioManager.current.setVolume(parseFloat(savedVolume))
+				} else {
+					audioManager.current.setVolume(volume)
 				}
 
+				await audioManager.current.audioContext.resume()
 				await audioManager.current.play()
-				audioManager.current.setVolume(volume)
 				setIsAudioInitialized(true)
-			} catch (error) {
-				console.error('Failed to initialize audio:', error)
 			}
+		} catch (error) {
+			console.error('Failed to initialize audio:', error)
 		}
-	}, [level, volume, isAudioInitialized])
+	}
 
 	useEffect(() => {
-		const handleUserInteraction = async () => {
-			await initializeAudio()
+		const handleFirstInteraction = async () => {
+			if (waitingForInteraction) {
+				await initializeAudio()
+				document.removeEventListener('click', handleFirstInteraction)
+			}
 		}
 
-		if (!isAudioInitialized) {
-			window.addEventListener('click', handleUserInteraction)
-			window.addEventListener('touchstart', handleUserInteraction)
-			window.addEventListener('keydown', handleUserInteraction)
-		}
+		document.addEventListener('click', handleFirstInteraction)
 
 		return () => {
-			window.removeEventListener('click', handleUserInteraction)
-			window.removeEventListener('touchstart', handleUserInteraction)
-			window.removeEventListener('keydown', handleUserInteraction)
+			document.removeEventListener('click', handleFirstInteraction)
+			if (audioManager.current) {
+				localStorage.setItem(
+					'musicCurrentTime',
+					audioManager.current.getCurrentTime()
+				)
+				localStorage.setItem('gameVolume', volume.toString())
+				audioManager.current.stop()
+				audioManager.current = null
+				setIsAudioInitialized(false)
+			}
 		}
-	}, [initializeAudio, isAudioInitialized])
+	}, [waitingForInteraction])
 
 	useEffect(() => {
 		let saveInterval
@@ -602,6 +618,7 @@ function Game() {
 		setVolume(value)
 		if (audioManager.current) {
 			audioManager.current.setVolume(value)
+			sessionStorage.setItem('lastVolume', value.toString())
 		}
 	}, [])
 
@@ -623,7 +640,7 @@ function Game() {
 					'musicCurrentTime',
 					audioManager.current.getCurrentTime()
 				)
-				sessionStorage.setItem('lastVolume', volume)
+				sessionStorage.setItem('lastVolume', volume.toString())
 			}
 		})
 
@@ -632,18 +649,21 @@ function Game() {
 				const savedTime = sessionStorage.getItem('musicCurrentTime')
 				const savedVolume = sessionStorage.getItem('lastVolume')
 
+				if (savedVolume !== null) {
+					audioManager.current.setVolume(parseFloat(savedVolume))
+				} else {
+					audioManager.current.setVolume(volume)
+				}
+
 				if (savedTime) {
 					audioManager.current.setCurrentTime(parseFloat(savedTime))
 				}
 
+				if (audioManager.current.audioContext.state === 'suspended') {
+					await audioManager.current.audioContext.resume()
+				}
 				await audioManager.current.play()
 				audioManager.current.fadeIn()
-
-				if (volume === 0) {
-					audioManager.current.setVolume(0)
-				} else if (savedVolume !== null) {
-					audioManager.current.setVolume(parseFloat(savedVolume))
-				}
 			}
 		})
 
@@ -686,38 +706,36 @@ function Game() {
 	}, [])
 
 	useEffect(() => {
-		const autoStartAudio = async () => {
-			try {
-				const silentAudio = new Audio()
-				silentAudio
-					.play()
-					.then(async () => {
-						if (!audioManager.current) {
-							audioManager.current = new AudioManager()
-							await audioManager.current.init()
-							const musicPath = LEVELS_CONFIG[level].music
-							await audioManager.current.loadMusic(musicPath)
-
-							const savedTime = localStorage.getItem('musicCurrentTime')
-							if (savedTime) {
-								audioManager.current.setCurrentTime(parseFloat(savedTime))
-							}
-
-							await audioManager.current.play()
-							audioManager.current.setVolume(volume)
-							setIsAudioInitialized(true)
-						}
-					})
-					.catch(() => {
-						console.log('Автозапуск аудио не разрешен браузером')
-					})
-			} catch (error) {
-				console.error('Failed to auto-start audio:', error)
+		const handleNavigation = () => {
+			if (audioManager.current) {
+				localStorage.setItem(
+					'musicCurrentTime',
+					audioManager.current.getCurrentTime()
+				)
+				audioManager.current.stop()
+				audioManager.current = null
+				setIsAudioInitialized(false)
 			}
 		}
 
-		autoStartAudio()
+		// Слушаем событие popstate (навигация назад/вперед)
+		window.addEventListener('popstate', handleNavigation)
+
+		// Очистка при размонтировании
+		return () => {
+			window.removeEventListener('popstate', handleNavigation)
+			if (audioManager.current) {
+				localStorage.setItem(
+					'musicCurrentTime',
+					audioManager.current.getCurrentTime()
+				)
+				audioManager.current.stop()
+				audioManager.current = null
+				setIsAudioInitialized(false)
+			}
+		}
 	}, [])
+
 	return (
 		<div
 			ref={mountRef}
