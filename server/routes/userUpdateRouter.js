@@ -52,15 +52,18 @@ router.post('/', async (req, res) => {
 		)
 
 		let totalStars = 0
-		Object.entries(updatedUser.achievements).forEach(
-			([level, achievements]) => {
-				const starsInLevel = Object.values(achievements).filter(
+		const achievementsObj = updatedUser.achievements.toObject()
+
+		Object.keys(achievementsObj)
+			.filter(key => !isNaN(key))
+			.forEach(level => {
+				const levelAchievements = achievementsObj[level]
+				const starsInLevel = Object.values(levelAchievements).filter(
 					v => v === true
 				).length
 				console.log(`[Debug] Stars in level ${level}:`, starsInLevel)
 				totalStars += starsInLevel
-			}
-		)
+			})
 
 		console.log('[Debug] Total stars calculated:', totalStars)
 
@@ -93,7 +96,7 @@ router.post('/', async (req, res) => {
 		return res.json({
 			success: true,
 			message: 'Прогресс успешно обновлен',
-			updatedUser,
+			updatedUser: updatedUser.toObject(),
 			totalStars,
 		})
 	} catch (error) {

@@ -290,53 +290,65 @@ function Game() {
 
 		const moveNpc = () => {
 			NPCObjects.current.forEach(npcData => {
-				if (!npcData.path || !npcData.model) return
-
-				const { model, path, speed } = npcData
-				const normalizedSpeed = speed * (1 / UPDATES_PER_SECOND) * 60
-
-				const target = path[npcData.currentTarget]
-				if (!target) return
-
-				const direction = new THREE.Vector3(
-					target.x - model.position.x,
-					0,
-					target.z - model.position.z
-				)
-
-				const distance = direction.length()
-
-				// Если достигли точки
-				if (distance < normalizedSpeed) {
-					// Важно! Проверяем, не последняя ли это точка
-					const nextTarget = npcData.currentTarget + 1
-					
-					// Если дошли до конца пути, начинаем сначала
-					if (nextTarget >= path.length) {
-						npcData.currentTarget = 0
-						console.log('Reset path to beginning:', {
-							npcId: npcData.id,
-							newTarget: path[0]
-						})
-					} else {
-						npcData.currentTarget = nextTarget
-						console.log('Moving to next point:', {
-							npcId: npcData.id,
-							oldTarget: target,
-							newTarget: path[nextTarget]
-						})
+					if (!npcData.path || !npcData.model) return
+	
+					const { model, path, speed } = npcData
+					const normalizedSpeed = speed * (1 / UPDATES_PER_SECOND) * 60
+	
+					// Проверка валидности текущей цели
+					if (npcData.currentTarget >= path.length) {
+							npcData.currentTarget = 0
 					}
-				} else {
-					direction.normalize()
-					model.position.addScaledVector(direction, normalizedSpeed)
-					model.rotation.y = Math.abs(direction.x) > Math.abs(direction.z)
-						? direction.x > 0
-							? Math.PI / 2
-							: -Math.PI / 2
-						: direction.z > 0
-							? 0
-							: Math.PI
-				}
+	
+					const target = path[npcData.currentTarget]
+					if (!target) return
+	
+					// Вычисляем направление к цели
+					const direction = new THREE.Vector3(
+							target.x - model.position.x,
+							0,
+							target.z - model.position.z
+					)
+	
+					const distance = direction.length()
+					
+					// Увеличиваем порог достижения точки
+					const threshold = normalizedSpeed * 22.5 // Немного больше чем скорость движения
+	
+					if (distance < threshold) {
+							// Точно устанавливаем позицию в точку маршрута
+							model.position.set(target.x, model.position.y, target.z)
+							
+							// Проверяем, есть ли следующая точка
+							const nextTarget = (npcData.currentTarget + 1) % path.length
+							if (path[nextTarget]) {
+									npcData.currentTarget = nextTarget
+							}
+					} else {
+							direction.normalize()
+							model.position.addScaledVector(direction, normalizedSpeed)
+							
+							// Плавный поворот
+							const targetRotation = Math.abs(direction.x) > Math.abs(direction.z)
+									? direction.x > 0
+											? Math.PI / 2
+											: -Math.PI / 2
+									: direction.z > 0
+											? 0
+											: Math.PI
+	
+							// Плавно поворачиваем к целевому углу
+							const rotationSpeed = 0.1
+							const currentRotation = model.rotation.y
+							const rotationDiff = targetRotation - currentRotation
+	
+							// Нормализуем разницу углов
+							let normalizedDiff = rotationDiff
+							while (normalizedDiff > Math.PI) normalizedDiff -= Math.PI * 2
+							while (normalizedDiff < -Math.PI) normalizedDiff += Math.PI * 2
+	
+							model.rotation.y += normalizedDiff * rotationSpeed
+					}
 			})
 		}
 
