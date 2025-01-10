@@ -35,37 +35,24 @@ function LevelsPage() {
 	const { user } = useAuth()
 	const [startAnimation, setStartAnimation] = useState(false)
 	const [selectedLevel, setSelectedLevel] = useState(null)
-	const [levelsProgress, setLevelsProgress] = useState({})
+	const [achievements, setAchievements] = useState({})
 	const navigate = useNavigate()
 
 	useEffect(() => {
-		const fetchUserProgress = async () => {
-			if (user) {
-				try {
-					console.log('[Debug] Fetching user progress for:', user.id)
-					const response = await fetch(
-						`https://api-night-watcher.vercel.app/getUser/${user.id}`,
-						{
-							credentials: 'include',
-						}
-					)
-					const data = await response.json()
-
+		if (user) {
+			fetch(`https://api-night-watcher.vercel.app/getUser/${user.id}`, {
+				credentials: 'include',
+			})
+				.then(response => response.json())
+				.then(data => {
 					if (data.success) {
-						console.log('[Debug] Received user data:', data)
-						setLevelsProgress(data.user.achievements || {})
-					} else {
-						console.error('[Error] Failed to get user data:', data.message)
+						setAchievements(data.user.achievements || {})
 					}
-				} catch (error) {
-					console.error('[Error] Failed to fetch user progress:', error)
-				}
-			} else {
-				setLevelsProgress({})
-			}
+				})
+				.catch(error => {
+					console.error('Failed to fetch achievements:', error)
+				})
 		}
-
-		fetchUserProgress()
 	}, [user])
 
 	function handleBack() {
@@ -89,20 +76,14 @@ function LevelsPage() {
 					>
 						<span className='level-name'>{level.name}</span>
 						<div className='level-stars'>
-							{[1, 2, 3].map(starIndex => {
-								const isAchieved =
-									levelsProgress[level.id]?.[starIndex] === true
-								console.log(
-									`[Debug] Level ${level.id}, Star ${starIndex}, Achieved:`,
-									isAchieved
-								)
-								return (
-									<StarIcon
-										key={starIndex}
-										className={`star-icon ${isAchieved ? 'filled' : ''}`}
-									/>
-								)
-							})}
+							{[1, 2, 3].map(starIndex => (
+								<StarIcon
+									key={starIndex}
+									className={`star-icon ${
+										achievements[level.id]?.[starIndex] === true ? 'filled' : ''
+									}`}
+								/>
+							))}
 						</div>
 					</button>
 				))}
