@@ -297,7 +297,7 @@ function Game() {
 
 				// Проверка валидности текущей цели
 				if (npcData.currentTarget >= path.length) {
-						npcData.currentTarget = 0
+					npcData.currentTarget = 0
 				}
 
 				const target = path[npcData.currentTarget]
@@ -305,56 +305,44 @@ function Game() {
 
 				// Вычисляем направление к цели
 				const direction = new THREE.Vector3(
-						target.x - model.position.x,
-						0,
-						target.z - model.position.z
+					target.x - model.position.x,
+					0,
+					target.z - model.position.z
 				)
 
 				const distance = direction.length()
-				
-				// Увеличиваем порог достижения точки
-				const threshold = normalizedSpeed * 1.5 // Немного больше чем скорость движения
+
+				const threshold = Math.max(0.1, normalizedSpeed * 0.25)
 
 				if (distance < threshold) {
-						// Точно устанавливаем позицию в точку маршрута
-						model.position.set(target.x, model.position.y, target.z)
-						
-						// Проверяем, есть ли следующая точка
-						const nextTarget = (npcData.currentTarget + 1) % path.length
-						if (path[nextTarget]) {
-								npcData.currentTarget = nextTarget
-						}
+					model.position.set(target.x, model.position.y, target.z)
+					npcData.currentTarget = (npcData.currentTarget + 1) % path.length
 				} else {
 					direction.normalize()
-					model.position.addScaledVector(direction, normalizedSpeed)
-					
-					// Плавный поворот
-					const targetRotation = Math.abs(direction.x) > Math.abs(direction.z)
-							? direction.x > 0
-									? Math.PI / 2
-									: -Math.PI / 2
-							: direction.z > 0
-									? 0
-									: Math.PI
+					const moveSpeed = Math.max(normalizedSpeed, 0.01)
 
-					// Плавно поворачиваем к целевому углу
-					const rotationSpeed = 0.1
-					const currentRotation = model.rotation.y
-					const rotationDiff = targetRotation - currentRotation
+					const newX = model.position.x + direction.x * moveSpeed
+					const newZ = model.position.z + direction.z * moveSpeed
 
-					// Нормализуем разницу углов
-					let normalizedDiff = rotationDiff
-					while (normalizedDiff > Math.PI) normalizedDiff -= Math.PI * 2
-					while (normalizedDiff < -Math.PI) normalizedDiff += Math.PI * 2
+					if (
+						Math.abs(newX - target.x) > Math.abs(model.position.x - target.x) ||
+						Math.abs(newZ - target.z) > Math.abs(model.position.z - target.z)
+					) {
+						model.position.set(target.x, model.position.y, target.z)
+						npcData.currentTarget = (npcData.currentTarget + 1) % path.length
+					} else {
+						model.position.x = newX
+						model.position.z = newZ
+					}
 
-					model.rotation.y += normalizedDiff * rotationSpeed
+					const angle = Math.atan2(direction.x, direction.z)
+					model.rotation.y = angle
 				}
-				
-				// Проверяем, находится ли NPC в освещенной зоне
+
 				const isNpcInLight = lightObjects.current.some(({ light }) => {
 					if (!light.visible) return false
 					const distance = model.position.distanceTo(light.position)
-					return distance < 300 // Радиус освещения
+					return distance < 300
 				})
 
 				setNpcMood(prevMood => {
@@ -362,7 +350,7 @@ function Game() {
 						? Math.min(100, prevMood - NPCMoodDecayRate)
 						: Math.max(0, prevMood + NPCMoodDecayRate)
 					setMaxNpcMood(prev => Math.max(prev, newMood))
-					return prevMood + (newMood - prevMood)
+					return newMood // Убрал лишнее сложение
 				})
 			})
 		}
