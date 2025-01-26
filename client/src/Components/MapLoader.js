@@ -21,7 +21,11 @@ function MapLoader(
 	MapModelLoader.load(
 		levelConfig.mapModel,
 		object => {
-			object.scale.set(0.1, 0.1, 0.1)
+			object.scale.set(
+				levelConfig.mapScale,
+				levelConfig.mapScale,
+				levelConfig.mapScale
+			)
 			object.position.set(0, 0, 0)
 
 			object.traverse(child => {

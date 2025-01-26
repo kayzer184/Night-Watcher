@@ -14,16 +14,21 @@ function addStreetLight(
 	zR = 0,
 	level = 1
 ) {
-	const StreetLightModelLoader = new FBXLoader()
+	const levelConfig = LEVELS_CONFIG[level]
 	const modelPath =
-		LEVELS_CONFIG[level].streetLightModels[
-			Math.floor(Math.random() * LEVELS_CONFIG[level].streetLightModels.length)
+		levelConfig.streetLightModels[
+			Math.floor(Math.random() * levelConfig.streetLightModels.length)
 		]
 
-	StreetLightModelLoader.load(
+	const loader = new FBXLoader()
+	loader.load(
 		modelPath,
 		object => {
-			object.scale.set(0.09, 0.09, 0.09)
+			object.scale.set(
+				levelConfig.streetLightScale,
+				levelConfig.streetLightScale,
+				levelConfig.streetLightScale
+			)
 
 			object.traverse(child => {
 				if (child.isMesh) {

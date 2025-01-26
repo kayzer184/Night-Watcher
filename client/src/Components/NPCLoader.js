@@ -47,7 +47,11 @@ export default function NPCLoader(
 				const spawn = levelConfig.npcSpawns[index]
 				const path = levelConfig.npcPaths[index]
 
-				NPC.scale.set(0.12, 0.12, 0.12)
+				NPC.scale.set(
+					levelConfig.npcScale,
+					levelConfig.npcScale,
+					levelConfig.npcScale
+				)
 				NPC.position.set(spawn[0], spawn[1], spawn[2])
 				scene.add(NPC)
 

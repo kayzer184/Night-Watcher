@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useLayoutEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import '../Sass/LevelsPage.scss'
@@ -38,7 +38,7 @@ function LevelsPage() {
 	const [achievements, setAchievements] = useState({})
 	const navigate = useNavigate()
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (user) {
 			fetch(`https://api-night-watcher.vercel.app/getUser/${user.id}`, {
 				credentials: 'include',
@@ -46,7 +46,6 @@ function LevelsPage() {
 				.then(response => response.json())
 				.then(data => {
 					if (data.success) {
-						console.log('Received achievements:', data.user.achievements)
 						setAchievements(data.user.achievements || {})
 					}
 				})

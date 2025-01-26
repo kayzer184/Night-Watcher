@@ -1,0 +1,51 @@
+export const TUTORIAL_STEPS = {
+	1: {
+		id: 'WELCOME',
+		text: 'Добро пожаловать в Night Watcher! Вы - смотритель ночного города.',
+		highlight: null,
+		position: 'center',
+		waitForAction: false,
+		overlay: true,
+	},
+	2: {
+		id: 'MOOD_BAR',
+		text: 'Это шкала недовольства пешеходов. Не позволяйте ей достигнуть 100%!',
+		highlight: '.ProgressBar-Wrapper:first-child',
+		position: 'center',
+		waitForAction: false,
+		overlay: true,
+	},
+	3: {
+		id: 'ENERGY_BAR',
+		text: 'Следите за запасом энергии. Когда фонари включены, энергия расходуется.',
+		highlight: '.ProgressBar-Wrapper:nth-child(2)',
+		position: 'center',
+		waitForAction: false,
+		overlay: true,
+	},
+	4: {
+		id: 'TIMER',
+		text: 'У вас ограниченное время на прохождение уровня.',
+		highlight: '.Timer',
+		position: 'center',
+		waitForAction: false,
+		overlay: true,
+	},
+	5: {
+		id: 'LIGHTS_CONTROL',
+		text: 'Нажмите на любой фонарь, чтобы включить или выключить его.',
+		highlight: null,
+		position: 'center',
+		waitForAction: true,
+		checkAction: gameState => gameState.lightSwitched,
+		overlay: false
+	},
+	6: {
+		id: 'FINAL',
+		text: 'Отлично! Теперь вы готовы начать игру. Удачи!',
+		highlight: null,
+		position: 'center',
+		waitForAction: false,
+		overlay: true,
+	},
+}

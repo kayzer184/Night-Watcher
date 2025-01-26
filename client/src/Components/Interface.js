@@ -11,6 +11,7 @@ import LoginGoogleButton from './LoginGoogleButton'
 import { ReactComponent as StarIcon } from '../Assets/Icons/Star.svg'
 import { useAuth } from '../context/AuthContext'
 import AudioManager from '../Utils/AudioManager'
+import TutorialTask from './TutorialTask'
 
 // Helper function to determine mood color
 function getMoodColor(mood) {
@@ -43,6 +44,8 @@ function Interface({
 	currentVolume,
 	onBrightnessChange,
 	onVolumeControlClick,
+	showTutorialTask,
+	tutorialTaskText,
 }) {
 	const navigate = useNavigate()
 	const { user, setUser } = useAuth()
@@ -413,7 +416,7 @@ function Interface({
 						>
 							<img src={menu} alt='menu' />
 						</button>
-												<button
+						<button
 							className='reset-modal-button interface-button'
 							onClick={handleRestart}
 						>
@@ -490,6 +493,8 @@ function Interface({
 					{Math.round((currentVolume || 0) * 100)}%
 				</span>
 			</div>
+
+			{showTutorialTask && <TutorialTask text={tutorialTaskText} />}
 		</div>
 	)
 }

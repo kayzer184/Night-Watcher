@@ -20,6 +20,7 @@ import { EVENTS_CONFIG } from '../Config/EventsConfig'
 import { useAuth } from '../context/AuthContext'
 import AudioManager from '../Utils/AudioManager'
 import { useSettings } from '../context/SettingsContext'
+import Tutorial from './Tutorial'
 
 function shuffle(array) {
 	for (let i = array.length - 1; i > 0; i--) {
@@ -74,6 +75,64 @@ function Game() {
 	const [audioReady, setAudioReady] = useState(false)
 	const [isAudioInitialized, setIsAudioInitialized] = useState(false)
 	const [waitingForInteraction, setWaitingForInteraction] = useState(true)
+	const [showTutorial, setShowTutorial] = useState(true)
+	const [currentTutorialStep, setCurrentTutorialStep] = useState(1)
+	const [waitingForAction, setWaitingForAction] = useState(false)
+	const waitingForActionRef = useRef(false)
+	const [lightSwitched, setLightSwitched] = useState(false)
+	const [showTutorialTask, setShowTutorialTask] = useState(false)
+	const [tutorialTaskText, setTutorialTaskText] = useState('')
+	const currentStepRef = useRef(1)
+
+	useEffect(() => {
+		const tutorialCompleted = localStorage.getItem('tutorialCompleted')
+		if (level === 1 && !tutorialCompleted) {
+			setShowTutorial(true)
+		} else {
+			setShowTutorial(false)
+		}
+	}, [level])
+
+	useEffect(() => {
+		currentStepRef.current = currentTutorialStep
+
+		if (currentTutorialStep === 5) {
+			setShowTutorialTask(true)
+			setTutorialTaskText(
+				'Включите фонарь'
+			)
+			setWaitingForAction(true)
+			waitingForActionRef.current = true
+			setLightSwitched(false)
+			isPausedRef.current = false
+			setIsPaused(false)
+			NPCObjects.current.forEach(npc => {
+				if (npc.mixer) {
+					npc.mixer.timeScale = 0;
+				}
+			});
+			setNPCMoodDecayRate(0);
+			setEnergyDecayRate(0);
+		} else {
+			setShowTutorialTask(false)
+			setTutorialTaskText('')
+			setWaitingForAction(false)
+			waitingForActionRef.current = false
+			isPausedRef.current = currentTutorialStep !== 6;
+			setIsPaused(currentTutorialStep !== 6)
+
+			// Возвращаем нормальную скорость NPC и шкал после туториала
+			if (currentTutorialStep === 6) {
+				NPCObjects.current.forEach(npc => {
+					if (npc.mixer) {
+						npc.mixer.timeScale = LEVELS_CONFIG[level].npcSpeed;
+					}
+				});
+				setNPCMoodDecayRate(LEVELS_CONFIG[level].moodDecayRate);
+				setEnergyDecayRate(LEVELS_CONFIG[level].energyDecayRate);
+			}
+		}
+	}, [currentTutorialStep])
 
 	const resetGame = () => {
 		setNpcMood(0)
@@ -262,23 +321,17 @@ function Game() {
 		window.addEventListener(
 			'click',
 			event => {
-				if (!isPausedRef.current) {
+				if (!isPausedRef.current || waitingForActionRef.current) {
 					mouse.x = (event.clientX / window.innerWidth) * 2 - 1
 					mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
 					raycaster.setFromCamera(mouse, camera)
 					const intersects = raycaster.intersectObjects(scene.children, true)
 
 					if (intersects.length > 0) {
-						const point = intersects[0].point
-						console.log(`${point.x.toFixed(2)} ${point.z.toFixed(2)}`)
-					}
-
-					if (intersects.length > 0) {
 						const intersection = intersects[0]
 						hitboxes.forEach(({ box }, index) => {
 							if (box.containsPoint(intersection.point)) {
-								const light = lightObjects.current[index].light
-								toggleLight(light, index)
+								handleLightSwitch(index)
 							}
 						})
 					}
@@ -539,15 +592,12 @@ function Game() {
 	}
 
 	useEffect(() => {
-		console.log('Light intensity changed:', brightness)
 		if (ambientLight) {
-			console.log('Updating light intensity to:', brightness)
 			ambientLight.intensity = brightness
 		}
 	}, [brightness, ambientLight])
 
 	const handleMapLoad = mapLoader => {
-		console.log('Map loaded, ambient light:', mapLoader.ambientLight)
 		setAmbientLight(mapLoader.ambientLight)
 	}
 
@@ -751,11 +801,50 @@ function Game() {
 		}
 	}, [])
 
+	const handleTutorialComplete = () => {
+		setShowTutorial(false)
+		localStorage.setItem('tutorialCompleted', 'true')
+	}
+
+	const handleWaitForAction = useCallback(waiting => {
+		setWaitingForAction(waiting)
+		setIsPaused(!waiting)
+	}, [])
+
+	const handleLightSwitch = useCallback(
+		lightIndex => {
+			const light = lightObjects.current[lightIndex]?.light
+
+			// Всегда переключаем свет если есть энергия
+			if (light && energy > 0) {
+				light.visible = !light.visible
+
+				if (currentStepRef.current === 5) {
+					setLightSwitched(true)
+					setShowTutorialTask(false)
+					setCurrentTutorialStep(6)
+					setWaitingForAction(false)
+					waitingForActionRef.current = false
+				}
+			}
+		},
+		[energy]
+	)
+
 	return (
 		<div
 			ref={mountRef}
 			onClick={!isAudioInitialized ? initializeAudio : undefined}
 		>
+			{showTutorial && !showTutorialTask && (
+				<Tutorial
+					currentStep={currentTutorialStep}
+					setCurrentStep={setCurrentTutorialStep}
+					onComplete={handleTutorialComplete}
+					gameState={{ lightSwitched }}
+					onWaitForAction={handleWaitForAction}
+				/>
+			)}
 			<div className='Interface-Box'>
 				<Interface
 					NPCObjects={NPCObjects}
@@ -771,7 +860,7 @@ function Game() {
 					setEnergyDecayRate={setEnergyDecayRate}
 					onPause={handlePause}
 					onRestart={resetGame}
-					isPaused={isPaused}
+					isPaused={isPaused && !waitingForAction}
 					isWin={isWin}
 					level={level}
 					maxNpcMood={maxNpcMood}
@@ -780,6 +869,9 @@ function Game() {
 					onVolumeChange={handleVolumeChange}
 					currentVolume={volume}
 					onVolumeControlClick={handleVolumeControlClick}
+					onLightSwitch={handleLightSwitch}
+					showTutorialTask={showTutorialTask}
+					tutorialTaskText={tutorialTaskText}
 				/>
 			</div>
 		</div>

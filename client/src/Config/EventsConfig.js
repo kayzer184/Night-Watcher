@@ -1,5 +1,41 @@
 export const EVENTS_CONFIG = {
 	LEVEL_1: {
+		GROUP_PANIC: {
+			id: 'GROUP_PANIC',
+			duration: 6000,
+			conditions: gameState => {
+				return gameState.npcMood > 60 && gameState.NPCObjects.length >= 3
+			},
+			action: (gameState, targetNPC) => {
+				const nearbyNPCs = gameState.NPCObjects.filter(
+					npc => npc.model.position.distanceTo(targetNPC.model.position) < 200
+				)
+
+				nearbyNPCs.forEach(npc => {
+					npc.previousState = {
+						speed: npc.speed,
+					}
+					npc.speed *= 1.8
+					npc.isInEvent = true
+				})
+			},
+			cleanup: (targetNPC, gameState) => {
+				if (targetNPC.previousState) {
+					const nearbyNPCs = gameState.NPCObjects.filter(
+						npc => npc.model.position.distanceTo(targetNPC.model.position) < 200
+					)
+
+					nearbyNPCs.forEach(npc => {
+						if (npc.previousState) {
+							npc.speed = npc.previousState.speed
+							npc.isInEvent = false
+						}
+					})
+				}
+			},
+		},
+	},
+	LEVEL_2: {
 		DRUNK_NPC: {
 			id: 'DRUNK_NPC',
 			duration: 5000,
@@ -47,7 +83,7 @@ export const EVENTS_CONFIG = {
 			},
 		},
 	},
-	LEVEL_2: {
+	LEVEL_3: {
 		LOST_NPC: {
 			id: 'LOST_NPC',
 			duration: 8000,
@@ -96,42 +132,6 @@ export const EVENTS_CONFIG = {
 				if (targetNPC.previousState) {
 					targetNPC.speed = targetNPC.previousState.speed
 					targetNPC.isInEvent = false
-				}
-			},
-		},
-	},
-	LEVEL_3: {
-		GROUP_PANIC: {
-			id: 'GROUP_PANIC',
-			duration: 6000,
-			conditions: gameState => {
-				return gameState.npcMood > 60 && gameState.NPCObjects.length >= 3
-			},
-			action: (gameState, targetNPC) => {
-				const nearbyNPCs = gameState.NPCObjects.filter(
-					npc => npc.model.position.distanceTo(targetNPC.model.position) < 200
-				)
-
-				nearbyNPCs.forEach(npc => {
-					npc.previousState = {
-						speed: npc.speed,
-					}
-					npc.speed *= 1.8
-					npc.isInEvent = true
-				})
-			},
-			cleanup: (targetNPC, gameState) => {
-				if (targetNPC.previousState) {
-					const nearbyNPCs = gameState.NPCObjects.filter(
-						npc => npc.model.position.distanceTo(targetNPC.model.position) < 200
-					)
-
-					nearbyNPCs.forEach(npc => {
-						if (npc.previousState) {
-							npc.speed = npc.previousState.speed
-							npc.isInEvent = false
-						}
-					})
 				}
 			},
 		},
