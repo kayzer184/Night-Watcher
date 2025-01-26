@@ -844,7 +844,7 @@ function Game() {
 				/>
 			)}
 			<div className='Interface-Box'>
-				{/*<Interface
+				<Interface
 					NPCObjects={NPCObjects}
 					NPCMood={Math.round(npcMood)}
 					setNpcMood={setNpcMood}
@@ -871,7 +871,7 @@ function Game() {
 					lightSwitches={lightSwitches}
 					showTutorialTask={showTutorialTask}
 					tutorialTaskText={tutorialTaskText}
-				/>*/}
+				/>
 			</div>
 		</div>
 	)
