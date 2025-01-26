@@ -54,7 +54,7 @@ export const LEVELS_CONFIG = {
 		mapScale: 0.1,
 		npcModels: ['/Models/NPC_2_1.fbx', '/Models/NPC_2_2.fbx'],
 		npcScale: 0.12,
-		streetLightModels: ['/Models/Street Light_1.fbx'],
+		streetLightModels: ['/Models/Street Light_2.fbx'],
 		streetLightScale: 0.09,
 		npcCount: 3,
 		npcSpeed: 0.33,

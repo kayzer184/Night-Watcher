@@ -86,49 +86,45 @@ function Game() {
 	const currentStepRef = useRef(1)
 
 	useEffect(() => {
-		setShowTutorial(true)
+		setShowTutorial(level === 1)
 	}, [level])
-
 	useEffect(() => {
-		currentStepRef.current = currentTutorialStep
-
-		if (currentTutorialStep === 5) {
-			setShowTutorialTask(true)
-			setTutorialTaskText(
-				'Включите фонарь'
-			)
-			setWaitingForAction(true)
-			waitingForActionRef.current = true
-			setLightSwitched(false)
-			isPausedRef.current = false
-			setIsPaused(false)
-			NPCObjects.current.forEach(npc => {
-				if (npc.mixer) {
-					npc.mixer.timeScale = 0;
-				}
-			});
-			setNPCMoodDecayRate(0);
-			setEnergyDecayRate(0);
-		} else {
-			setShowTutorialTask(false)
-			setTutorialTaskText('')
-			setWaitingForAction(false)
-			waitingForActionRef.current = false
-			isPausedRef.current = currentTutorialStep !== 6;
-			setIsPaused(currentTutorialStep !== 6)
-
-			// Возвращаем нормальную скорость NPC и шкал после туториала
-			if (currentTutorialStep === 6) {
+		if (level === 1) {
+			currentStepRef.current = currentTutorialStep
+			if ([1, 2, 3, 4].includes(currentTutorialStep)) {
+				setShowTutorialTask(false)
+				setTutorialTaskText('')
+				waitingForActionRef.current = false
+				setIsPaused(true)
+				isPausedRef.current = true
+			} else if (currentTutorialStep === 5) {
+				setShowTutorialTask(true)
+				setTutorialTaskText('Включите фонарь')
+				waitingForActionRef.current = true
+				setLightSwitched(false)
+				setIsPaused(false)
+				isPausedRef.current = false
 				NPCObjects.current.forEach(npc => {
 					if (npc.mixer) {
-						npc.mixer.timeScale = LEVELS_CONFIG[level].npcSpeed;
+						npc.mixer.timeScale = 0
 					}
-				});
-				setNPCMoodDecayRate(LEVELS_CONFIG[level].moodDecayRate);
-				setEnergyDecayRate(LEVELS_CONFIG[level].energyDecayRate);
+				})
+				setNPCMoodDecayRate(0)
+				setEnergyDecayRate(0)
+			} else if (currentTutorialStep === 6) {
+				setShowTutorialTask(false)
+				setTutorialTaskText('')
+				waitingForActionRef.current = false
+				setIsPaused(false)
+				isPausedRef.current = false
+				NPCObjects.current.forEach(npc => {
+					if (npc.mixer) {
+						npc.mixer.timeScale = LEVELS_CONFIG[level].npcSpeed
+					}
+				})
 			}
 		}
-	}, [currentTutorialStep])
+	}, [currentTutorialStep, level])
 
 	const resetGame = () => {
 		setNpcMood(0)
@@ -802,6 +798,19 @@ function Game() {
 
 	const handleTutorialComplete = () => {
 		setShowTutorial(false)
+		isPausedRef.current = false
+		setIsPaused(false)
+
+		NPCObjects.current.forEach(npc => {
+			if (npc.mixer) {
+				npc.mixer.timeScale = LEVELS_CONFIG[level].npcSpeed
+			}
+		})
+
+		setNPCMoodDecayRate(LEVELS_CONFIG[level].moodDecayRate)
+		setEnergyDecayRate(LEVELS_CONFIG[level].energyDecayRate)
+
+		lastUpdateRef.current = performance.now()
 	}
 
 	const handleWaitForAction = useCallback(waiting => {
@@ -834,7 +843,7 @@ function Game() {
 			ref={mountRef}
 			onClick={!isAudioInitialized ? initializeAudio : undefined}
 		>
-			{showTutorial && !showTutorialTask && (
+			{showTutorial && !showTutorialTask && level === 1 && (
 				<Tutorial
 					currentStep={currentTutorialStep}
 					setCurrentStep={setCurrentTutorialStep}
