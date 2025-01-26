@@ -48,6 +48,8 @@ export const LEVELS_CONFIG = {
 				{ x: -70, z: -715 },
 			],
 		],
+		music: '/audio/Music_1.mp3',
+		musicVolume: 0.5,
 	},
 	2: {
 		mapModel: '/Models/Map_2.fbx',
