@@ -85,12 +85,7 @@ function Game() {
 	const currentStepRef = useRef(1)
 
 	useEffect(() => {
-		const tutorialCompleted = localStorage.getItem('tutorialCompleted')
-		if (level === 1 && !tutorialCompleted) {
-			setShowTutorial(true)
-		} else {
-			setShowTutorial(false)
-		}
+		setShowTutorial(true)
 	}, [level])
 
 	useEffect(() => {
@@ -803,7 +798,6 @@ function Game() {
 
 	const handleTutorialComplete = () => {
 		setShowTutorial(false)
-		localStorage.setItem('tutorialCompleted', 'true')
 	}
 
 	const handleWaitForAction = useCallback(waiting => {
