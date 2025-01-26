@@ -16,18 +16,21 @@ const levelData = [
 		name: 'Уровень 1',
 		description: 'Это первый уровень, где вы познакомитесь с основами.',
 		screenshot: level1Screenshot,
+		requiredStars: 0
 	},
 	{
 		id: 2,
 		name: 'Уровень 2',
 		description: 'Сложность повышается. Осторожно!',
 		screenshot: level2Screenshot,
+		requiredStars: 3
 	},
 	{
 		id: 3,
 		name: 'Уровень 3',
 		description: 'Приготовьтесь к настоящему вызову!',
 		screenshot: level3Screenshot,
+		requiredStars: 6
 	},
 ]
 
@@ -55,41 +58,61 @@ function LevelsPage() {
 		}
 	}, [user])
 
+	const getTotalStars = () => {
+		let total = 0
+		Object.values(achievements).forEach(levelAchievements => {
+			Object.values(levelAchievements).forEach(achieved => {
+				if (achieved) total++
+			})
+		})
+		return total
+	}
+
 	function handleBack() {
 		setStartAnimation(true)
 		setTimeout(() => navigate('/'), 1000)
 	}
 
 	function handleLevelSelect(level) {
-		setSelectedLevel(level)
+		const totalStars = getTotalStars()
+		if (totalStars >= level.requiredStars) {
+			setSelectedLevel(level)
+		}
 	}
 
 	return (
 		<div className={`LevelsPage ${startAnimation ? 'animate' : ''}`}>
 			<h1 className='title'>Выберите уровень</h1>
 			<div className='levels-container'>
-				{levelData.map(level => (
-					<button
-						key={level.id}
-						className='level-button'
-						onClick={() => handleLevelSelect(level)}
-					>
-						<span className='level-name'>{level.name}</span>
-						<div className='level-stars'>
-							{[1, 2, 3].map(starIndex => {
-								const levelAchievements = achievements[String(level.id)] || {}
-								return (
-									<StarIcon
-										key={starIndex}
-										className={`star-icon ${
-											levelAchievements[starIndex] === true ? 'filled' : ''
-										}`}
-									/>
-								)
-							})}
-						</div>
-					</button>
-				))}
+				{levelData.map(level => {
+					const totalStars = getTotalStars()
+					const isLocked = totalStars < level.requiredStars
+					return (
+						<button
+							key={level.id}
+							className={`level-button ${isLocked ? 'locked' : ''}`}
+							onClick={() => handleLevelSelect(level)}
+						>
+							<span className='level-name'>
+								{level.name}
+								{isLocked && ` (${level.requiredStars} ⭐)`}
+							</span>
+							<div className='level-stars'>
+								{[1, 2, 3].map(starIndex => {
+									const levelAchievements = achievements[String(level.id)] || {}
+									return (
+										<StarIcon
+											key={starIndex}
+											className={`star-icon ${
+												levelAchievements[starIndex] === true ? 'filled' : ''
+											}`}
+										/>
+									)
+								})}
+							</div>
+						</button>
+					)
+				})}
 			</div>
 			<button onClick={handleBack} className='back-button'>
 				Назад

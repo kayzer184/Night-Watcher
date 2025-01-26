@@ -8,24 +8,24 @@ export const LEVELS_CONFIG = {
 		streetLightScale: 0.4,
 		npcCount: 2,
 		npcSpeed: 0.45,
-		timeLimit: 60,
+		timeLimit: 20,
 		moodDecayRate: 0.005,
-		energyDecayRate: 1.5,
+		energyDecayRate: 1,
 		starConditions: {
-			MOOD_EXPERT: {
-				id: 'MOOD_EXPERT',
-				description: 'Держите недовольство ниже 60%',
-				check: gameState => gameState.npcMood < 60,
+			FINISH_LEVEL: {
+				id: 'FINISH_LEVEL', 
+				description: 'Пройдите уровень',
+				check: gameState => gameState.isWin === true,
 			},
-			ENERGY_EXPERT: {
-				id: 'ENERGY_EXPERT',
-				description: 'Сохраните более 40% энергии',
-				check: gameState => gameState.energy > 40,
+			SWITCH_LIGHT: {
+				id: 'SWITCH_LIGHT',
+				description: 'Включите фонарь 1 раз',
+				check: gameState => gameState.lightSwitches > 0,
 			},
-			GROUP_MASTER: {
-				id: 'GROUP_MASTER',
-				description: 'Успешно разрешите групповую панику',
-				check: gameState => gameState.handledGroupPanics > 0,
+			KEEP_MOOD: {
+				id: 'KEEP_MOOD',
+				description: 'Не дайте недовольству подняться выше 50%',
+				check: gameState => gameState.maxNpcMood < 50,
 			},
 		},
 		streetLights: [

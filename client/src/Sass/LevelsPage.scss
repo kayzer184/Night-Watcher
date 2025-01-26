@@ -71,6 +71,53 @@
 		&:active {
 			transform: scale(0.95);
 		}
+
+		&.locked {
+			background-color: #1a1a1a;
+			border-color: #444;
+			color: #666;
+			cursor: not-allowed;
+			position: relative;
+			overflow: hidden;
+
+			&::before {
+				position: absolute;
+				top: 10px;
+				right: 10px;
+				font-size: 20px;
+			}
+
+			.level-name {
+				opacity: 0.7;
+			}
+
+			.level-stars {
+				opacity: 0.5;
+
+				.star-icon {
+					fill: #444;
+				}
+			}
+
+			&:hover {
+				transform: none;
+				box-shadow: none;
+				animation: shake 0.5s ease-in-out;
+			}
+		}
+	}
+
+	@keyframes shake {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		25% {
+			transform: translateX(-5px);
+		}
+		75% {
+			transform: translateX(5px);
+		}
 	}
 
 	.modal {

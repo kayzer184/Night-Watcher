@@ -44,6 +44,7 @@ function Interface({
 	currentVolume,
 	onBrightnessChange,
 	onVolumeControlClick,
+	lightSwitches,
 	showTutorialTask,
 	tutorialTaskText,
 }) {
@@ -375,6 +376,7 @@ function Interface({
 											npcMood: NPCMood,
 											maxNpcMood: maxNpcMood,
 											energy: Energy,
+											lightSwitches: lightSwitches,
 										})
 											? 'completed'
 											: ''
@@ -387,6 +389,7 @@ function Interface({
 												npcMood: NPCMood,
 												maxNpcMood: maxNpcMood,
 												energy: Energy,
+												lightSwitches: lightSwitches,
 											})
 												? 'filled'
 												: ''

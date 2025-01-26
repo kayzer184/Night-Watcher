@@ -80,6 +80,7 @@ function Game() {
 	const [waitingForAction, setWaitingForAction] = useState(false)
 	const waitingForActionRef = useRef(false)
 	const [lightSwitched, setLightSwitched] = useState(false)
+	const [lightSwitches, setLightSwitches] = useState(0)
 	const [showTutorialTask, setShowTutorialTask] = useState(false)
 	const [tutorialTaskText, setTutorialTaskText] = useState('')
 	const currentStepRef = useRef(1)
@@ -135,6 +136,7 @@ function Game() {
 		setEnergy(100)
 		setTimeLeft(LEVELS_CONFIG[level].timeLimit)
 		setIsWin(null)
+		setLightSwitches(0)
 		setIsPaused(false)
 		setIsSystemPaused(null)
 		isPausedRef.current = false
@@ -278,6 +280,7 @@ function Game() {
 		const toggleLight = (light, index) => {
 			if (energy > 0) {
 				light.visible = !light.visible
+				setLightSwitches(prev => prev + 1)
 			}
 		}
 
@@ -327,6 +330,7 @@ function Game() {
 						hitboxes.forEach(({ box }, index) => {
 							if (box.containsPoint(intersection.point)) {
 								handleLightSwitch(index)
+								setLightSwitches(prev => prev + 1)
 							}
 						})
 					}
@@ -864,6 +868,7 @@ function Game() {
 					currentVolume={volume}
 					onVolumeControlClick={handleVolumeControlClick}
 					onLightSwitch={handleLightSwitch}
+					lightSwitches={lightSwitches}
 					showTutorialTask={showTutorialTask}
 					tutorialTaskText={tutorialTaskText}
 				/>
