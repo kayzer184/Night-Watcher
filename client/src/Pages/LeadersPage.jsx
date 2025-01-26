@@ -20,24 +20,26 @@ const getLeaderboard = async () => {
 
 function LeadersPage() {
 	const [startAnimation, setStartAnimation] = useState(false)
-	const [leaders, setLeaders] = useState([]) // State to hold the leaderboard data
-	const [loading, setLoading] = useState(true) // Loading state
-	const [error, setError] = useState(null) // Error state
+	const [leaders, setLeaders] = useState([])
+	const [loading, setLoading] = useState(true)
+	const [error, setError] = useState(null)
 	const navigate = useNavigate()
 
 	useEffect(() => {
 		const fetchLeaderboard = async () => {
 			try {
 				const leaderboard = await getLeaderboard()
-				setLeaders(leaderboard) // Update state with fetched data
+				// Сортировка лидеров по количеству звезд (по убыванию)
+				const sortedLeaderboard = leaderboard.sort((a, b) => b.stars - a.stars)
+				setLeaders(sortedLeaderboard)
 			} catch (error) {
 				setError('Failed to load leaderboard')
 			} finally {
-				setLoading(false) // Set loading to false after fetch completes
+				setLoading(false)
 			}
 		}
 		fetchLeaderboard()
-	}, []) // This runs once when the component mounts
+	}, [])
 
 	function handleBack() {
 		setStartAnimation(true)
@@ -48,10 +50,8 @@ function LeadersPage() {
 		<div className={`LeadersPage ${startAnimation ? 'animate' : ''}`}>
 			<h1 className='title'>Лидеры</h1>
 
-			{/* Display error if there was an issue with the fetch */}
 			{error && <div className='error-message'>{error}</div>}
 
-			{/* If loading, display the Loading component instead of the table */}
 			{loading ? (
 				<Loading />
 			) : (
