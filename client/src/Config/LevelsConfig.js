@@ -8,7 +8,7 @@ export const LEVELS_CONFIG = {
 		streetLightScale: 0.4,
 		npcCount: 2,
 		npcSpeed: 0.45,
-		timeLimit: 20,
+		timeLimit: 10,
 		moodDecayRate: 0.005,
 		energyDecayRate: 1,
 		starConditions: {
