@@ -175,7 +175,6 @@ function Interface({
 	}
 
 	useEffect(() => {
-		// Когда isWin меняется и это победа
 		if (isWin === true) {
 			const sendAchievements = async () => {
 				if (!user?.id) return
@@ -192,6 +191,7 @@ function Interface({
 							npcMood: NPCMood,
 							maxNpcMood: maxNpcMood,
 							energy: Energy,
+							lightSwitches: lightSwitches,
 						})
 					}
 				)
