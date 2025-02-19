@@ -49,7 +49,7 @@ export const LEVELS_CONFIG = {
 			],
 		],
 		music: '/audio/Music_1.mp3',
-		musicVolume: 0.5,
+		musicVolume: 0.25,
 	},
 	2: {
 		mapModel: '/Models/Map_2.fbx',
@@ -161,7 +161,7 @@ export const LEVELS_CONFIG = {
 			],
 		],
 		music: '/audio/Music_2.mp3',
-		musicVolume: 0.5,
+		musicVolume: 0.25,
 	},
 	3: {
 		mapModel: '/Models/Map_3.fbx',
@@ -250,6 +250,6 @@ export const LEVELS_CONFIG = {
 			],
 		],
 		music: '/audio/Music_3.mp3',
-		musicVolume: 0.5,
+		musicVolume: 0.25,
 	},
 }
