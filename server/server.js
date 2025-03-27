@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
@@ -26,8 +28,7 @@ app.use((req, res, next) => {
 app.use(express.json())
 
 // MongoDB URI
-const mongoURI =
-	'mongodb+srv://api_backend_user:bNm6rjubtsyEELwh@night-watcher.1nbdj.mongodb.net/Game'
+const mongoURI = process.env.MONGO_URI;
 
 // Подключаем роуты до подключения к MongoDB
 app.use('/auth', authRouter)
@@ -38,10 +39,7 @@ app.use('/update', userUpdateRouter)
 
 // Подключение к MongoDB
 mongoose
-	.connect(mongoURI, {
-		useNewUrlParser: true,
-		useUnifiedTopology: true,
-	})
+	.connect(mongoURI)
 	.then(() => {
 		console.log('MongoDB connected')
 	})
