@@ -67,7 +67,7 @@ app.use('/getUser', getUserRouter)
 app.use('/update', userUpdateRouter)
 
 app.use('/update', writeLimiter)
-app.use('/auth/*', registerLimiter)
+app.use('/auth/', registerLimiter)
 app.use('/getLeaderBoard', getLimiter)
 app.use('/getUser', getLimiter)
 app.use('/userExist', getLimiter)
